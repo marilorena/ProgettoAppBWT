@@ -30,8 +30,9 @@ class LoginPageState extends State<StatefulWidget>{
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
+                color: const Color(0x0C00FF00),
                 border: Border.all(color: Colors.green, width: 2),
                 borderRadius: BorderRadius.circular(12)
               ),
@@ -39,14 +40,16 @@ class LoginPageState extends State<StatefulWidget>{
               height: 50,
               child: TextField(
                 controller: _usernameController,
+                style: const TextStyle(fontSize: 18),
                 decoration: const InputDecoration(hintText: 'username')
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(15),
               child: Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
+                  color: const Color(0x0C00FF00),
                   border: Border.all(color: Colors.green, width: 2),
                   borderRadius: BorderRadius.circular(12)
                 ),
@@ -54,6 +57,7 @@ class LoginPageState extends State<StatefulWidget>{
                 height: 50,
                 child: TextField(
                   controller: _passwordController,
+                  style: const TextStyle(fontSize: 18),
                   decoration: const InputDecoration(hintText: 'password'),
                   obscureText: true,
                   obscuringCharacter: '•',
@@ -65,18 +69,25 @@ class LoginPageState extends State<StatefulWidget>{
               child: ElevatedButton(
                 child: const Text('Login'),
                 style: ElevatedButton.styleFrom(
-                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1)
+                  textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 1),
+                  padding: const EdgeInsets.all(8),
+                  fixedSize: const Size.fromWidth(90),
                 ),
                 onPressed: (){
                   if(_usernameController.text=='test' && _passwordController.text=='test'){
                     _usernameController.text='';
                     _passwordController.text='';
-                    Navigator.pushNamed(context, '/home/');
+                    Navigator.popAndPushNamed(context, '/home/');
                   }
                   else{
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Wrong credentials', style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic)),
+                      content: Text(
+                        'Wrong credentials',
+                        style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic)
+                      ),
                       duration: Duration(seconds: 2),
+                      backgroundColor: Colors.black54,
+                      padding: EdgeInsets.all(18)
                       ),
                     );
                   }
