@@ -71,7 +71,7 @@ class LoginPageState extends State<StatefulWidget>{
                   if(_usernameController.text=='test' && _passwordController.text=='test'){
                     _usernameController.text='';
                     _passwordController.text='';
-                    Navigator.pushNamed(context, '/home/', arguments: _usernameController.text);
+                    Navigator.pushNamed(context, '/home/');
                   }
                   else{
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
