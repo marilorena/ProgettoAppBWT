@@ -19,7 +19,7 @@ class ProfilePageState extends State<ProfilePage>{
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 25,
-            letterSpacing: 3
+            letterSpacing: 1
           )
         ),
       ),

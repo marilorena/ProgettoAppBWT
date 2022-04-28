@@ -20,7 +20,7 @@ class HomePageState extends State<HomePage>{
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 25,
-            letterSpacing: 3
+            letterSpacing: 1
           )
         ),
         actions: <Widget>[

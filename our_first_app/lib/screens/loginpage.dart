@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class LoginPage extends StatefulWidget{
   const LoginPage({Key? key}) : super(key: key);
@@ -10,6 +11,7 @@ class LoginPage extends StatefulWidget{
 class LoginPageState extends State<StatefulWidget>{
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _obscure = true;
 
   @override
   Widget build(BuildContext context){
@@ -17,11 +19,11 @@ class LoginPageState extends State<StatefulWidget>{
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
-          'Login',
+          'Welcome',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 25,
-            letterSpacing: 3
+            letterSpacing: 1
           )
         )
       ),
@@ -29,43 +31,50 @@ class LoginPageState extends State<StatefulWidget>{
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            const Padding(
+              padding: EdgeInsets.all(15),
+              child: Text('Login to continue', style: TextStyle(fontSize: 20, letterSpacing: 1)),
+            ),
             Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0x0C00FF00),
-                border: Border.all(color: Colors.green, width: 2),
-                borderRadius: BorderRadius.circular(12)
-              ),
+              padding: const EdgeInsets.all(7),
               width: 350,
-              height: 50,
               child: TextField(
-                controller: _usernameController,
-                style: const TextStyle(fontSize: 18),
-                decoration: const InputDecoration(hintText: 'username')
-              ),
+                  controller: _usernameController,
+                  style: const TextStyle(fontSize: 18),
+                  decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: Color(0x0B00FF00),
+                    hintText: 'username',
+                    prefixIcon: Icon(MdiIcons.account),
+                    border: OutlineInputBorder()
+                  )
+                ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(7),
+              width: 350,
+              child: TextField(
+                  controller: _passwordController,
+                  obscureText: _obscure,
+                  obscuringCharacter: '•',
+                  style: const TextStyle(fontSize: 18),
+                  decoration: InputDecoration(
+                    hintText: 'password',
+                    icon: const Icon(MdiIcons.lock),
+                    suffixIcon: IconButton(
+                      onPressed: (){
+                        setState((){
+                          _obscure=!_obscure;
+                        });
+                      },
+                      icon: const Icon(MdiIcons.eye)
+                      ),
+                    border: const OutlineInputBorder()
+                  ),
+                ),
             ),
             Padding(
               padding: const EdgeInsets.all(15),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0x0C00FF00),
-                  border: Border.all(color: Colors.green, width: 2),
-                  borderRadius: BorderRadius.circular(12)
-                ),
-                width: 350,
-                height: 50,
-                child: TextField(
-                  controller: _passwordController,
-                  style: const TextStyle(fontSize: 18),
-                  decoration: const InputDecoration(hintText: 'password'),
-                  obscureText: true,
-                  obscuringCharacter: '•',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
               child: ElevatedButton(
                 child: const Text('Login'),
                 style: ElevatedButton.styleFrom(
