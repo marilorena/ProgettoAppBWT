@@ -9,6 +9,7 @@ class HomePage extends StatefulWidget{
 }
 
 class HomePageState extends State<HomePage>{
+final Color col = const Color.fromARGB(248, 159, 224, 159);
 
   @override
   Widget build(BuildContext context){
@@ -32,7 +33,101 @@ class HomePageState extends State<HomePage>{
           )
         ],
       ),
-      
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            FittedBox(
+              child: Row(
+                children: [
+                  GestureDetector(
+                        child: Container(
+                          child: const Icon(MdiIcons.heartPulse, size: 50, color: Colors.white),
+                          decoration: BoxDecoration(
+                            color: col,
+                            borderRadius: BorderRadius.circular(40)
+                          ),
+                        ),
+                        onTap: (){}
+                      ),
+                      GestureDetector(
+                        child: Container(
+                          child: const Icon(MdiIcons.run, size: 50, color: Colors.white),
+                          decoration: BoxDecoration(
+                            color: col,
+                            borderRadius: BorderRadius.circular(40)
+                          ),
+                        ),
+                        onTap: (){}
+                      )
+                ]
+              ),
+            ),
+            FittedBox(
+              child: Row(
+                children: [
+                  GestureDetector(
+                        child: Container(
+                          child: const Icon(MdiIcons.bed, size: 50, color: Colors.white),
+                          decoration: BoxDecoration(
+                            color: col,
+                            borderRadius: BorderRadius.circular(40)
+                          ),
+                        ),
+                        onTap: (){}
+                      ),
+                      GestureDetector(
+                        child: Container(
+                          child: const Icon(MdiIcons.emoticon, size: 50, color: Colors.white),
+                          decoration: BoxDecoration(
+                            color: col,
+                            borderRadius: BorderRadius.circular(40)
+                          ),
+                        ),
+                        onTap: (){}
+                      ),
+                ]
+              ),
+            ),
+            FittedBox(
+              child: Row(
+                children: [
+                  GestureDetector(
+                        child: Container(
+                          child: const Icon(MdiIcons.silverwareForkKnife, size: 50, color: Colors.white),
+                          decoration: BoxDecoration(
+                            color: col,
+                            borderRadius: BorderRadius.circular(40)
+                          ),
+                        ),
+                        onTap: (){}
+                      ),
+                      GestureDetector(
+                        child: Container(
+                          child: const Icon(MdiIcons.lungs, size: 50, color: Colors.white),
+                          decoration: BoxDecoration(
+                            color: col,
+                            borderRadius: BorderRadius.circular(40)
+                          ),
+                        ),
+                        onTap: (){}
+                      )
+                ]
+              ),
+            ),
+            GestureDetector(
+                  child: Container(
+                    child: const Icon(MdiIcons.yoga, size: 50, color: Colors.white),
+                    decoration: BoxDecoration(
+                      color: col,
+                      borderRadius: BorderRadius.circular(40)
+                    ),
+                  ),
+                  onTap: (){}
+                )
+          ]
+        ),
+      )     
     );
   }
 }
