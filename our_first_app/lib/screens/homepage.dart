@@ -31,7 +31,8 @@ class HomePageState extends State<HomePage>{
             icon: const CircleAvatar(child: Icon(MdiIcons.account))
           )
         ],
-      )
+      ),
+      
     );
   }
 }
