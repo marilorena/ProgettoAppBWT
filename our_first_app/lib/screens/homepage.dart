@@ -173,8 +173,24 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: [
-          BottomNavigationBarItem(icon: IconButton(icon: const Icon(MdiIcons.home), onPressed: (){},), label: 'Home'),
-          BottomNavigationBarItem(icon: IconButton(icon: const Icon(MdiIcons.account), onPressed: (){},), label: 'Profile')
+          BottomNavigationBarItem(
+            icon: IconButton(
+              icon: const Icon(MdiIcons.home),
+              onPressed: (){
+                Navigator.popAndPushNamed(context, '/home/')
+              },
+            ),
+            label: 'Home'
+          ),
+          BottomNavigationBarItem(
+            icon: IconButton(
+              icon: const Icon(MdiIcons.account),
+              onPressed: (){
+                Navigator.popAndPushNamed(context, '/profile/')
+              },
+            ),
+            label: 'Profile'
+          )
         ]
       ),
     );
