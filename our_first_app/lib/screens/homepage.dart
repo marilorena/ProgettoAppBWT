@@ -175,7 +175,7 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
         items: [
           BottomNavigationBarItem(
             icon: IconButton(
-              icon: const Icon(MdiIcons.home),
+              icon: const Icon(Icons.home),
               onPressed: (){
                 Navigator.popAndPushNamed(context, '/home/');
               },
@@ -184,7 +184,7 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
           ),
           BottomNavigationBarItem(
             icon: IconButton(
-              icon: const Icon(MdiIcons.account),
+              icon: const Icon(Icons.person),
               onPressed: (){
                 Navigator.popAndPushNamed(context, '/profile/');
               },
@@ -192,7 +192,7 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
             label: 'Profile'
           )
         ]
-      ),
+      )
     );
   }
 }

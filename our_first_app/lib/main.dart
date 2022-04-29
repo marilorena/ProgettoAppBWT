@@ -13,7 +13,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.green),
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedItemColor: Colors.green,
+          unselectedItemColor: Colors.green,
+          selectedLabelStyle: TextStyle(fontSize: 14),
+          unselectedLabelStyle: TextStyle(fontSize: 14)
+        )
+      ),
       initialRoute: '/login/',
       routes: {
         '/login/': (context) => const LoginPage(),

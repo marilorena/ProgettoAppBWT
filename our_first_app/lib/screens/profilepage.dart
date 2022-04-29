@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class ProfilePage extends StatefulWidget{
   const ProfilePage({Key? key}) : super(key: key);
@@ -36,7 +37,29 @@ class ProfilePageState extends State<ProfilePage>{
         onTap: (){
           Navigator.popAndPushNamed(context, '/login/');
         },
-        )
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: IconButton(
+              icon: const Icon(MdiIcons.home),
+              onPressed: (){
+                Navigator.popAndPushNamed(context, '/home/');
+              },
+            ),
+            label: 'Home'
+          ),
+          BottomNavigationBarItem(
+            icon: IconButton(
+              icon: const Icon(MdiIcons.account),
+              onPressed: (){
+                Navigator.popAndPushNamed(context, '/profile/');
+              },
+            ),
+            label: 'Profile'
+          )
+        ]
+      )
     );
   }
 }
