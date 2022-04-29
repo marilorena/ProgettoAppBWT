@@ -60,7 +60,9 @@ class LoginPageState extends State<StatefulWidget>{
                   style: const TextStyle(fontSize: 18),
                   decoration: InputDecoration(
                     hintText: 'password',
-                    icon: const Icon(MdiIcons.lock),
+                    filled: true,
+                    fillColor: Color(0x0B00FF00),
+                    prefixIcon: const Icon(MdiIcons.lock),
                     suffixIcon: IconButton(
                       onPressed: (){
                         setState((){
