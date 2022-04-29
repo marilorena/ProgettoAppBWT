@@ -177,7 +177,7 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
             icon: IconButton(
               icon: const Icon(MdiIcons.home),
               onPressed: (){
-                Navigator.popAndPushNamed(context, '/home/')
+                Navigator.popAndPushNamed(context, '/home/');
               },
             ),
             label: 'Home'
@@ -186,7 +186,7 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
             icon: IconButton(
               icon: const Icon(MdiIcons.account),
               onPressed: (){
-                Navigator.popAndPushNamed(context, '/profile/')
+                Navigator.popAndPushNamed(context, '/profile/');
               },
             ),
             label: 'Profile'
