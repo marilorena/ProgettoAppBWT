@@ -23,15 +23,7 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
             fontSize: 25,
             letterSpacing: 1
           )
-        ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: (){
-              Navigator.popAndPushNamed(context, '/profile/');
-            },
-            icon: const CircleAvatar(child: Icon(MdiIcons.account))
-          )
-        ],
+        )
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(15),
