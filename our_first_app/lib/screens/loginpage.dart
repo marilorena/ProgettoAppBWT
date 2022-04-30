@@ -35,7 +35,7 @@ class LoginPageState extends State<StatefulWidget>{
               ),
               const Padding(
                 padding: EdgeInsets.all(15),
-                child: Text('Login to continue', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                child: Text('Login', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),
               Container(
                 padding: const EdgeInsets.all(7),
