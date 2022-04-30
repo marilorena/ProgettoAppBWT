@@ -32,7 +32,7 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
+                padding: const EdgeInsets.fromLTRB(0, 15, 0, 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -70,7 +70,7 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
+                padding: const EdgeInsets.fromLTRB(0, 15, 0, 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -108,7 +108,7 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
+                padding: const EdgeInsets.fromLTRB(0, 15, 0, 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -146,15 +146,21 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
+              padding: const EdgeInsets.fromLTRB(0, 15, 0, 10),
               child: GestureDetector(
                     child: Container(
                       width: 320,
-                      height: 140,
-                      child: const Icon(MdiIcons.yoga, size: 50, color: Colors.white),
+                      height: 100,
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(image: AssetImage('asset/icons/icon_launcher_adaptive_fore.png'), fit: BoxFit.none, scale: 3.5)
+                        )
+                      ),
                       decoration: BoxDecoration(
                         color: col,
-                        borderRadius: BorderRadius.circular(40)
+                        borderRadius: BorderRadius.circular(45)
                       ),
                     ),
                     onTap: (){}

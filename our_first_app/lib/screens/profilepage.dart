@@ -23,20 +23,30 @@ class ProfilePageState extends State<ProfilePage>{
             letterSpacing: 1
           )
         ),
-      ),
-      body: GestureDetector(
-        child: Container(
-          child: const Text('Logout', style: TextStyle(fontSize: 18)),
-          padding: const EdgeInsets.all(10),
-          margin: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.green, width: 2),
-            borderRadius: BorderRadius.circular(12)
-          ),
-        ),
-        onTap: (){
-          Navigator.popAndPushNamed(context, '/login/');
-        },
+        actions: [
+          PopupMenuButton(
+            itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+              PopupMenuItem(
+                child: Column(
+                  children: const [
+                    ListTile(
+                      title: Text('Settings'),
+                      leading: Icon(Icons.settings)
+                    ),
+                    Divider(color: Colors.black)
+                  ],
+                )
+              ),
+              PopupMenuItem(
+                child: ListTile(
+                  title: const Text('Logout'),
+                  leading: const Icon(Icons.logout),
+                  onTap: () => Navigator.popAndPushNamed(context, '/login/'),
+                )
+              )
+            ]
+          )
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: [

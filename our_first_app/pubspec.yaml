@@ -69,6 +69,7 @@ flutter:
   assets:
     - asset/login.jpg
     - asset/icons/icon_launcher.png
+    - asset/icons/icon_launcher_adaptive_fore.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
