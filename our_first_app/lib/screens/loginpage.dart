@@ -33,7 +33,7 @@ class LoginPageState extends State<StatefulWidget>{
           children: <Widget>[
             const Padding(
               padding: EdgeInsets.all(15),
-              child: Text('Login to continue', style: TextStyle(fontSize: 20, letterSpacing: 1)),
+              child: Text('Login to continue', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             ),
             Container(
               padding: const EdgeInsets.all(7),
@@ -61,7 +61,7 @@ class LoginPageState extends State<StatefulWidget>{
                   decoration: InputDecoration(
                     hintText: 'password',
                     filled: true,
-                    fillColor: Color(0x0B00FF00),
+                    fillColor: const Color(0x0B00FF00),
                     prefixIcon: const Icon(MdiIcons.lock),
                     suffixIcon: IconButton(
                       onPressed: (){
