@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
-class ProfilePage extends StatefulWidget{
+class ProfilePage extends StatelessWidget{
   const ProfilePage({Key? key}) : super(key: key);
-
-  @override
-  ProfilePageState createState() => ProfilePageState();
-}
-
-class ProfilePageState extends State<ProfilePage>{
 
   @override
   Widget build(BuildContext context){
@@ -28,12 +22,13 @@ class ProfilePageState extends State<ProfilePage>{
             itemBuilder: (BuildContext context) => <PopupMenuEntry>[
               PopupMenuItem(
                 child: Column(
-                  children: const [
+                  children: [
                     ListTile(
-                      title: Text('Settings'),
-                      leading: Icon(Icons.settings)
+                      title: const Text('Settings'),
+                      leading: const Icon(Icons.settings),
+                      onTap: (){Navigator.pushNamed(context, '/settings/');},
                     ),
-                    Divider(color: Colors.black)
+                    const Divider(color: Colors.black)
                   ],
                 )
               ),

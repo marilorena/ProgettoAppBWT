@@ -151,16 +151,10 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
                     child: Container(
                       width: 320,
                       height: 100,
-                      child: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(image: AssetImage('asset/icons/icon_launcher_adaptive_fore.png'), fit: BoxFit.none, scale: 3.5)
-                        )
-                      ),
                       decoration: BoxDecoration(
                         color: col,
-                        borderRadius: BorderRadius.circular(45)
+                        borderRadius: BorderRadius.circular(45),
+                        image: const DecorationImage(image: AssetImage('asset/icons/icon_launcher_adaptive_fore.png'), fit: BoxFit.none, scale: 3.5)
                       ),
                     ),
                     onTap: (){}
