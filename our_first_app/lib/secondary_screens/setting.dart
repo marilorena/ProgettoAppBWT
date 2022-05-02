@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/darktheme.dart';
+import 'package:our_first_app/model/language.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget{
@@ -7,46 +8,93 @@ class SettingsPage extends StatelessWidget{
 
 @override
 Widget build(BuildContext context){
-  return Scaffold(
-    appBar: AppBar(
-      centerTitle: true,
-      title: const Text(
-        'Settings',
-        style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
-            letterSpacing: 1
+  return Consumer<Language>(
+    builder: (context, language, child) => Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          language.language[4],
+          style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 25,
+              letterSpacing: 1
+          )
         )
-      )
-    ),
-    body: ListView(
-      padding: const EdgeInsets.all(10),
-      children: [
-        Row(
-          children: [
-            const Text(
-              'Dark theme',
-              style: TextStyle(fontSize: 18),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(10),
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 311.7,
+                child: Text(
+                  language.language[5],
+                  style: const TextStyle(fontSize: 18),
+                ),
               ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(220, 0, 0, 0),
-              child: Consumer<DarkTheme>(
+              Consumer<DarkTheme>(
                 builder: (context, darkTheme, child){
                   return Switch(
                     value: darkTheme.dark,
-                    onChanged: (newValue){
+                    onChanged: (bool newValue){
                       newValue=!(darkTheme.dark);
-                      darkTheme.darkThemeOn(newValue);
+                      darkTheme.darkThemeSwitch(newValue);
                     },
                   );
                 }
-              ),
-            )
-          ]
-        ),
-        const Divider(thickness: 3)
-      ],
-    )
+              )
+            ]
+          ),
+          const Divider(thickness: 1),
+          Text(language.language[6], style: const TextStyle(fontSize: 18),),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
+            child: Row(
+              children: [
+                const SizedBox(
+                  width: 311.7,
+                  child: Text(
+                    'English',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+                Radio(
+                  value: language.cond,
+                  groupValue: false,
+                  toggleable: true,
+                  onChanged: (newCond){
+                    language.switchLanguage(false);
+                  },
+                ),
+              ]
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+            child: Row(
+              children: [
+                const SizedBox(
+                  width: 311.7,
+                  child: Text(
+                    'Italiano',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+                Radio(
+                  value: !language.cond,
+                  groupValue: false,
+                  toggleable: true,
+                  onChanged: (newCond){
+                    language.switchLanguage(true);
+                  },
+                ),
+              ]
+            ),
+          )
+        ],
+      )
+    ),
   );
 }
 }

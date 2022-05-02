@@ -1,70 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:our_first_app/model/darktheme.dart';
+import 'package:our_first_app/model/language.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatelessWidget{
   const ProfilePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context){
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          'Profile',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
-            letterSpacing: 1
-          )
-        ),
-        actions: [
-          PopupMenuButton(
-            itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-              PopupMenuItem(
-                child: Column(
-                  children: [
-                    ListTile(
-                      title: const Text('Settings'),
-                      leading: const Icon(Icons.settings),
-                      onTap: (){Navigator.pushNamed(context, '/settings/');},
-                    ),
-                    const Divider(color: Colors.black)
-                  ],
-                )
-              ),
-              PopupMenuItem(
-                child: ListTile(
-                  title: const Text('Logout'),
-                  leading: const Icon(Icons.logout),
-                  onTap: () => Navigator.popAndPushNamed(context, '/login/'),
-                )
-              )
-            ]
-          )
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: IconButton(
-              icon: const Icon(MdiIcons.home),
-              onPressed: (){
-                Navigator.popAndPushNamed(context, '/home/');
-              },
-            ),
-            label: 'Home'
+    return Consumer<Language>(
+      builder: (context, language, child) =>  Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(
+            language.language[3],
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 25,
+              letterSpacing: 1
+            )
           ),
-          BottomNavigationBarItem(
-            icon: IconButton(
-              icon: const Icon(MdiIcons.account),
-              onPressed: (){
-                Navigator.popAndPushNamed(context, '/profile/');
-              },
+          actions: [
+            PopupMenuButton(
+              itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+                PopupMenuItem(
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text(language.language[4]),
+                        leading: const Icon(Icons.settings),
+                        onTap: (){Navigator.pushNamed(context, '/settings/');},
+                      ),
+                      const Divider(color: Colors.black)
+                    ],
+                  )
+                ),
+                PopupMenuItem(
+                  child: Consumer<DarkTheme>(
+                    builder: (context, darkTheme, child) {
+                      return ListTile(
+                        title: const Text('Logout'),
+                        leading: const Icon(Icons.logout),
+                        onTap: (){
+                          Navigator.pop(context);
+                          Navigator.popAndPushNamed(context, '/login/');
+                          darkTheme.darkThemeSwitch(false);
+                        }
+                      );
+                    }
+                  )
+                )
+              ]
+            )
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: [
+            BottomNavigationBarItem(
+              icon: IconButton(
+                icon: const Icon(MdiIcons.home),
+                onPressed: (){
+                  Navigator.popAndPushNamed(context, '/home/');
+                },
+              ),
+              label: 'Home'
             ),
-            label: 'Profile'
-          )
-        ]
-      )
+            BottomNavigationBarItem(
+              icon: IconButton(
+                icon: const Icon(MdiIcons.account),
+                onPressed: (){
+                  Navigator.popAndPushNamed(context, '/profile/');
+                },
+              ),
+              label: language.language[3]
+            )
+          ]
+        )
+      ),
     );
   }
 }

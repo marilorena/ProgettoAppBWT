@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/darktheme.dart';
+import 'package:our_first_app/model/language.dart';
 import 'package:our_first_app/screens/loginpage.dart';
 import 'package:our_first_app/screens/homepage.dart';
 import 'package:our_first_app/screens/profilepage.dart';
@@ -15,8 +16,11 @@ class MyApp extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => DarkTheme(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<DarkTheme>(create: (context) => DarkTheme()),
+        ChangeNotifierProvider<Language>(create: (context) => Language())
+      ],
       builder: (context, child) {
         return Consumer<DarkTheme>(
           builder: (context, darkTheme, child){
