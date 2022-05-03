@@ -1,5 +1,8 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:our_first_app/model/bottomnavigationbar.dart';
 import 'package:our_first_app/model/darktheme.dart';
 import 'package:our_first_app/model/language.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +33,11 @@ class ProfilePage extends StatelessWidget{
                       ListTile(
                         title: Text(language.language[4]),
                         leading: const Icon(Icons.settings),
-                        onTap: (){Navigator.pushNamed(context, '/settings/');},
+                        onTap: (){
+                          Navigator.popAndPushNamed(context, '/profile/');
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/settings/');
+                        },
                       ),
                       const Divider(color: Colors.black)
                     ],
@@ -55,28 +62,7 @@ class ProfilePage extends StatelessWidget{
             )
           ],
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: [
-            BottomNavigationBarItem(
-              icon: IconButton(
-                icon: const Icon(MdiIcons.home),
-                onPressed: (){
-                  Navigator.popAndPushNamed(context, '/home/');
-                },
-              ),
-              label: 'Home'
-            ),
-            BottomNavigationBarItem(
-              icon: IconButton(
-                icon: const Icon(MdiIcons.account),
-                onPressed: (){
-                  Navigator.popAndPushNamed(context, '/profile/');
-                },
-              ),
-              label: language.language[3]
-            )
-          ]
-        )
+        bottomNavigationBar: const BottomNavBar()
       ),
     );
   }

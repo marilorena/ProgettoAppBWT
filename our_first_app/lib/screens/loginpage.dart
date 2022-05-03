@@ -7,10 +7,10 @@ class LoginPage extends StatefulWidget{
   const LoginPage({Key? key}) : super(key: key);
 
   @override
-  LoginPageState createState() => LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class LoginPageState extends State<StatefulWidget>{
+class _LoginPageState extends State<LoginPage>{
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscure = true;

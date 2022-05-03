@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:our_first_app/model/bottomnavigationbar.dart';
 import 'package:our_first_app/model/language.dart';
 import 'package:provider/provider.dart';
 
@@ -7,10 +8,10 @@ class HomePage extends StatefulWidget{
   const HomePage({Key? key}) : super(key: key);
 
   @override
-  HomePageState createState() => HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class HomePageState extends State<HomePage>{
+class _HomePageState extends State<HomePage>{
 final Color col = const Color.fromARGB(248, 159, 224, 159);
 
   @override
@@ -166,28 +167,7 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
             ]
           ),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: [
-            BottomNavigationBarItem(
-              icon: IconButton(
-                icon: const Icon(Icons.home),
-                onPressed: (){
-                  Navigator.popAndPushNamed(context, '/home/');
-                },
-              ),
-              label: 'Home'
-            ),
-            BottomNavigationBarItem(
-              icon: IconButton(
-                icon: const Icon(Icons.person),
-                onPressed: (){
-                  Navigator.popAndPushNamed(context, '/profile/');
-                },
-              ),
-              label: language.language[3]
-            )
-          ]
-        )
+        bottomNavigationBar: const BottomNavBar()
       ),
     );
   }

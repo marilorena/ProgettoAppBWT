@@ -26,13 +26,9 @@ class MyApp extends StatelessWidget{
           builder: (context, darkTheme, child){
             return MaterialApp(
               theme: ThemeData(
-              brightness: darkTheme.brightness,
-              primarySwatch: Colors.green,
-              bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-                selectedItemColor: Colors.green,
-                unselectedItemColor: Colors.green,
-                selectedLabelStyle: TextStyle(fontSize: 14),
-                unselectedLabelStyle: TextStyle(fontSize: 14))),
+                brightness: darkTheme.brightness,
+                primarySwatch: Colors.green
+              ),
               initialRoute: '/login/',
               routes: {
                 '/login/': (context) => const LoginPage(),

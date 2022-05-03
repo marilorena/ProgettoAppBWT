@@ -47,7 +47,10 @@ Widget build(BuildContext context){
             ]
           ),
           const Divider(thickness: 1),
-          Text(language.language[6], style: const TextStyle(fontSize: 18),),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+            child: Text(language.language[6], style: const TextStyle(fontSize: 18),),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
             child: Row(
