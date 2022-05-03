@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:our_first_app/model/bottomnavigationbar.dart';
 import 'package:our_first_app/model/language.dart';
 import 'package:provider/provider.dart';
 
@@ -167,7 +166,31 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
             ]
           ),
         ),
-        bottomNavigationBar: const BottomNavBar()
+        bottomNavigationBar: BottomNavigationBar(
+            items: [
+              BottomNavigationBarItem(
+                icon: IconButton(
+                  icon: const Icon(Icons.home),
+                  onPressed: (){
+                    Navigator.popAndPushNamed(context, '/home/');
+                  },
+                ),
+                label: 'Home'
+              ),
+              BottomNavigationBarItem(
+                icon: IconButton(
+                  icon: const Icon(Icons.person),
+                  onPressed: (){
+                    Navigator.popAndPushNamed(context, '/profile/');
+                  },
+                ),
+                label: language.language[3]
+              )
+            ],
+            currentIndex: 0,
+            selectedItemColor: Colors.green,
+            unselectedLabelStyle: const TextStyle(fontSize: 14)
+          )
       ),
     );
   }

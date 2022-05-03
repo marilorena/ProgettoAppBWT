@@ -1,8 +1,4 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:our_first_app/model/bottomnavigationbar.dart';
 import 'package:our_first_app/model/darktheme.dart';
 import 'package:our_first_app/model/language.dart';
 import 'package:provider/provider.dart';
@@ -62,7 +58,31 @@ class ProfilePage extends StatelessWidget{
             )
           ],
         ),
-        bottomNavigationBar: const BottomNavBar()
+        bottomNavigationBar: BottomNavigationBar(
+            items: [
+              BottomNavigationBarItem(
+                icon: IconButton(
+                  icon: const Icon(Icons.home),
+                  onPressed: (){
+                    Navigator.popAndPushNamed(context, '/home/');
+                  },
+                ),
+                label: 'Home'
+              ),
+              BottomNavigationBarItem(
+                icon: IconButton(
+                  icon: const Icon(Icons.person),
+                  onPressed: (){
+                    Navigator.popAndPushNamed(context, '/profile/');
+                  },
+                ),
+                label: language.language[3]
+              )
+            ],
+            currentIndex: 1,
+            selectedItemColor: Colors.green,
+            unselectedLabelStyle: const TextStyle(fontSize: 14)
+          )
       ),
     );
   }
