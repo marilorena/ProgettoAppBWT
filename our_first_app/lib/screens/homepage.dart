@@ -11,13 +11,14 @@ class HomePage extends StatefulWidget{
 }
 
 class _HomePageState extends State<HomePage>{
-final Color col = const Color.fromARGB(248, 159, 224, 159);
+final Color col = Color.fromARGB(248, 172, 137, 255);
 
   @override
   Widget build(BuildContext context){
     return Consumer<Language>(
       builder: (context, language, child) =>  Scaffold(
         appBar: AppBar(
+          backgroundColor: Color.fromARGB(255, 117, 233, 152),
           centerTitle: true,
           title: const Text(
             'Home',
@@ -28,76 +29,82 @@ final Color col = const Color.fromARGB(248, 159, 224, 159);
             )
           )
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(25),
-          children: [
-            GestureDetector(
-              child: Container(
-              width: 320,
-              height: 100,
-              child: const Icon(MdiIcons.heartPulse, size: 50, color: Colors.white),
-              decoration: BoxDecoration(
-                color: col,
-                borderRadius: BorderRadius.circular(45),
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('asset/sfondo3.jpg'), fit: BoxFit.cover)),
+          child: ListView(
+            padding: const EdgeInsets.all(25),
+            children: [
+              GestureDetector(
+                child: Container(
+                width: 320,
+                height: 100,
+                child: const Icon(MdiIcons.heartPulse, size: 50, color: Colors.white),
+                decoration: BoxDecoration(
+                  color: col,
+                  borderRadius: BorderRadius.circular(45),
+                ),
+                ),
+                onTap: (){}
               ),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Divider(
+                  thickness: 3,
+                ),
               ),
-              onTap: (){}
-            ),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Divider(
-                thickness: 3,
+              GestureDetector(
+                child: Container(
+                width: 320,
+                height: 100,
+                child: const Icon(MdiIcons.run, size: 50, color: Colors.white),
+                decoration: BoxDecoration(
+                  color: col,
+                  borderRadius: BorderRadius.circular(45),
+                ),
+                ),
+                onTap: (){}
               ),
-            ),
-            GestureDetector(
-              child: Container(
-              width: 320,
-              height: 100,
-              child: const Icon(MdiIcons.run, size: 50, color: Colors.white),
-              decoration: BoxDecoration(
-                color: col,
-                borderRadius: BorderRadius.circular(45),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Divider(
+                  thickness: 3,
+                ),
               ),
+              GestureDetector(
+                child: Container(
+                width: 320,
+                height: 100,
+                child: const Icon(MdiIcons.bed, size: 50, color: Colors.white),
+                decoration: BoxDecoration(
+                  color: col,
+                  borderRadius: BorderRadius.circular(45),
+                ),
+                ),
+                onTap: (){}
               ),
-              onTap: (){}
-            ),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Divider(
-                thickness: 3,
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Divider(
+                  thickness: 3,
+                ),
               ),
-            ),
-            GestureDetector(
-              child: Container(
-              width: 320,
-              height: 100,
-              child: const Icon(MdiIcons.bed, size: 50, color: Colors.white),
-              decoration: BoxDecoration(
-                color: col,
-                borderRadius: BorderRadius.circular(45),
+              GestureDetector(
+                child: Container(
+                width: 320,
+                height: 100,
+                decoration: BoxDecoration(
+                  
+                  color: col,
+                  borderRadius: BorderRadius.circular(45),
+                  image: const DecorationImage(image: AssetImage('asset/icons/icon_launcher_adaptive_fore.png'), fit: BoxFit.none, scale: 3.5)
+                ),
+                ),
+                onTap: (){}
               ),
-              ),
-              onTap: (){}
-            ),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Divider(
-                thickness: 3,
-              ),
-            ),
-            GestureDetector(
-              child: Container(
-              width: 320,
-              height: 100,
-              decoration: BoxDecoration(
-                color: col,
-                borderRadius: BorderRadius.circular(45),
-                image: const DecorationImage(image: AssetImage('asset/icons/icon_launcher_adaptive_fore.png'), fit: BoxFit.none, scale: 3.5)
-              ),
-              ),
-              onTap: (){}
-            ),
-          ]
+            ]
+          ),
         ),
         bottomNavigationBar: BottomNavigationBar(
             items: [
