@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget{
         return Consumer<DarkTheme>(
           builder: (context, darkTheme, child){
             return MaterialApp(
-              theme: ThemeData(backgroundColor: Color.fromARGB(255, 117, 233, 152)),
+              theme: ThemeData(colorSchemeSeed: Color.fromARGB(255, 153, 254, 185)),
               initialRoute: '/login/',
               routes: {
                 '/login/': (context) => const LoginPage(),

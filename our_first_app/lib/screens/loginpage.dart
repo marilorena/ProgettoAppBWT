@@ -21,7 +21,7 @@ class _LoginPageState extends State<LoginPage>{
       builder: (context, language, child) => Scaffold(
         body: Container(
           decoration: const BoxDecoration(
-            image: DecorationImage(image: AssetImage('asset/login.jpg'), fit: BoxFit.cover)),
+            image: DecorationImage(image: AssetImage('asset/sfondo7.jpg'), fit: BoxFit.cover)),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

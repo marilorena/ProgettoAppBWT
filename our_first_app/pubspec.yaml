@@ -74,6 +74,11 @@ flutter:
     - asset/sfondo1.jpg
     - asset/sfondo2.jpg
     - asset/sfondo3.jpg
+    - asset/sfondo4.jpg
+    - asset/sfondo5.jpg
+    - asset/sfondo6.jpg
+    - asset/sfondo7.jpg
+  
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

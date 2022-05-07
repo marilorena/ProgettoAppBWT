@@ -11,30 +11,32 @@ class HomePage extends StatefulWidget{
 }
 
 class _HomePageState extends State<HomePage>{
-final Color col = Color.fromARGB(248, 172, 137, 255);
+final Color col = Color.fromARGB(150, 53, 196, 84);
 
   @override
   Widget build(BuildContext context){
     return Consumer<Language>(
       builder: (context, language, child) =>  Scaffold(
         appBar: AppBar(
-          backgroundColor: Color.fromARGB(255, 117, 233, 152),
+          
+          backgroundColor: Color.fromARGB(150, 195, 181, 236),
           centerTitle: true,
           title: const Text(
             'Home',
             style: TextStyle(
+              color: Colors.black,
               fontWeight: FontWeight.bold,
               fontSize: 25,
-              letterSpacing: 1
+              
             )
           )
         ),
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('asset/sfondo3.jpg'), fit: BoxFit.cover)),
+              image: AssetImage('asset/sfondo5.jpg'), fit: BoxFit.fitHeight)),
           child: ListView(
-            padding: const EdgeInsets.all(25),
+            padding: const EdgeInsets.fromLTRB(25, 50, 25, 25),
             children: [
               GestureDetector(
                 child: Container(
