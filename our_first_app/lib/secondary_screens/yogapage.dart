@@ -47,7 +47,7 @@ get https => null;
 
 
 Future<YogaPose?> _fetchPose() async {
-  final int id = Random().nextInt(10);
+  final int id = Random().nextInt(10)+1;
   final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/:$id';
   final response = await http.get(Uri.parse(url));
   return response.statusCode == 200 ? YogaPose.fromJson(jsonDecode(response.body)): null;
