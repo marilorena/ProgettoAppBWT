@@ -6,6 +6,7 @@ import 'package:our_first_app/screens/loginpage.dart';
 import 'package:our_first_app/screens/homepage.dart';
 import 'package:our_first_app/screens/profilepage.dart';
 import 'package:our_first_app/secondary_screens/setting.dart';
+import 'package:our_first_app/secondary_screens/yogapage.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -33,7 +34,8 @@ class MyApp extends StatelessWidget{
                 '/home/': (context) => const HomePage(),
                 '/profile/': (context) => const ProfilePage(),
                 '/settings/':(context) => const SettingsPage(),
-                '/authorization/':(context) => AuthorizationPage()
+                '/authorization/':(context) => AuthorizationPage(),
+                '/yoga/' : (context) => YogaPage()
               }
             );
           }

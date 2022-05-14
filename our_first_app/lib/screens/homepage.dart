@@ -103,7 +103,9 @@ final Color col = Color.fromARGB(150, 53, 196, 84);
                   image: const DecorationImage(image: AssetImage('asset/icons/icon_launcher_adaptive_fore.png'), fit: BoxFit.none, scale: 3.5)
                 ),
                 ),
-                onTap: (){}
+                onTap: (){
+                  Navigator.pushNamed(context, '/yoga/');
+                }
               ),
             ]
           ),
