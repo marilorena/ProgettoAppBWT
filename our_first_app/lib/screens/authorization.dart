@@ -1,0 +1,37 @@
+import 'package:flutter/material.dart';
+import 'package:fitbitter/fitbitter.dart';
+
+class AuthorizationPage extends StatelessWidget {
+  AuthorizationPage({Key? key}) : super(key: key);
+
+  static const route = '/';
+  static const routename = 'AuthorizationPage';
+
+  @override
+  Widget build(BuildContext context) {
+    print('${AuthorizationPage.routename} built');
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AuthorizationPage.routename),
+      ),
+      body: Center(
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          ElevatedButton(
+            onPressed: () async {
+              String? userId = await FitbitConnector.authorize(
+                  context: context,
+                  clientID: '238BR6',
+                  clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4',
+                  redirectUri: 'example://fitbit/auth',
+                  callbackUrlScheme: 'example');
+                  Navigator.popAndPushNamed(context, '/home/');
+                  
+            }, 
+
+            child: Text('Authorize'),
+          )
+        ]),
+      ),
+    );
+  }
+}

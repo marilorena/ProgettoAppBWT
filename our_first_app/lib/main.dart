@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/darktheme.dart';
 import 'package:our_first_app/model/language.dart';
+import 'package:our_first_app/screens/authorization.dart';
 import 'package:our_first_app/screens/loginpage.dart';
 import 'package:our_first_app/screens/homepage.dart';
 import 'package:our_first_app/screens/profilepage.dart';
@@ -31,7 +32,8 @@ class MyApp extends StatelessWidget{
                 '/login/': (context) => const LoginPage(),
                 '/home/': (context) => const HomePage(),
                 '/profile/': (context) => const ProfilePage(),
-                '/settings/':(context) => const SettingsPage()
+                '/settings/':(context) => const SettingsPage(),
+                '/authorization/':(context) => AuthorizationPage()
               }
             );
           }

@@ -38,7 +38,7 @@ class _LoginPageState extends State<LoginPage>{
                 ),
                 Padding(
                   padding: EdgeInsets.all(15),
-                  child: Text(language.language[0], style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  child: Text(language.language[0], style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold)),
                 ),
                 Container(
                   padding: const EdgeInsets.all(7),
@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage>{
                       style: const TextStyle(fontSize: 18),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: const Color(0x0B00FF00),
+                        fillColor: Color.fromARGB(200, 255, 255, 255),
                         hintText: language.language[1],
                         prefixIcon: const Icon(MdiIcons.account),
                         border: const OutlineInputBorder()
@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage>{
                       decoration: InputDecoration(
                         hintText: 'password',
                         filled: true,
-                        fillColor: const Color(0x0B00FF00),
+                        fillColor: Color.fromARGB(200, 255, 255, 255),
                         prefixIcon: const Icon(MdiIcons.lock),
                         suffixIcon: IconButton(
                           onPressed: (){
@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage>{
                       if(_usernameController.text=='test' && _passwordController.text=='test'){
                         _usernameController.text='';
                         _passwordController.text='';
-                        Navigator.popAndPushNamed(context, '/home/');
+                        Navigator.popAndPushNamed(context, '/authorization/');
                       }
                       else{
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

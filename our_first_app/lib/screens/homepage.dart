@@ -26,8 +26,8 @@ final Color col = Color.fromARGB(150, 53, 196, 84);
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
-              fontSize: 25,
-              
+              fontSize: 27,
+              letterSpacing: 1,
             )
           )
         ),
