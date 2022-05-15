@@ -9,7 +9,6 @@ import 'package:our_first_app/model/yogapose.dart';
 class YogaPage extends StatelessWidget{
   const YogaPage({Key? key}) : super(key: key);
 
-get https => null;
 
  @override 
  Widget build(BuildContext context){
@@ -17,7 +16,7 @@ get https => null;
      body: Center(
        child: 
           FutureBuilder(
-            future: _fetchPose(),
+            future: _fetchPose(1),
             builder: (context, snapshot){
               if (snapshot.hasData){
                 final pose = snapshot.data as YogaPose;
@@ -25,9 +24,9 @@ get https => null;
                       child: Column( 
                             children: [
                               Text(pose.name),
-                              Text(pose.sanskrit_name, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.green),
+                              Text(pose.sanskritname, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.green),
                               ),
-                              Image.network(pose.image_url)
+                              Image.network(pose.imageurl)
                             ],
                       ),
                     );
@@ -43,15 +42,13 @@ get https => null;
 
    );
 
- }
+  }
 
-
-Future<YogaPose?> _fetchPose() async {
-  final int id = Random().nextInt(10);
-  final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/:$id';
+ Future<YogaPose?> _fetchPose(int id) async {
+  
+  final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/$id';
   final response = await http.get(Uri.parse(url));
   return response.statusCode == 200 ? YogaPose.fromJson(jsonDecode(response.body)): null;
-     
-}
-
+  
+ }
 }

@@ -1,14 +1,14 @@
 class YogaPose {
   final int id;
   final String name;
-  final String sanskrit_name;
-  final String image_url;
+  final String sanskritname;
+  final String imageurl;
 
   YogaPose(
     { required this.id,
-      required this.name,
-      required this.sanskrit_name,
-      required this.image_url
+      required this.name, 
+      required this.sanskritname,
+      required this.imageurl
 
     }
   );
@@ -17,10 +17,10 @@ class YogaPose {
     return YogaPose(
       id: json['id'], 
       name: json['name'], 
-      sanskrit_name: json['sanskrit_name'], 
-      image_url: json['image_url']);
+      sanskritname: json['sanskritname'], 
+      imageurl: json['imageurl']);
   }
-
+ 
 
 
 
