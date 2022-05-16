@@ -16,9 +16,9 @@ class YogaPose {
   factory YogaPose.fromJson(Map<String, dynamic> json){
     return YogaPose(
       id: json['id'], 
-      name: json['name'], 
-      sanskritname: json['sanskritname'], 
-      imageurl: json['imageurl']);
+      name: json['english_name'], 
+      sanskritname: json['sanskrit_name'], 
+      imageurl: json['img_url']);
   }
  
 

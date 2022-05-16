@@ -12,6 +12,7 @@ class YogaPage extends StatelessWidget{
 
  @override 
  Widget build(BuildContext context){
+   _fetchImage();
    return Scaffold(
      body: Center(
        child: 
@@ -51,4 +52,12 @@ class YogaPage extends StatelessWidget{
   return response.statusCode == 200 ? YogaPose.fromJson(jsonDecode(response.body)): null;
   
  }
+  Future<void> _fetchImage() async {
+  
+  final url = 'https://www.dropbox.com/s/4m64ztxkj8a4dab/boatstraightlegs.svg?raw=1';
+  final response = await http.get(Uri.parse(url));
+  print(response.body);
+
+}
+
 }
