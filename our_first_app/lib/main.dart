@@ -27,15 +27,15 @@ class MyApp extends StatelessWidget{
         return Consumer<DarkTheme>(
           builder: (context, darkTheme, child){
             return MaterialApp(
-              theme: ThemeData(colorSchemeSeed: Color.fromARGB(255, 153, 254, 185)),
+              theme: ThemeData(colorSchemeSeed: const Color.fromARGB(255, 153, 254, 185)),
               initialRoute: '/login/',
               routes: {
                 '/login/': (context) => const LoginPage(),
                 '/home/': (context) => const HomePage(),
                 '/profile/': (context) => const ProfilePage(),
                 '/settings/':(context) => const SettingsPage(),
-                '/authorization/':(context) => AuthorizationPage(),
-                '/yoga/' : (context) => YogaPage()
+                '/authorization/':(context) => const AuthorizationPage(),
+                '/yoga/' : (context) => const YogaPage()
               }
             );
           }

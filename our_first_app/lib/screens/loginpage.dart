@@ -37,8 +37,8 @@ class _LoginPageState extends State<LoginPage>{
                   )
                 ),
                 Padding(
-                  padding: EdgeInsets.all(15),
-                  child: Text(language.language[0], style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold)),
+                  padding: const EdgeInsets.all(15),
+                  child: Text(language.language[0], style: const TextStyle(fontSize: 23, fontWeight: FontWeight.bold)),
                 ),
                 Container(
                   padding: const EdgeInsets.all(7),
@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage>{
                       style: const TextStyle(fontSize: 18),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Color.fromARGB(200, 255, 255, 255),
+                        fillColor: const Color.fromARGB(200, 255, 255, 255),
                         hintText: language.language[1],
                         prefixIcon: const Icon(MdiIcons.account),
                         border: const OutlineInputBorder()
@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage>{
                       decoration: InputDecoration(
                         hintText: 'password',
                         filled: true,
-                        fillColor: Color.fromARGB(200, 255, 255, 255),
+                        fillColor: const Color.fromARGB(200, 255, 255, 255),
                         prefixIcon: const Icon(MdiIcons.lock),
                         suffixIcon: IconButton(
                           onPressed: (){

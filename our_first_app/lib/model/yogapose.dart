@@ -1,24 +1,18 @@
 class YogaPose {
-  final int id;
-  final String name;
-  final String sanskrit_name;
-  final String image_url;
+  final int? id;
+  final String? name;
+  final String? sanskritName;
+  final String? imageUrl;
 
-  YogaPose(
-    { required this.id,
-      required this.name,
-      required this.sanskrit_name,
-      required this.image_url
-
-    }
-  );
+  YogaPose({required this.id, required this.name, required this.sanskritName, required this.imageUrl});
 
   factory YogaPose.fromJson(Map<String, dynamic> json){
     return YogaPose(
-      id: json['id'], 
-      name: json['name'], 
-      sanskrit_name: json['sanskrit_name'], 
-      image_url: json['image_url']);
+      id: json["id"], 
+      name: json["english_name"], 
+      sanskritName: json["sanskrit_name"], 
+      imageUrl: json["image_url"]
+    );
   }
 
 

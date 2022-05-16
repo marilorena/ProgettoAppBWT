@@ -11,7 +11,7 @@ class HomePage extends StatefulWidget{
 }
 
 class _HomePageState extends State<HomePage>{
-final Color col = Color.fromARGB(150, 53, 196, 84);
+final Color col = const Color.fromARGB(150, 53, 196, 84);
 
   @override
   Widget build(BuildContext context){
@@ -19,7 +19,7 @@ final Color col = Color.fromARGB(150, 53, 196, 84);
       builder: (context, language, child) =>  Scaffold(
         appBar: AppBar(
           
-          backgroundColor: Color.fromARGB(150, 195, 181, 236),
+          backgroundColor: const Color.fromARGB(150, 195, 181, 236),
           centerTitle: true,
           title: const Text(
             'Home',
@@ -32,7 +32,7 @@ final Color col = Color.fromARGB(150, 53, 196, 84);
           )
         ),
         body: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             image: DecorationImage(
               image: AssetImage('asset/sfondo5.jpg'), fit: BoxFit.fitHeight)),
           child: ListView(

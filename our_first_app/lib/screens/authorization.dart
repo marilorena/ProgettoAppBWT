@@ -2,17 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:fitbitter/fitbitter.dart';
 
 class AuthorizationPage extends StatelessWidget {
-  AuthorizationPage({Key? key}) : super(key: key);
-
-  static const route = '/';
-  static const routename = 'AuthorizationPage';
-
+  const AuthorizationPage({Key? key}) : super(key: key);
+  
   @override
   Widget build(BuildContext context) {
-    print('${AuthorizationPage.routename} built');
     return Scaffold(
       appBar: AppBar(
-        title: Text(AuthorizationPage.routename),
+        title: const Text('AuthorizationPage'),
       ),
       body: Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -28,7 +24,7 @@ class AuthorizationPage extends StatelessWidget {
                   
             }, 
 
-            child: Text('Authorize'),
+            child: const Text('Authorize'),
           )
         ]),
       ),
