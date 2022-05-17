@@ -108,10 +108,10 @@ class _LoginPageState extends State<LoginPage>{
                       padding: const EdgeInsets.all(8),
                       fixedSize: const Size.fromWidth(90),
                     ),
-                    onPressed: (){
+                    onPressed: () async{
                       if(_usernameController.text=='test' && _passwordController.text=='test'){
-                        _usernameController.text='';
-                        _passwordController.text='';
+                         final sp = await SharedPreferences.getInstance();
+                         sp.setString('username', _usernameController.text);
                         Navigator.popAndPushNamed(context, '/authorization/');
                       }
                       else{
