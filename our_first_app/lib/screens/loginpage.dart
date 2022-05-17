@@ -28,7 +28,7 @@ class _LoginPageState extends State<LoginPage>{
     final sp = await SharedPreferences.getInstance();
     if(sp.getString('username') != null){
       //If 'username is set, push the HomePage
-      Navigator.popAndPushNamed(context, '/Home/');
+      Navigator.popAndPushNamed(context, '/home/');
     }//if
   }
 
