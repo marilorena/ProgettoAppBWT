@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 class YogaPose {
   final int? id;
   final String? name;
@@ -11,7 +13,7 @@ class YogaPose {
       id: json["id"], 
       name: json["english_name"], 
       sanskritName: json["sanskrit_name"], 
-      imageUrl: json["image_url"]
+      imageUrl: json["img_url"]
     );
   }
 
