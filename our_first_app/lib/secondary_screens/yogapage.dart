@@ -29,8 +29,8 @@ class YogaPage extends StatelessWidget{
                               Text(pose.name),
                               Text(pose.sanskritname, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.green),
                               ),
-                              Image.network(pose.imageurl)
-                              
+                              SizedBox(height: 15),
+                              SvgPicture.network(pose.imageurl)
                             ],
                       ),
                     );
