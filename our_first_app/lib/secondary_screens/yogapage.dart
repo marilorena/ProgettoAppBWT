@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/yogapose.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class YogaPage extends StatelessWidget{
   const YogaPage({Key? key}) : super(key: key);
