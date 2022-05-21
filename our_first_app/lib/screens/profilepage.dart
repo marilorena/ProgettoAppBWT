@@ -86,13 +86,13 @@ class ProfilePage extends StatelessWidget{
     );
   }
    void _toLoginPage(BuildContext context) async{
-    //Unset the 'username' filed in SharedPreference 
+     
     final sp = await SharedPreferences.getInstance();
     sp.remove('username');
-
-    //Pop the drawer first 
+    
+    
     Navigator.pop(context);
-    //Then pop the HomePage
+    
     Navigator.popAndPushNamed(context, '/login/');
    }
 }
