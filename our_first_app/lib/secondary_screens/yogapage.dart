@@ -19,14 +19,16 @@ class YogaPage extends StatelessWidget{
      body: Center(
        child: 
           FutureBuilder(
-            future: _fetchPose(1),
+            future: _fetchPose(48),
             builder: (context, snapshot){
               if (snapshot.hasData){
                 final pose = snapshot.data as YogaPose;
                 return Card(
+                  shadowColor: Color.fromARGB(0, 190, 228, 193),
+                  color: Color.fromARGB(255, 224, 245, 223),
                   elevation: 5,
                   child: Padding(
-                  padding: const EdgeInsets.all(100),
+                  padding: const EdgeInsets.all(50),
                   child: FittedBox(
                       child: Column( 
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -35,7 +37,7 @@ class YogaPage extends StatelessWidget{
                               Text(pose.sanskritname, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.green),
                               ),
                               SizedBox(height: 15),
-                              SvgPicture.network(pose.imageurl),
+                              SvgPicture.network(pose.imageurl, height: 250),
                               
                               
                              ElevatedButton( onPressed: (){
@@ -72,12 +74,5 @@ class YogaPage extends StatelessWidget{
   
  }
 
-  //Future<void> _fetchImage() async {
-  
- //final url = 'https://uc549dab9f5a20837e1793111b7b.dl.dropboxusercontent.com/cd/0/inline2/BlbzVO9n-ugBaXcqjezjxw3IKcrB1Zm2rU-Bnx_82xSf7szRATEvCCGYEsIf8pQLgIN4rRb2WSvPfxHutblHjpWYau-m8dmHsNRaj0hJoufi9hzZHq7q5c6ZEgj5x39xekx9-P6-67aUBG4GSRh552v75sE91KghsGknR6buf6t3Rxz8Z9hPCfrYZAZ6htxyMSPP6yxOt3_P7jd-gOM4OfwxAT5TFcrf4BjSKSDJByKJarjFCg-8NZJGz5Q-kHUJI_e0k4wgF_w25BVWL6aiF1FlEiwde2fS2NNgbLVaqf6kXE1IziVllnGO7BQkUryp9A1IZ1mgz-DLdM8gGF4tfxE6yLe7EydvrbI2cFUtTwnkZVErT05FUg7TSiW68Q8ZHS2evQu0Z6Mrzaz2PrXiGkrkPBBew6k-f7_ORi_7ekK7pg/file';
- // final response = await http.get(Uri.parse(url));
- // print(response.body);
-
-//}
 
 }
