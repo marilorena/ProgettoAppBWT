@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
+import 'package:flutter/painting.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,10 @@ class YogaPage extends StatelessWidget{
               if (snapshot.hasData){
                 final pose = snapshot.data as YogaPose;
                 return Card(
+                  elevation: 5,
+                  child: Padding(
+                  padding: const EdgeInsets.all(100),
+                  child: FittedBox(
                       child: Column( 
                         mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -30,10 +35,21 @@ class YogaPage extends StatelessWidget{
                               Text(pose.sanskritname, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.green),
                               ),
                               SizedBox(height: 15),
-                              SvgPicture.network(pose.imageurl)
+                              SvgPicture.network(pose.imageurl),
+                              
+                              
+                             ElevatedButton( onPressed: (){
+                               Navigator.popAndPushNamed(context, '/home/');
+                               },
+                             child: 
+                             Icon(Icons.arrow_back)
+                             )
+                            
                             ],
                       ),
-                    );
+                    )
+                  )
+                );
               } else {
                 return CircularProgressIndicator();
               }
