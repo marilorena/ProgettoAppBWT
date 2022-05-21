@@ -33,10 +33,10 @@ class YogaPage extends StatelessWidget{
                         mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(pose.name),
-                              Text(pose.sanskritname, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.green),
+                              Text(pose.sanskritName, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.green),
                               ),
                               SizedBox(height: 15),
-                              SvgPicture.network(pose.imageurl, height: 250),
+                              SvgPicture.network(pose.imageUrl, height: 250),
                               
                               
                              ElevatedButton( onPressed: (){
@@ -55,7 +55,7 @@ class YogaPage extends StatelessWidget{
                 return CircularProgressIndicator();
               }
             }
-          }
+          
         )
       ),
       floatingActionButton: FloatingActionButton(
@@ -66,15 +66,14 @@ class YogaPage extends StatelessWidget{
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat
     );
   }
-
-          )
+  
         
        
-      )
+    
 
-   );
+   
 
-  }
+  
 
  Future<YogaPose?> _fetchPose(int id) async {
   

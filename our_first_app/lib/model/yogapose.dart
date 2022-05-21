@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 
 class YogaPose {
-  final int? id;
-  final String? name;
-  final String? sanskritName;
-  final String? imageUrl;
+  final int id;
+  final String name;
+  final String sanskritName;
+  final String imageUrl;
 
   YogaPose({required this.id, required this.name, required this.sanskritName, required this.imageUrl});
 
