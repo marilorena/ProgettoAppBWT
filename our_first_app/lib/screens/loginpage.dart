@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:our_first_app/model/language.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget{
   const LoginPage({Key? key}) : super(key: key);
@@ -14,6 +15,22 @@ class _LoginPageState extends State<LoginPage>{
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscure = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLogin();
+  }
+
+ void _checkLogin() async {
+    final sp = await SharedPreferences.getInstance();
+    if(sp.getString('username') != null){
+      
+      Navigator.popAndPushNamed(context, '/home/');
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context){
@@ -89,10 +106,10 @@ class _LoginPageState extends State<LoginPage>{
                       padding: const EdgeInsets.all(8),
                       fixedSize: const Size.fromWidth(90),
                     ),
-                    onPressed: (){
+                    onPressed: () async{
                       if(_usernameController.text=='test' && _passwordController.text=='test'){
-                        _usernameController.text='';
-                        _passwordController.text='';
+                         final sp = await SharedPreferences.getInstance();
+                         sp.setString('username', _usernameController.text);
                         Navigator.popAndPushNamed(context, '/authorization/');
                       }
                       else{

@@ -5,45 +5,55 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/yogapose.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class YogaPage extends StatelessWidget{
   const YogaPage({Key? key}) : super(key: key);
 
-  @override 
-  Widget build(BuildContext context){
-    return Scaffold(
-      body: Center(
-        child: FutureBuilder(
-          future: _fetchPose(),
-          builder: (context, snapshot) {
-            if(snapshot.hasData){
-              final pose = snapshot.data as YogaPose;
-              return Card(
-                elevation: 5,
-                child: Padding(
-                  padding: const EdgeInsets.all(30),
+
+ @override 
+ Widget build(BuildContext context){
+   
+   return Scaffold(
+     body: Center(
+       child: 
+          FutureBuilder(
+            future: _fetchPose(37),
+            builder: (context, snapshot){
+              if (snapshot.hasData){
+                final pose = snapshot.data as YogaPose;
+                return Card(
+                  shadowColor: Color.fromARGB(0, 190, 228, 193),
+                  color: Color.fromARGB(255, 224, 245, 223),
+                  elevation: 5,
+                  child: Padding(
+                  padding: const EdgeInsets.all(50),
                   child: FittedBox(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          pose.name!,
-                          style: const TextStyle(fontSize: 18)
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          pose.sanskritName!,
-                          style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic, color: Colors.green)
-                        ),
-                        const SizedBox(height: 15),
-                        SvgPicture.network(pose.imageUrl!, height: 250)
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            } else {
-              return const CircularProgressIndicator();
+                      child: Column( 
+                        mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(pose.name),
+                              Text(pose.sanskritname, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.green),
+                              ),
+                              SizedBox(height: 15),
+                              SvgPicture.network(pose.imageurl, height: 250),
+                              
+                              
+                             ElevatedButton( onPressed: (){
+                               Navigator.popAndPushNamed(context, '/home/');
+                               },
+                             child: 
+                             Icon(Icons.arrow_back)
+                             )
+                            
+                            ],
+                      ),
+                    )
+                  )
+                );
+              } else {
+                return CircularProgressIndicator();
+              }
             }
           }
         )
@@ -57,10 +67,22 @@ class YogaPage extends StatelessWidget{
     );
   }
 
-  Future<YogaPose?> _fetchPose() async {
-    final int id = Random().nextInt(10)+1;
-    final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/$id';
-    final response = await http.get(Uri.parse(url));
-    return response.statusCode==200 ? YogaPose.fromJson(jsonDecode(response.body)): null;
+          )
+        
+       
+      )
+
+   );
+
   }
+
+ Future<YogaPose?> _fetchPose(int id) async {
+  
+  final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/$id';
+  final response = await http.get(Uri.parse(url));
+  return response.statusCode == 200 ? YogaPose.fromJson(jsonDecode(response.body)): null;
+  
+ }
+
+
 }
