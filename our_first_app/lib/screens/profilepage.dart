@@ -85,14 +85,12 @@ class ProfilePage extends StatelessWidget{
       ),
     );
   }
-   void _toLoginPage(BuildContext context) async{
-     
+   void _toLoginPage(BuildContext context) async{ 
     final sp = await SharedPreferences.getInstance();
     sp.remove('username');
     
     
     Navigator.pop(context);
-    
     Navigator.popAndPushNamed(context, '/login/');
    }
 }

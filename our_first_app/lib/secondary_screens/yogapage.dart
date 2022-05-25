@@ -18,7 +18,7 @@ class YogaPage extends StatelessWidget{
      body: Center(
        child: 
           FutureBuilder(
-            future: _fetchPose(37),
+            future: _fetchPose(47),
             builder: (context, snapshot){
               if (snapshot.hasData){
                 final pose = snapshot.data as YogaPose;
@@ -37,14 +37,7 @@ class YogaPage extends StatelessWidget{
                               ),
                               SizedBox(height: 15),
                               SvgPicture.network(pose.imageUrl, height: 250),
-                              
-                              
-                             ElevatedButton( onPressed: (){
-                               Navigator.popAndPushNamed(context, '/home/');
-                               },
-                             child: 
-                             Icon(Icons.arrow_back)
-                             )
+
                             
                             ],
                       ),

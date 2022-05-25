@@ -25,8 +25,7 @@ class _LoginPageState extends State<LoginPage>{
  void _checkLogin() async {
     final sp = await SharedPreferences.getInstance();
     if(sp.getString('username') != null){
-      
-      Navigator.popAndPushNamed(context, '/home/');
+      Navigator.pushReplacementNamed(context, '/home/');
     }
   }
 
