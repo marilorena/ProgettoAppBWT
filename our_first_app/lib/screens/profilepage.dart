@@ -1,3 +1,4 @@
+import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/darktheme.dart';
 import 'package:our_first_app/model/language.dart';
@@ -89,5 +90,8 @@ class ProfilePage extends StatelessWidget{
     sp.remove('username');    
     Navigator.pop(context);
     Navigator.popAndPushNamed(context, '/login/');
+    await FitbitConnector.unauthorize(
+                    clientID:'238BR6',
+                    clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
   }
 }
