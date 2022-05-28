@@ -2,6 +2,7 @@ import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:our_first_app/model/language.dart';
+import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,16 +12,12 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>{
   final Color col = Color.fromARGB(150, 53, 196, 84);
 
-  final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManager = FitbitActivityTimeseriesDataManager(clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
-  
-  
-  final FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
-
-  final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
-  
+  final FitbitActivityTimeseriesDataManager? fitbitActivityTimeseriesDataManager = FitbitActivityTimeseriesDataManager(clientID: Credentials.getCredentials().id, clientSecret: Credentials.getCredentials().secret);
+  FitbitActivityDataManager? fitbitActivityDataManager = FitbitActivityDataManager(clientID: Credentials.getCredentials().id, clientSecret: Credentials.getCredentials().secret);
+  FitbitSleepDataManager? fitbitSleepDataManager = FitbitSleepDataManager(clientID: Credentials.getCredentials().id, clientSecret: Credentials.getCredentials().secret);
   
   @override
   Widget build(BuildContext context) {
@@ -62,53 +59,8 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(45),
                   ),
                 ),
-                onTap: () async {
-                  final heart = await _fetchRate();
-                  
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return Center(
-                        child: Container(
-                          height: 450,
-                          width: 350,
-                          color: Color.fromARGB(255, 225, 255, 203),
-                          child: Column(
-                            children: [
-                              const SizedBox(height: 20),
-                              const Text(
-                                'Heart Rate',
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  fontStyle: FontStyle.italic,
-                                  color: Colors.black,
-                                  decoration: TextDecoration.none
-                                ),
-                              ),
-                              Text(
-                                'Your resting heart rate is ${heart[0].restingHeartRate} bpm',
-                                style: const TextStyle(
-                                  fontSize: 30,
-                                  fontStyle: FontStyle.italic,
-                                  color: Colors.black,
-                                  decoration: TextDecoration.none
-                                )
-                              ),
-                              Text(
-                                'Minutes Out of Range ${heart[0].minutesOutOfRange} ',
-                                style: const TextStyle(
-                                  fontSize: 30,
-                                  fontStyle: FontStyle.italic,
-                                  color: Colors.black,
-                                  decoration: TextDecoration.none
-                                )
-                              )
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-                  );
+                onTap: (){
+                  Navigator.pushNamed(context, '/heart/', arguments: 0);
                 }
               ),
               const Padding(
@@ -134,8 +86,7 @@ class _HomePageState extends State<HomePage> {
                 onTap: () async {
                   final steps = await _fetchSteps();
                   final floors = await _fetchFloors();
-                  final calories = await _fetchCalories();
-                  final distance = await _fetchDistance();
+                  final activity = await _fetchActivity();
                   final minutesSedentary = await _fetchSedentary();
                   final minutesLight= await _fetchLight();
                   final minutesFairly= await _fetchFairly();
@@ -171,7 +122,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             Text(
-                                'Today you walked for ${distance[0].value} km',
+                                'Today you walked for  km',
                                 style: const TextStyle(
                                   fontSize: 30,
                                   fontStyle: FontStyle.italic,
@@ -301,7 +252,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<List<FitbitActivityTimeseriesData>> _fetchSteps() async {
-    return await fitbitActivityTimeseriesDataManager.fetch(
+    return await fitbitActivityTimeseriesDataManager!.fetch(
       FitbitActivityTimeseriesAPIURL.dayWithResource(
         date: DateTime.now().subtract(Duration(days: 0)),
         userID: '7ML2XV',
@@ -310,8 +261,8 @@ class _HomePageState extends State<HomePage> {
     ) as List<FitbitActivityTimeseriesData>;
   }
 
-   Future<List<FitbitActivityTimeseriesData>> _fetchFloors() async {
-    return await fitbitActivityTimeseriesDataManager.fetch(
+  Future<List<FitbitActivityTimeseriesData>> _fetchFloors() async {
+    return await fitbitActivityTimeseriesDataManager!.fetch(
       FitbitActivityTimeseriesAPIURL.dayWithResource(
         date: DateTime.now().subtract(Duration(days: 0)),
         userID: '7ML2XV',
@@ -320,26 +271,17 @@ class _HomePageState extends State<HomePage> {
     ) as List<FitbitActivityTimeseriesData>;
   }
 
-   Future<List<FitbitActivityTimeseriesData>> _fetchCalories() async {
-    return await fitbitActivityTimeseriesDataManager.fetch(
-      FitbitActivityTimeseriesAPIURL.dayWithResource(
+  Future<List<FitbitActivityData>> _fetchActivity() async {
+    return await fitbitActivityDataManager!.fetch(
+      FitbitActivityAPIURL.day(
         date: DateTime.now().subtract(Duration(days: 0)),
-        userID: '7ML2XV',
-        resource: 'activityCalories',
+        userID: '7ML2XV'
       )
-    ) as List<FitbitActivityTimeseriesData>;
+    ) as List<FitbitActivityData>;
   }
-     Future<List<FitbitActivityTimeseriesData>> _fetchDistance() async {
-    return await fitbitActivityTimeseriesDataManager.fetch(
-      FitbitActivityTimeseriesAPIURL.dayWithResource(
-        date: DateTime.now().subtract(Duration(days: 0)),
-        userID: '7ML2XV',
-        resource: 'distance',
-      )
-    ) as List<FitbitActivityTimeseriesData>;
-  }
-     Future<List<FitbitActivityTimeseriesData>> _fetchSedentary() async {
-    return await fitbitActivityTimeseriesDataManager.fetch(
+  
+  Future<List<FitbitActivityTimeseriesData>> _fetchSedentary() async {
+    return await fitbitActivityTimeseriesDataManager!.fetch(
       FitbitActivityTimeseriesAPIURL.dayWithResource(
         date: DateTime.now().subtract(Duration(days: 0)),
         userID: '7ML2XV',
@@ -347,8 +289,9 @@ class _HomePageState extends State<HomePage> {
       )
     ) as List<FitbitActivityTimeseriesData>;
   }
-     Future<List<FitbitActivityTimeseriesData>> _fetchLight() async {
-    return await fitbitActivityTimeseriesDataManager.fetch(
+  
+  Future<List<FitbitActivityTimeseriesData>> _fetchLight() async {
+    return await fitbitActivityTimeseriesDataManager!.fetch(
       FitbitActivityTimeseriesAPIURL.dayWithResource(
         date: DateTime.now().subtract(Duration(days: 0)),
         userID: '7ML2XV',
@@ -356,8 +299,9 @@ class _HomePageState extends State<HomePage> {
       )
     ) as List<FitbitActivityTimeseriesData>;
   }
-     Future<List<FitbitActivityTimeseriesData>> _fetchFairly() async {
-    return await fitbitActivityTimeseriesDataManager.fetch(
+  
+  Future<List<FitbitActivityTimeseriesData>> _fetchFairly() async {
+    return await fitbitActivityTimeseriesDataManager!.fetch(
       FitbitActivityTimeseriesAPIURL.dayWithResource(
         date: DateTime.now().subtract(Duration(days: 0)),
         userID: '7ML2XV',
@@ -365,8 +309,9 @@ class _HomePageState extends State<HomePage> {
       )
     ) as List<FitbitActivityTimeseriesData>;
   }
-     Future<List<FitbitActivityTimeseriesData>> _fetchVery() async {
-    return await fitbitActivityTimeseriesDataManager.fetch(
+  
+  Future<List<FitbitActivityTimeseriesData>> _fetchVery() async {
+    return await fitbitActivityTimeseriesDataManager!.fetch(
       FitbitActivityTimeseriesAPIURL.dayWithResource(
         date: DateTime.now().subtract(Duration(days: 0)),
         userID: '7ML2XV',
@@ -374,17 +319,9 @@ class _HomePageState extends State<HomePage> {
       )
     ) as List<FitbitActivityTimeseriesData>;
   }
-  Future<List<FitbitHeartData>> _fetchRate() async {
-    return await fitbitHeartDataManager.fetch(
-      FitbitHeartAPIURL.dayWithUserID(
-        date: DateTime.now().subtract(Duration(days: 0)),
-        userID: '7ML2XV',
-      )
-    ) as List<FitbitHeartData>;  
-  }
 
   Future<List<FitbitSleepData>> _fetchSleep() async {
-    return await fitbitSleepDataManager.fetch(
+    return await fitbitSleepDataManager!.fetch(
       FitbitSleepAPIURL.withUserIDAndDay(
         date: DateTime.now().subtract(Duration(days: 1)),
       userID: '7ML2XV',

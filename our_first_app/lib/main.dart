@@ -5,6 +5,7 @@ import 'package:our_first_app/screens/authorization.dart';
 import 'package:our_first_app/screens/loginpage.dart';
 import 'package:our_first_app/screens/homepage.dart';
 import 'package:our_first_app/screens/profilepage.dart';
+import 'package:our_first_app/secondary_screens/heartpage.dart';
 import 'package:our_first_app/secondary_screens/setting.dart';
 import 'package:our_first_app/secondary_screens/yogapage.dart';
 import 'package:provider/provider.dart';
@@ -27,15 +28,18 @@ class MyApp extends StatelessWidget{
         return Consumer<DarkTheme>(
           builder: (context, darkTheme, child){
             return MaterialApp(
-              theme: ThemeData(colorSchemeSeed: const Color.fromARGB(255, 153, 254, 185)),
+              theme: ThemeData(
+                colorSchemeSeed: const Color.fromARGB(255, 153, 254, 185),
+              ),
               initialRoute: '/login/',
               routes: {
                 '/login/': (context) => const LoginPage(),
                 '/home/': (context) => const HomePage(),
                 '/profile/': (context) => const ProfilePage(),
-                '/settings/':(context) => const SettingsPage(),
-                '/authorization/':(context) => const AuthorizationPage(),
-                '/yoga/' : (context) => const YogaPage()
+                '/settings/': (context) => const SettingsPage(),
+                '/authorization/': (context) => const AuthorizationPage(),
+                '/yoga/': (context) => const YogaPage(),
+                '/heart/': (context) => const HeartPage()
               }
             );
           }

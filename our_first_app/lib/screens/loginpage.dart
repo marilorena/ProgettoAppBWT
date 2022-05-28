@@ -107,7 +107,7 @@ class _LoginPageState extends State<LoginPage>{
                       if(_usernameController.text=='test' && _passwordController.text=='test'){
                          final sp = await SharedPreferences.getInstance();
                          sp.setString('username', _usernameController.text);
-                        Navigator.popAndPushNamed(context, '/authorization/');
+                        Navigator.pushReplacementNamed(context, '/authorization/');
                       }
                       else{
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
