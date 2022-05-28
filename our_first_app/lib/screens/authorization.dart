@@ -11,22 +11,24 @@ class AuthorizationPage extends StatelessWidget {
         title: const Text('AuthorizationPage'),
       ),
       body: Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          ElevatedButton(
-            onPressed: () async {
-              String? userId = await FitbitConnector.authorize(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () async {
+                String? userId = await FitbitConnector.authorize(
                   context: context,
                   clientID: '238BR6',
                   clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4',
                   redirectUri: 'example://fitbit/auth',
-                  callbackUrlScheme: 'example');
-                  Navigator.popAndPushNamed(context, '/home/');
-                  
-            }, 
-
-            child: const Text('Authorize'),
-          )
-        ]),
+                  callbackUrlScheme: 'example'
+                );
+                Navigator.popAndPushNamed(context, '/home/');   
+              },
+              child: const Text('Authorize'),
+            )
+          ]
+        ),
       ),
     );
   }

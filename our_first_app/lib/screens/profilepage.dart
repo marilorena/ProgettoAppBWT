@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/darktheme.dart';
 import 'package:our_first_app/model/language.dart';
-import 'package:our_first_app/screens/loginpage.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -47,8 +46,7 @@ class ProfilePage extends StatelessWidget{
                       return ListTile(
                         title: const Text('Logout'),
                         leading: const Icon(Icons.logout),
-                         
-                          onTap: () => _toLoginPage(context), 
+                        onTap: () => _toLoginPage(context), 
                       );
                     }
                   )
@@ -85,12 +83,11 @@ class ProfilePage extends StatelessWidget{
       ),
     );
   }
-   void _toLoginPage(BuildContext context) async{ 
+  
+  void _toLoginPage(BuildContext context) async{ 
     final sp = await SharedPreferences.getInstance();
-    sp.remove('username');
-    
-    
+    sp.remove('username');    
     Navigator.pop(context);
     Navigator.popAndPushNamed(context, '/login/');
-   }
+  }
 }

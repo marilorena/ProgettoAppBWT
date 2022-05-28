@@ -22,14 +22,12 @@ class _LoginPageState extends State<LoginPage>{
     _checkLogin();
   }
 
- void _checkLogin() async {
+  void _checkLogin() async {
     final sp = await SharedPreferences.getInstance();
     if(sp.getString('username') != null){
       Navigator.pushReplacementNamed(context, '/home/');
     }
   }
-
-
 
   @override
   Widget build(BuildContext context){

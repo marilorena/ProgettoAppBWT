@@ -14,52 +14,54 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final Color col = Color.fromARGB(150, 53, 196, 84);
 
-  final FitbitActivityTimeseriesDataManager
-      fitbitActivityTimeseriesDataManager = FitbitActivityTimeseriesDataManager(
-          clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
+  final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManager = FitbitActivityTimeseriesDataManager(clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
 
-  final FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(
-      clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
+  final FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
 
-  final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(
-      clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
+  final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
 
   @override
   Widget build(BuildContext context) {
     return Consumer<Language>(
       builder: (context, language, child) => Scaffold(
           appBar: AppBar(
-              backgroundColor: Color.fromARGB(150, 195, 181, 236),
-              centerTitle: true,
-              title: const Text('Home',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 27,
-                    letterSpacing: 1,
-                  ))),
+            backgroundColor: Color.fromARGB(150, 195, 181, 236),
+            centerTitle: true,
+            title: const Text(
+              'Home',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 27,
+                letterSpacing: 1,
+              )
+            )
+          ),
           body: Container(
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage('asset/sfondo5.jpg'),
-                    fit: BoxFit.fitHeight)),
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('asset/sfondo5.jpg'),
+                fit: BoxFit.fitHeight
+              )
+            ),
             child: ListView(
-                padding: const EdgeInsets.fromLTRB(25, 50, 25, 25),
-                children: [
-                  GestureDetector(
-                      child: Container(
-                        width: 320,
-                        height: 100,
-                        child: const Icon(MdiIcons.heartPulse,
-                            size: 50, color: Colors.white),
-                        decoration: BoxDecoration(
-                          color: col,
-                          borderRadius: BorderRadius.circular(45),
-                        ),
-                      ),
-                      onTap: () async {  final heart = await _fetchRate();
-                      print(heart);
-                        showDialog(
+              padding: const EdgeInsets.fromLTRB(25, 50, 25, 25),
+              children: [
+                GestureDetector(
+                  child: Container(
+                    width: 320,
+                    height: 100,
+                    child: const Icon(
+                      MdiIcons.heartPulse,
+                      size: 50, color: Colors.white
+                    ),
+                    decoration: BoxDecoration(
+                      color: col,
+                      borderRadius: BorderRadius.circular(45),
+                    ),
+                  ),
+                  onTap: () async {  final heart = await _fetchRate();
+                  showDialog(
                             context: context,
                             builder: (context) {
                               return Center(
@@ -69,15 +71,15 @@ class _HomePageState extends State<HomePage> {
                                   color: Color.fromARGB(255, 225, 255, 203),
                                   child: Column(
                                     children: [
-                                      SizedBox(height: 20),
-                                      Text(
+                                      const SizedBox(height: 20),
+                                      const Text(
                                         'Heart Rate',
                                         style: TextStyle(
                                             fontSize: 30,
                                             fontStyle: FontStyle.italic,
                                             color: Colors.black,
                                             decoration: TextDecoration.none),
-                                      ), Text('Your resting heart rate is ${heart[0].restingHeartRate} bpm', style: TextStyle(
+                                      ), Text('Your resting heart rate is ${heart[0].restingHeartRate} bpm', style: const TextStyle(
                                             fontSize: 30,
                                             fontStyle: FontStyle.italic,
                                             color: Colors.black,
