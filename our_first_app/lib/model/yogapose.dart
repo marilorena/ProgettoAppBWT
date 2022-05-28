@@ -16,9 +16,4 @@ class YogaPose {
       imageUrl: json["img_url"]
     );
   }
- 
-
-
-
-
 }
