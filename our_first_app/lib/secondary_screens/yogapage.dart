@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/yogapose.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+
+import '../model/yoga.dart';
 
 class YogaPage extends StatelessWidget{
   const YogaPage({Key? key}) : super(key: key);
@@ -17,7 +20,7 @@ class YogaPage extends StatelessWidget{
    return Scaffold(
      body: Center(
        child: FutureBuilder(
-          future: _fetchPose(47),
+          future: _fetchPose(1),
           builder: (context, snapshot){
             if (snapshot.hasData){
               final pose = snapshot.data as YogaPose;
@@ -28,15 +31,17 @@ class YogaPage extends StatelessWidget{
                 child: Padding(
                 padding: const EdgeInsets.all(50),
                 child: FittedBox(
-                  child: Column( 
-                    mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(pose.name),
-                        Text(pose.sanskritName, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.green)),
-                        SizedBox(height: 15),
-                        SvgPicture.network(pose.imageUrl, height: 250),
-                      ],
-                    ),
+                  child: Consumer<Yoga>( builder: (context, value, child) => 
+                     Column( 
+                      mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(pose.name),
+                          Text(pose.sanskritName, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.green)),
+                          SizedBox(height: 15),
+                          SvgPicture.network(pose.imageUrl, height: 250),
+                        ],
+                      ),
+                  ),
                   )
                 )
               );
