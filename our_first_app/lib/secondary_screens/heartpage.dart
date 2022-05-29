@@ -44,10 +44,10 @@ class _HeartPageState extends State<HeartPage>{
             if(snapshot.hasData){
               final heartData = snapshot.data as List<FitbitHeartData>;
               final dataMap = {
-                'Minutes out of activity range [${heartData[0].minimumOutOfRange}-${heartData[0].minimumFatBurn}]: ${heartData[0].minutesOutOfRange!}': heartData[0].minutesOutOfRange! + .0,
-                'Minutes in fat-burn range [${heartData[0].minimumFatBurn}-${heartData[0].minimumCardio}]: ${heartData[0].minutesFatBurn!}': heartData[0].minutesFatBurn! + .0,
-                'Minutes in cardio range [${heartData[0].minimumCardio}-${heartData[0].minimumPeak}]: ${heartData[0].minutesCardio!}': heartData[0].minutesCardio! + .0,
-                'Minutes in peak range [${heartData[0].minimumPeak}-220]: ${heartData[0].minutesPeak!}': heartData[0].minutesPeak! + .0
+                'Minutes out of activity range [${heartData[0].minimumOutOfRange}-${heartData[0].minimumFatBurn}]: ${_intToTime(heartData[0].minutesOutOfRange!)}': heartData[0].minutesOutOfRange! + .0,
+                'Minutes in fat-burn range [${heartData[0].minimumFatBurn}-${heartData[0].minimumCardio}]: ${_intToTime(heartData[0].minutesFatBurn!)}': heartData[0].minutesFatBurn! + .0,
+                'Minutes in cardio range [${heartData[0].minimumCardio}-${heartData[0].minimumPeak}]: ${_intToTime(heartData[0].minutesCardio!)}': heartData[0].minutesCardio! + .0,
+                'Minutes in peak range [${heartData[0].minimumPeak}-220]: ${_intToTime(heartData[0].minutesPeak!)}': heartData[0].minutesPeak! + .0
               };
               return Column(
                 children: [
@@ -125,5 +125,12 @@ class _HeartPageState extends State<HeartPage>{
 
   String _toDate(DateTime date){
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  String _intToTime(int value){
+    int h = value ~/ 60;
+    int m = value - (h * 60);
+
+    return '$h h $m m';
   }
 }
