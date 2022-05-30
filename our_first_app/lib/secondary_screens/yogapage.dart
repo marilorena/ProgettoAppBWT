@@ -16,11 +16,13 @@ class YogaPage extends StatelessWidget{
 
  @override 
  Widget build(BuildContext context){
+
    
    return Scaffold(
      body: Center(
        child: FutureBuilder(
-          future: _fetchPose(1),
+         
+          future: _fetchPose(${id}),
           builder: (context, snapshot){
             if (snapshot.hasData){
               final pose = snapshot.data as YogaPose;
@@ -31,7 +33,7 @@ class YogaPage extends StatelessWidget{
                 child: Padding(
                 padding: const EdgeInsets.all(50),
                 child: FittedBox(
-                  child: Consumer<Yoga>( builder: (context, value, child) => 
+                  child: Consumer<Yoga>( builder: (context, Yoga, child) => 
                      Column( 
                       mainAxisAlignment: MainAxisAlignment.center,
                         children: [

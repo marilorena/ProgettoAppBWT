@@ -15,10 +15,7 @@ class _HomePageState extends State<HomePage> {
   final Color col = Color.fromARGB(150, 53, 196, 84);
 
   final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManager = FitbitActivityTimeseriesDataManager(clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
-  
-  
   final FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
-
   final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(clientID: '238BR6', clientSecret: '447a1a825a0ff1846b3b3f35024dd7d4');
   
   

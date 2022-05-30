@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,21 +15,18 @@ final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManager = 
 
 class Yoga extends ChangeNotifier{
   
- final PoseImg = _fetchPose(1);
- 
-
-  Future <void> showImage(YogaPage) async {
-       final steps = await _fetchSteps();
-       int NumOfSteps = steps as int;
-       if (NumOfSteps > 20000){
-         PoseImg.asStream();
-        notifyListeners();
+  Future<YogaPose?> showImageNew(int steps) async {
+       if (steps > 20000){
+         return await _fetchPose(1);
+       }else if(steps < 20000 && steps > 15000){
+         return await _fetchPose(2);
        }
-
-      }
 
   }
 
+}
+
+  
 
 Future<List<FitbitActivityTimeseriesData>> _fetchSteps() async {
     return await fitbitActivityTimeseriesDataManager.fetch(
