@@ -1,10 +1,7 @@
 import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
-import 'package:our_first_app/model/darktheme.dart';
-import 'package:our_first_app/model/language.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatelessWidget{
@@ -12,13 +9,12 @@ class ProfilePage extends StatelessWidget{
 
   @override
   Widget build(BuildContext context){
-    return Consumer<Language>(
-      builder: (context, language, child) =>  Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text(
-            language.language[3],
-            style: const TextStyle(
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text(
+          'Profile',
+            style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 25,
               letterSpacing: 1
@@ -28,33 +24,13 @@ class ProfilePage extends StatelessWidget{
             PopupMenuButton(
               itemBuilder: (BuildContext context) => <PopupMenuEntry>[
                 PopupMenuItem(
-                  child: Column(
-                    children: [
-                      ListTile(
-                        title: Text(language.language[4]),
-                        leading: const Icon(Icons.settings),
-                        onTap: (){
-                          Navigator.popAndPushNamed(context, '/profile/');
-                          Navigator.pop(context);
-                          Navigator.pushNamed(context, '/settings/');
-                        },
-                      ),
-                      const Divider(color: Colors.black)
-                    ],
-                  )
+                  child: ListTile(
+                    title: const Text('Logout'),
+                    leading: const Icon(Icons.logout),
+                    onTap: () => _toLoginPage(context), 
+                  ),
                 ),
-                PopupMenuItem(
-                  child: Consumer<DarkTheme>(
-                    builder: (context, darkTheme, child) {
-                      return ListTile(
-                        title: const Text('Logout'),
-                        leading: const Icon(Icons.logout),
-                        onTap: () => _toLoginPage(context), 
-                      );
-                    }
-                  )
-                )
-              ]
+              ],
             )
           ],
         ),
@@ -76,20 +52,20 @@ class ProfilePage extends StatelessWidget{
                     Navigator.popAndPushNamed(context, '/profile/');
                   },
                 ),
-                label: language.language[3]
+                label: 'Profile'
               )
             ],
             currentIndex: 1,
             selectedItemColor: Colors.green,
             unselectedLabelStyle: const TextStyle(fontSize: 14)
           )
-      ),
-    );
+      );
   }
   
   void _toLoginPage(BuildContext context) async{ 
     final sp = await SharedPreferences.getInstance();
     sp.remove('username');
+    sp.remove('userID');
 
     Navigator.pop(context);
     Navigator.popAndPushNamed(context, '/login/');
@@ -99,7 +75,6 @@ class ProfilePage extends StatelessWidget{
       clientSecret: credentials.secret
     );
 
-    final queriesCounter = QueriesCounter.getInstance();
-    queriesCounter.stop();
+    QueriesCounter.getInstance().stop();
   }
 }

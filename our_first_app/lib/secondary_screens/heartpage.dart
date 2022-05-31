@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HeartPage extends StatefulWidget{
   const HeartPage({Key? key}) : super(key: key);
@@ -11,12 +12,18 @@ class HeartPage extends StatefulWidget{
   State<HeartPage> createState() => _HeartPageState();
 }
 
-class _HeartPageState extends State<HeartPage>{
-  final FitbitHeartDataManager _fitbitHeartDataManager = FitbitHeartDataManager(clientID: Credentials.getCredentials().id, clientSecret: Credentials.getCredentials().secret);
+class _HeartPageState extends State<HeartPage> {
+  late final FitbitHeartDataManager _fitbitHeartDataManager; // * with late: flutter verify if it's initialized at runtime (i.e. lately), not at compile time, moreover with late you can also use final (i.e. initialization only one time, not necessarely within the same line of code)
+
+  @override
+  void initState() {
+    _fitbitHeartDataManager = FitbitHeartDataManager(clientID: Credentials.getCredentials().id, clientSecret: Credentials.getCredentials().secret);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context){
-  int subtractedDays = ModalRoute.of(context)!.settings.arguments as int;
+    int subtractedDays = ModalRoute.of(context)!.settings.arguments as int;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -157,10 +164,54 @@ class _HeartPageState extends State<HeartPage>{
                 ],
               );
             } else {
-              final queriesCounter = QueriesCounter.getInstance();
-              return queriesCounter.getStopQueries()
-              ? const Text('Rate limit of requests exceeded...', style: TextStyle(fontSize: 16))
-              : const CircularProgressIndicator();
+              return FutureBuilder(
+                future: SharedPreferences.getInstance(),
+                builder: (context, snapshot){
+                  if(snapshot.hasData){
+                    final sp = snapshot.data as SharedPreferences;
+                    if(sp.getString('userID') == null){
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('To get data, please authorize', style: TextStyle(fontSize: 16)),
+                          const SizedBox(height: 5),
+                          ElevatedButton(
+                            onPressed: () async{
+                              final credentials = Credentials.getCredentials();
+                              String? userID = await FitbitConnector.authorize(
+                                context: context,
+                                clientID: credentials.id,
+                                clientSecret: credentials.secret,
+                                redirectUri: 'example://fitbit/auth',
+                                callbackUrlScheme: 'example'
+                              );
+                              final sp = await SharedPreferences.getInstance();
+                              if(userID != null){
+                                sp.setString('userID', userID);
+                              }
+                              Navigator.pushReplacement(
+                                context,
+                                PageRouteBuilder(
+                                  pageBuilder: (context, animation1, animation2) => const HeartPage(),
+                                  transitionDuration: Duration.zero, // in this way there is no animation
+                                  settings: const RouteSettings(arguments: 0)
+                                )
+                              );
+                            },
+                            child: const Text('Authorize'),
+                          )
+                        ],
+                      );
+                    } else if(QueriesCounter.getInstance().getStopQueries()){
+                      return const Text('Rate limit of requests exceeded...', style: TextStyle(fontSize: 16));
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                }
+              );
             }
           }
         ),
@@ -169,15 +220,16 @@ class _HeartPageState extends State<HeartPage>{
   }
 
   Future<List<FitbitHeartData>?> _fetchHeartData(int subtracted) async {
-    final queriesCounter = QueriesCounter.getInstance();
+    final sp = await SharedPreferences.getInstance();
+    final userID = sp.getString('userID');
     final now = DateTime.now();
-    if(queriesCounter.check()){
+    if(userID == null || QueriesCounter.getInstance().check()){
       return null;
     } else {
       return await _fitbitHeartDataManager.fetch(
         FitbitHeartAPIURL.dayWithUserID(
           date: DateTime.utc(now.year, now.month, now.day+subtracted),
-          userID: '7ML2XV',
+          userID: userID,
         )
       ) as List<FitbitHeartData>;  
     }
