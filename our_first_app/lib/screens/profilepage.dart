@@ -2,6 +2,7 @@ import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/darktheme.dart';
 import 'package:our_first_app/model/language.dart';
+import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,7 +89,8 @@ class ProfilePage extends StatelessWidget{
   
   void _toLoginPage(BuildContext context) async{ 
     final sp = await SharedPreferences.getInstance();
-    sp.remove('username');    
+    sp.remove('username');
+
     Navigator.pop(context);
     Navigator.popAndPushNamed(context, '/login/');
     final credentials = Credentials.getCredentials();
@@ -96,5 +98,8 @@ class ProfilePage extends StatelessWidget{
       clientID: credentials.id,
       clientSecret: credentials.secret
     );
+
+    final queriesCounter = QueriesCounter.getInstance();
+    queriesCounter.stop();
   }
 }

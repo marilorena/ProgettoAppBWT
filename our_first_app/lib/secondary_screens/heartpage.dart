@@ -1,5 +1,6 @@
 import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
+import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:pie_chart/pie_chart.dart';
 
@@ -11,7 +12,7 @@ class HeartPage extends StatefulWidget{
 }
 
 class _HeartPageState extends State<HeartPage>{
-  final FitbitHeartDataManager? _fitbitHeartDataManager = FitbitHeartDataManager(clientID: Credentials.getCredentials().id, clientSecret: Credentials.getCredentials().secret);
+  final FitbitHeartDataManager _fitbitHeartDataManager = FitbitHeartDataManager(clientID: Credentials.getCredentials().id, clientSecret: Credentials.getCredentials().secret);
 
   @override
   Widget build(BuildContext context){
@@ -21,18 +22,43 @@ class _HeartPageState extends State<HeartPage>{
         centerTitle: true,
         title: const Text('Heart'),
         actions: [
-          subtractedDays != 0
-          ? Container()
-          : IconButton(
-            onPressed: () => Navigator.pushReplacement(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation1, animation2) => const HeartPage(),
-                transitionDuration: Duration.zero, // in this way there is no animation
-                settings: const RouteSettings(arguments: 0)
+          IconButton(
+            onPressed: () async{
+              final pickedDate = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100)
+              );
+              if(pickedDate != null){
+                final now = DateTime.now();
+                final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
+                Navigator.pushReplacement(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) => const HeartPage(),
+                    transitionDuration: Duration.zero, // in this way there is no animation
+                    settings: RouteSettings(arguments: -difference)
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.calendar_month)
+          ),
+          Visibility(
+            visible: false,
+            maintainSize: false,
+            child: IconButton(
+              onPressed: () => Navigator.pushReplacement(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation1, animation2) => const HeartPage(),
+                  transitionDuration: Duration.zero, // in this way there is no animation
+                  settings: const RouteSettings(arguments: 0)
+                ),
               ),
+              icon: const Icon(Icons.update)
             ),
-            icon: const Icon(Icons.update)
           )
         ],
       ),
@@ -53,6 +79,7 @@ class _HeartPageState extends State<HeartPage>{
                 children: [
                   const SizedBox(height: 20),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
                         onPressed: (){
@@ -60,7 +87,7 @@ class _HeartPageState extends State<HeartPage>{
                             context,
                             PageRouteBuilder(
                               pageBuilder: (context, animation1, animation2) => const HeartPage(),
-                              transitionDuration: Duration.zero, // in this way there is no animation
+                              transitionDuration: Duration.zero, // in this way there is no page animation
                               settings: RouteSettings(arguments: subtractedDays-1)
                             ),
                           );
@@ -69,23 +96,47 @@ class _HeartPageState extends State<HeartPage>{
                       ),
                       Container(
                         alignment: Alignment.center,
-                        width: MediaQuery.of(context).size.width-100,
-                        child: Text(_toDate(heartData[0].dateOfMonitoring!), style: const TextStyle(fontSize: 16),)
-                      ),
-                      subtractedDays == 0
-                      ? Container()
-                      : IconButton(
-                        onPressed: (){
-                          Navigator.pushReplacement(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder: (context, animation1, animation2) => const HeartPage(),
-                              transitionDuration: Duration.zero, // in this way there is no animation
-                              settings: RouteSettings(arguments: subtractedDays+1)
+                        width: MediaQuery.of(context).size.width*0.7,
+                        child: Column(
+                          children: [
+                            Text(
+                              subtractedDays == 0 ? 'last 24 hours' : _toDate(heartData[0].dateOfMonitoring!),
+                              style: const TextStyle(fontSize: 16),
                             ),
-                          );
-                        },
-                        icon: const Icon(Icons.arrow_forward_ios)
+                            Visibility(
+                              visible: subtractedDays == 0 ? false : true,
+                              maintainSize: false,
+                              child: Column(
+                                children: const [
+                                  SizedBox(height: 2),
+                                  Text(
+                                    '00:00 - 23:59',
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              )
+                            )
+                          ],
+                        )
+                      ),
+                      Visibility(
+                        visible: subtractedDays == 0 ? false : true,
+                        maintainSize: true,
+                        maintainAnimation: true,
+                        maintainState: true,
+                        child: IconButton(
+                          onPressed: (){
+                            Navigator.pushReplacement(
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder: (context, animation1, animation2) => const HeartPage(),
+                                transitionDuration: Duration.zero, // in this way there is no animation
+                                settings: RouteSettings(arguments: subtractedDays+1)
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.arrow_forward_ios)
+                        ),
                       )
                     ]
                   ),
@@ -106,7 +157,10 @@ class _HeartPageState extends State<HeartPage>{
                 ],
               );
             } else {
-              return const CircularProgressIndicator();
+              final queriesCounter = QueriesCounter.getInstance();
+              return queriesCounter.getStopQueries()
+              ? const Text('Rate limit of requests exceeded...', style: TextStyle(fontSize: 16))
+              : const CircularProgressIndicator();
             }
           }
         ),
@@ -114,13 +168,19 @@ class _HeartPageState extends State<HeartPage>{
     );
   }
 
-  Future<List<FitbitHeartData>> _fetchHeartData(int subtracted) async {
-    return await _fitbitHeartDataManager?.fetch(
-      FitbitHeartAPIURL.dayWithUserID(
-        date: DateTime.now().subtract(Duration(days: -subtracted)),
-        userID: '7ML2XV',
-      )
-    ) as List<FitbitHeartData>;  
+  Future<List<FitbitHeartData>?> _fetchHeartData(int subtracted) async {
+    final queriesCounter = QueriesCounter.getInstance();
+    final now = DateTime.now();
+    if(queriesCounter.check()){
+      return null;
+    } else {
+      return await _fitbitHeartDataManager.fetch(
+        FitbitHeartAPIURL.dayWithUserID(
+          date: DateTime.utc(now.year, now.month, now.day+subtracted),
+          userID: '7ML2XV',
+        )
+      ) as List<FitbitHeartData>;  
+    }
   }
 
   String _toDate(DateTime date){
@@ -130,7 +190,6 @@ class _HeartPageState extends State<HeartPage>{
   String _intToTime(int value){
     int h = value ~/ 60;
     int m = value - (h * 60);
-
     return '$h h $m m';
   }
 }

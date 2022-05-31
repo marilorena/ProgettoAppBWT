@@ -2,6 +2,7 @@ import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:our_first_app/model/language.dart';
+import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:provider/provider.dart';
 
@@ -13,7 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>{
-  final Color col = Color.fromARGB(150, 53, 196, 84);
+  final Color col = const Color.fromARGB(150, 53, 196, 84);
 
   final FitbitActivityTimeseriesDataManager? fitbitActivityTimeseriesDataManager = FitbitActivityTimeseriesDataManager(clientID: Credentials.getCredentials().id, clientSecret: Credentials.getCredentials().secret);
   FitbitActivityDataManager? fitbitActivityDataManager = FitbitActivityDataManager(clientID: Credentials.getCredentials().id, clientSecret: Credentials.getCredentials().secret);
@@ -21,10 +22,14 @@ class _HomePageState extends State<HomePage>{
   
   @override
   Widget build(BuildContext context) {
+    // start the chronometer and initialize the queries counter
+    final queriesCounter = QueriesCounter.getInstance();
+    queriesCounter.start();
+
     return Consumer<Language>(
       builder: (context, language, child) => Scaffold(
         appBar: AppBar(
-          backgroundColor: Color.fromARGB(150, 195, 181, 236),
+          backgroundColor: const Color.fromARGB(150, 195, 181, 236),
           centerTitle: true,
           title: const Text(
             'Home',
