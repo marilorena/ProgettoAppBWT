@@ -22,7 +22,7 @@ class YogaPage extends StatelessWidget{
      body: Center(
        child: FutureBuilder(
          
-          future: _fetchPose(${id}),
+          future: _fetchPose(id),
           builder: (context, snapshot){
             if (snapshot.hasData){
               final pose = snapshot.data as YogaPose;
@@ -63,6 +63,7 @@ class YogaPage extends StatelessWidget{
   }
 
   Future<YogaPose?> _fetchPose(int id) async {
+     
     final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/$id';
     final response = await http.get(Uri.parse(url));
     return response.statusCode == 200 ? YogaPose.fromJson(jsonDecode(response.body)): null;
