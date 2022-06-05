@@ -36,7 +36,7 @@ class _ActivitySettingsState extends State<ActivitySettings> {
                     _stepsTarget = value;
                   });
                   final sp = await SharedPreferences.getInstance();
-                  sp.setDouble('steps', _stepsTarget);
+                  sp.setInt('steps', _stepsTarget.toInt());
                 },
                 min: 5000,
                 max: 50000,
@@ -53,7 +53,7 @@ class _ActivitySettingsState extends State<ActivitySettings> {
                     _floorsTarget = value;
                   });
                   final sp = await SharedPreferences.getInstance();
-                  sp.setDouble('floors', _floorsTarget);
+                  sp.setInt('floors', _floorsTarget.toInt());
                 },
                 min: 1,
                 max: 100,

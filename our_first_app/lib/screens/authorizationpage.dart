@@ -26,10 +26,21 @@ class AuthorizationPage extends StatelessWidget {
                   redirectUri: 'example://fitbit/auth',
                   callbackUrlScheme: 'example'
                 );
+                
                 final sp = await SharedPreferences.getInstance();
                 if(userID != null){
                   sp.setString('userID', userID);
                 }
+
+                // for the queries counter
+                if(sp.getInt('pastTime') == null){
+                  sp.setInt('pastTime', DateTime.now().millisecondsSinceEpoch);
+                }
+                sp.setInt(
+                  'millisecondsSincePastTime',
+                  DateTime.now().millisecondsSinceEpoch - sp.getInt('pastTime')!
+                ); 
+
                 Navigator.pushReplacementNamed(context, '/home/');   
               },
               child: const Text('Authorize'),

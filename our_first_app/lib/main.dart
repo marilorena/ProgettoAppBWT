@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:our_first_app/screens/authorization.dart';
+import 'package:our_first_app/screens/authorizationpage.dart';
 import 'package:our_first_app/screens/loginpage.dart';
 import 'package:our_first_app/screens/homepage.dart';
 import 'package:our_first_app/screens/profilepage.dart';
 import 'package:our_first_app/secondary_screens/activitypage.dart';
 import 'package:our_first_app/secondary_screens/activitysettingspage.dart';
 import 'package:our_first_app/secondary_screens/heartpage.dart';
+import 'package:our_first_app/secondary_screens/sleeppage.dart';
 import 'package:our_first_app/secondary_screens/yogapage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget{
               '/yoga/': (context) => const YogaPage(),
               '/heart/': (context) => const HeartPage(),
               '/activity/': (context) => const ActivityPage(),
+              '/sleep/': (context) => const SleepPage(),
               '/activitysettings/': (context) => const ActivitySettings()
             }
           );

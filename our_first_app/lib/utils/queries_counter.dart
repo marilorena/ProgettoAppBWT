@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 class QueriesCounter{ // to detect if the rate limit of queries is reached
   static final Stopwatch chronometer = Stopwatch();
   static int counter = 0;
@@ -11,13 +13,15 @@ class QueriesCounter{ // to detect if the rate limit of queries is reached
 
   void start(){
     chronometer.start();
-    stopQueries = false;
   }
 
-  bool check(){
+  Future<bool> check() async{
     if(chronometer.isRunning){
-      final elapsedTime = chronometer.elapsedMilliseconds/1000/60/60;
+      final sp = await SharedPreferences.getInstance();
+      final elapsedTime = (chronometer.elapsedMilliseconds + sp.getInt('millisecondsSincePastTime')!)/1000/60/60; // hours
       if(elapsedTime >= 1){ // after each hour...
+        sp.setInt('pastTime', DateTime.now().millisecondsSinceEpoch);
+        sp.setInt('millisecondsSincePastTime', 0);
         counter = 1;
         chronometer.reset();
         stopQueries = false;
@@ -43,5 +47,6 @@ class QueriesCounter{ // to detect if the rate limit of queries is reached
 
   void stop(){
     chronometer.stop();
+    chronometer.reset();
   }
 }

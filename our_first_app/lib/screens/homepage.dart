@@ -13,13 +13,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>{
   final Color col = const Color.fromARGB(150, 53, 196, 84);
-  FitbitSleepDataManager? fitbitSleepDataManager = FitbitSleepDataManager(clientID: Credentials.getCredentials().id, clientSecret: Credentials.getCredentials().secret);
   
   @override
   Widget build(BuildContext context) {
     // start the chronometer and initialize the queries counter
-    final queriesCounter = QueriesCounter.getInstance();
-    queriesCounter.start();
+    QueriesCounter.getInstance().start();
 
     return Scaffold(
       appBar: AppBar(
@@ -58,9 +56,7 @@ class _HomePageState extends State<HomePage>{
                   borderRadius: BorderRadius.circular(45),
                 ),
               ),
-              onTap: (){
-                Navigator.pushNamed(context, '/heart/', arguments: 0);
-              }
+              onTap: () => Navigator.pushNamed(context, '/heart/', arguments: 0)
             ),
             const Padding(
               padding: EdgeInsets.all(8.0),
@@ -82,9 +78,7 @@ class _HomePageState extends State<HomePage>{
                   borderRadius: BorderRadius.circular(45),
                 ),
               ),
-              onTap: (){
-                Navigator.pushNamed(context, '/activity/', arguments: 0);
-              }
+              onTap: () => Navigator.pushNamed(context, '/activity/', arguments: 0)
             ),
           const Padding(
             padding: EdgeInsets.all(8.0),
@@ -106,38 +100,7 @@ class _HomePageState extends State<HomePage>{
                 borderRadius: BorderRadius.circular(45),
               ),
             ),
-            onTap: () async {
-              final sleep = await _fetchSleep();
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                  return Center(
-                    child: Container(
-                      height: 450,
-                      width: 350,
-                      color: Color.fromARGB(255, 225, 255, 203),
-                      child: Column(
-                        children: [
-                          SizedBox(height: 20),
-                          const Text(
-                            'Sleep',
-                            style: TextStyle(
-                              fontSize: 30,
-                              fontStyle: FontStyle.italic,
-                              color: Colors.black,
-                              decoration: TextDecoration.none
-                            ),
-                          ),
-                          Text(
-                            'You slept for ${sleep[0].dateOfSleep}'
-                          )
-                        ],
-                      ),
-                    ),
-                  );
-                }
-              );
-            }
+            onTap: () => Navigator.pushNamed(context, '/sleep/', arguments: 0)
         ),
         const Padding(
           padding: EdgeInsets.all(8.0),
@@ -194,14 +157,5 @@ class _HomePageState extends State<HomePage>{
         unselectedLabelStyle: const TextStyle(fontSize: 14)
       )
     );
-  }
-
-  Future<List<FitbitSleepData>> _fetchSleep() async {
-    return await fitbitSleepDataManager!.fetch(
-      FitbitSleepAPIURL.withUserIDAndDay(
-        date: DateTime.now().subtract(Duration(days: 1)),
-      userID: '7ML2XV',
-      )
-    ) as List<FitbitSleepData>;
   }
 }

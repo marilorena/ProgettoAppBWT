@@ -7,9 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:our_first_app/model/yogapose.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class YogaPage extends StatelessWidget{
+class YogaPage extends StatefulWidget{
   const YogaPage({Key? key}) : super(key: key);
 
+  @override
+  State<YogaPage> createState() => _YogaPageState();
+}
+
+class _YogaPageState extends State<YogaPage> {
+  List<int> poseList = [1,2,10,48];
 
  @override 
  Widget build(BuildContext context){
@@ -59,5 +65,5 @@ class YogaPage extends StatelessWidget{
     final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/$id';
     final response = await http.get(Uri.parse(url));
     return response.statusCode == 200 ? YogaPose.fromJson(jsonDecode(response.body)): null;
-  }
+  }    
 }
