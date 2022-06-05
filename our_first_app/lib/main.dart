@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/darktheme.dart';
 import 'package:our_first_app/model/language.dart';
-import 'package:our_first_app/model/yoga.dart';
 import 'package:our_first_app/screens/authorization.dart';
 import 'package:our_first_app/screens/loginpage.dart';
 import 'package:our_first_app/screens/homepage.dart';
@@ -23,7 +22,7 @@ class MyApp extends StatelessWidget{
       providers: [
         ChangeNotifierProvider<DarkTheme>(create: (context) => DarkTheme()),
         ChangeNotifierProvider<Language>(create: (context) => Language()),
-        ChangeNotifierProvider<Yoga>(create: (context) => Yoga())
+        
       ],
       builder: (context, child) {
         return Consumer<DarkTheme>(

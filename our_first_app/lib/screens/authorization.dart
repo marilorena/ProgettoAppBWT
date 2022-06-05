@@ -26,7 +26,7 @@ class AuthorizationPage extends StatefulWidget {
           children: [
             ElevatedButton(
               onPressed: () async {
-                final account = _fetchData();
+               
                 String? userId = await FitbitConnector.authorize(
                   context: context,
                   clientID: '238BR6',
@@ -34,6 +34,7 @@ class AuthorizationPage extends StatefulWidget {
                   redirectUri: 'example://fitbit/auth',
                   callbackUrlScheme: 'example'
                 );
+                 final account = await _fetchData();
                 Navigator.popAndPushNamed(context, '/home/');   
               },
               child: const Text('Authorize'),
@@ -46,10 +47,10 @@ class AuthorizationPage extends StatefulWidget {
 
 
 
- Future<List<FitbitAccountData>> _fetchData() async {
+ Future<List<FitbitData>> _fetchData() async {
 
   return await fitbitAccountDataManager.fetch(FitbitUserAPIURL.withUserID(
-    userID: '7ML2XV' )) as List<FitbitAccountData>;
+    userID: '7ML2XV' )) as List<FitbitData>;
   } 
 
 }
