@@ -97,10 +97,10 @@ class _LoginPageState extends State<LoginPage>{
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                         content: Text(
                           'Wrong credentials',
-                          style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic)
+                          style: TextStyle(fontSize: 18, color: Colors.black)
                         ),
-                        duration: Duration(seconds: 2),
-                        backgroundColor: Colors.black54,
+                        duration: Duration(seconds: 3),
+                        backgroundColor: Color.fromARGB(150, 195, 181, 236),
                         padding: EdgeInsets.all(18)
                       ));
                     }

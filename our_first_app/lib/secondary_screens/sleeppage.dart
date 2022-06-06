@@ -1,3 +1,4 @@
+import 'package:d_chart/d_chart.dart';
 import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -55,12 +56,12 @@ class SleepPage extends StatelessWidget{
 
   String _getSleepDuration(DateTime? startDate, DateTime? endDate){
     if(startDate == null || endDate == null){
-      return '0 h 0 m';
+      return '---';
     } else {
       final duration = (endDate.millisecondsSinceEpoch - startDate.millisecondsSinceEpoch)~/1000~/60;
       int h = duration ~/ 60;
       int m = duration - (h * 60);
-      return '$h h $m m';
+      return h == 0 ? '$m m' : '$h h $m m';
     }
   }
 
@@ -137,19 +138,26 @@ class SleepPage extends StatelessWidget{
   }
 
   Widget _showChart(BuildContext context, int subtractedDays, List<FitbitSleepData> sleepData){
-    List<List<String>> data = [];
     Map<String, int> levels = {};
+    List<Map<String, int>> data = [];
+    Map<String, int> levelsValues = {};
+    int levelsCounter = -1;
+    int iterCounter = 0;
     for(FitbitSleepData item in sleepData){
+      iterCounter = iterCounter + 1;
       if(item.level != null){
         if(!levels.keys.contains(item.level)){
           levels.addEntries({item.level! : 1}.entries);
+          levelsCounter = levelsCounter + 1;
+          levelsValues.addEntries({item.level! : levelsCounter}.entries);
         } else {
           levels[item.level!] = levels[item.level]! + 1;
         }
 
-        if(item.entryDateTime != null){
-          final time = DateFormat.Hm().format(item.entryDateTime!);
-          data.add([time, item.level!]);
+        if(item.entryDateTime != null && sleepData[0].entryDateTime != null && item.level != null){
+          final difference = (item.entryDateTime!.millisecondsSinceEpoch - sleepData[0].entryDateTime!.millisecondsSinceEpoch)~/1000~/60;
+          final value = item.level!;
+          data.add({'domain': difference, 'measure': levelsValues[value]!});
         }
       }
     }
@@ -159,19 +167,37 @@ class SleepPage extends StatelessWidget{
       final time = levels[item]!*30~/60; // minutes
       int h = time ~/ 60;
       int m = time - (h * 60);
-      final percentage = levels[item]!/levels.values.sum;
+      final percentage = (levels[item]!/levels.values.sum*100*100).toInt()/100;
       timesInPercentage.add(
-        Text('time in $item sleep: $h h $m m ($percentage %)', style: const TextStyle(fontSize: 16))
+        Text(item == 'wake' ? 'time awake: ${h == 0 ? '$m m' : '$h h $m m'} ($percentage %)' : 'time in $item sleep: ${h == 0 ? '$m m' : '$h h $m m'} ($percentage %)', style: const TextStyle(fontSize: 16))
       );
       timesInPercentage.add(const SizedBox(height: 10));
     }
 
-    return Column(
-      children: [
-        
-        const SizedBox(height: 20),
-        Column(children: timesInPercentage)
-      ],
+    return SizedBox(
+      width: MediaQuery.of(context).size.width*0.7,
+      child: Column(
+        children: [
+          SizedBox(
+            height: 180,
+            child: DChartLine(
+              animate: true,
+              includePoints: true,
+              lineWidth: 1.5,
+              lineColor: (lineData, index, id) => Colors.blue,
+              pointColor: (lineData, index, id) => Colors.black,
+              data: [{
+                'id' : 'Line',
+                'data' : data
+              }]
+            ),
+          ),
+          const SizedBox(height: 5),
+          const Text('- legend: wake=0, light=1, deep=2, rem=3\n- the x-axis is in minutes'),
+          const SizedBox(height: 30),
+          Column(children: timesInPercentage)
+        ],
+      ),
     );
   }
 

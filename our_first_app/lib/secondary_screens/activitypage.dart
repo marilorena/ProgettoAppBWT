@@ -463,7 +463,7 @@ class ActivityPage extends StatelessWidget{
                 if(activityData[index].distance == null){
                   distance = '---';
                 } else {
-                  distance = (activityData[index].distance!*10.toInt())/10;
+                  distance = (activityData[index].distance!*100).toInt()/100;
                 }
                 final dynamic duration;
                 if(activityData[index].distance == null){
@@ -491,13 +491,13 @@ class ActivityPage extends StatelessWidget{
                     children: [
                       Text(activityData[index].name?? '---', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 10),
-                      Text('distance: $distance', style: const TextStyle(fontSize: 14)),
+                      Text('distance: $distance km', style: const TextStyle(fontSize: 14)),
                       const SizedBox(height: 5),
                       Text('duration: $duration', style: const TextStyle(fontSize: 14)),
                       const SizedBox(height: 5),
                       Text('start time: $startTime', style: const TextStyle(fontSize: 14)),
                       const SizedBox(height: 5),
-                      Text('calories: $calories', style: const TextStyle(fontSize: 14))
+                      Text('calories: $calories kcal', style: const TextStyle(fontSize: 14))
                     ]
                   ),
                 );

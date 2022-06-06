@@ -14,8 +14,10 @@ class _HomePageState extends State<HomePage>{
   
   @override
   Widget build(BuildContext context) {
-    // start the chronometer and initialize the queries counter
-    QueriesCounter.getInstance().start();
+    // if, when starting the app, the first page is this, start the chronometer
+    if(!QueriesCounter.chronometer.isRunning){
+      QueriesCounter.getInstance().start();
+    }
 
     return Scaffold(
       appBar: AppBar(
