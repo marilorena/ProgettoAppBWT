@@ -1,8 +1,6 @@
-import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
-import 'package:our_first_app/utils/client_credentials.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);

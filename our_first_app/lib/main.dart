@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: SharedPreferences.getInstance(),
+      future: _whenOpening(),
       builder: (context, snapshot) {
         if(snapshot.hasData){
           final sp = snapshot.data as SharedPreferences;
@@ -42,9 +42,14 @@ class MyApp extends StatelessWidget{
             }
           );
         } else {
-          return Image.asset('asset/icons/icon_launcher.png', height: 100);
+          return Container(color:Colors.white, child: Center(child: Image.asset('asset/icons/icon_launcher.png', height: 100)));
         }
       }
     );
+  }
+
+  Future<SharedPreferences> _whenOpening() async{
+    await Future.delayed(const Duration(milliseconds: 1500));
+    return await SharedPreferences.getInstance();
   }
 }
