@@ -180,6 +180,32 @@ class SleepPage extends StatelessWidget{
       child: Column(
         children: [
           _Chart(data: data, levelsValues: levelsValues, colors: colors, times: times),
+          const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(height: 10, width: 10, color: colors[0]),
+            const SizedBox(width: 10),
+            const Text('0: deep sleep'),
+            const SizedBox(width: 20),
+            Container(height: 10, width: 10, color: colors[1]),
+            const SizedBox(width: 10),
+            const Text('1: light sleep')
+          ],
+        ),
+        const SizedBox(height: 5),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(height: 10, width: 10, color: colors[2]),
+              const SizedBox(width: 10),
+              const Text('2: rem sleep'),
+              const SizedBox(width: 20),
+              Container(height: 10, width: 10, color: colors[3]),
+              const SizedBox(width: 10),
+              const Text('3: awake')
+            ],
+          ),
           const SizedBox(height: 30),
           Column(children: timesInPercentage)
         ],
@@ -319,36 +345,10 @@ class _ChartState extends State<_Chart> {
                 markerSettings: const MarkerSettings(isVisible: true),
                 pointColorMapper: (_SleepDatum datum, _) => widget.colors[widget.levelsValues[datum.level]!],
                 width: 1,
-                dataLabelSettings: const DataLabelSettings(isVisible: true, labelAlignment: ChartDataLabelAlignment.middle, color: Colors.transparent)
+                dataLabelSettings: const DataLabelSettings(isVisible: true, labelAlignment: ChartDataLabelAlignment.middle, opacity: 0.3)
               )
             ],
           ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(height: 10, width: 10, color: widget.colors[0]),
-            const SizedBox(width: 10),
-            const Text('0: deep sleep'),
-            const SizedBox(width: 20),
-            Container(height: 10, width: 10, color: widget.colors[1]),
-            const SizedBox(width: 10),
-            const Text('1: light sleep')
-          ],
-        ),
-        const SizedBox(height: 5),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(height: 10, width: 10, color: widget.colors[2]),
-            const SizedBox(width: 10),
-            const Text('2: rem sleep'),
-            const SizedBox(width: 20),
-            Container(height: 10, width: 10, color: widget.colors[3]),
-            const SizedBox(width: 10),
-            const Text('3: awake')
-          ],
         )
       ]
     );

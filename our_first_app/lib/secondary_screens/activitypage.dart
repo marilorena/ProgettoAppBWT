@@ -451,7 +451,7 @@ class ActivityPage extends StatelessWidget{
             alignment: Alignment.center,
             height: 200,
             child: activityData.isEmpty
-            ? const Center(child: Text('---', style: TextStyle(fontSize: 14)))
+            ? const Text('none', style: TextStyle(fontSize: 14))
             : ListView.builder(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
