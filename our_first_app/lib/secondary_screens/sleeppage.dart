@@ -1,4 +1,3 @@
-import 'package:d_chart/d_chart.dart';
 import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +5,8 @@ import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 
 class SleepPage extends StatelessWidget{
   const SleepPage({Key? key}) : super(key: key);
@@ -139,25 +140,23 @@ class SleepPage extends StatelessWidget{
 
   Widget _showChart(BuildContext context, int subtractedDays, List<FitbitSleepData> sleepData){
     Map<String, int> levels = {};
-    List<Map<String, int>> data = [];
-    Map<String, int> levelsValues = {};
-    int levelsCounter = -1;
+    List<_SleepDatum> data = [];
+    List<String> times = [];
     int iterCounter = 0;
     for(FitbitSleepData item in sleepData){
       iterCounter = iterCounter + 1;
       if(item.level != null){
         if(!levels.keys.contains(item.level)){
           levels.addEntries({item.level! : 1}.entries);
-          levelsCounter = levelsCounter + 1;
-          levelsValues.addEntries({item.level! : levelsCounter}.entries);
         } else {
           levels[item.level!] = levels[item.level]! + 1;
         }
 
-        if(item.entryDateTime != null && sleepData[0].entryDateTime != null && item.level != null){
-          final difference = (item.entryDateTime!.millisecondsSinceEpoch - sleepData[0].entryDateTime!.millisecondsSinceEpoch)~/1000~/60;
-          final value = item.level!;
-          data.add({'domain': difference, 'measure': levelsValues[value]!});
+        if(item.entryDateTime != null && item.level != null){
+          final level = item.level!;
+          final time = item.entryDateTime!;
+          data.add(_SleepDatum(DateFormat.Hm().format(time), level));
+          times.add(DateFormat.Hm().format(time));
         }
       }
     }
@@ -174,26 +173,13 @@ class SleepPage extends StatelessWidget{
       timesInPercentage.add(const SizedBox(height: 10));
     }
 
+    Map<String, int> levelsValues = {'deep': 0, 'light': 1, 'rem': 2, 'wake': 3};
+    List<Color> colors = [Colors.deepPurple, Colors.pink, Colors.orange, Colors.yellow];
     return SizedBox(
-      width: MediaQuery.of(context).size.width*0.7,
+      width: MediaQuery.of(context).size.width*0.9,
       child: Column(
         children: [
-          SizedBox(
-            height: 180,
-            child: DChartLine(
-              animate: true,
-              includePoints: true,
-              lineWidth: 1.5,
-              lineColor: (lineData, index, id) => Colors.blue,
-              pointColor: (lineData, index, id) => Colors.black,
-              data: [{
-                'id' : 'Line',
-                'data' : data
-              }]
-            ),
-          ),
-          const SizedBox(height: 5),
-          const Text('- legend: wake=0, light=1, deep=2, rem=3\n- the x-axis is in minutes'),
+          _Chart(data: data, levelsValues: levelsValues, colors: colors, times: times),
           const SizedBox(height: 30),
           Column(children: timesInPercentage)
         ],
@@ -272,6 +258,99 @@ class SleepPage extends StatelessWidget{
           child: const Text('Authorize'),
         )
       ],
+    );
+  }
+}
+
+class _SleepDatum {
+  final String time;
+  final String level;
+
+  _SleepDatum(this.time, this.level);
+}
+
+class _Chart extends StatefulWidget{
+  final List<_SleepDatum> data;
+  final Map<String, int> levelsValues;
+  final List<Color> colors;
+  final List<String> times;
+  const _Chart({Key? key, required this.data, required this.levelsValues, required this.colors, required this.times}) : super(key: key);
+
+  @override
+  State<_Chart> createState() => _ChartState();
+}
+
+class _ChartState extends State<_Chart> {
+  String? time;
+  String? level;
+
+  @override
+  void initState() {
+    time = '';
+    level = '';
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context){
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('$time - $level', style: const TextStyle(fontSize: 16)),
+        SizedBox(
+          height: 200,
+          child: SfCartesianChart(
+            onDataLabelTapped: (details) => setState((){
+              time = widget.times[details.pointIndex];
+              level = widget.levelsValues.keys.toList()[int.parse(details.text)];
+            }),
+            enableAxisAnimation: true,
+            primaryXAxis: CategoryAxis(majorGridLines: const MajorGridLines(width: 0)),
+            primaryYAxis: NumericAxis(
+              maximumLabels: 2,
+              minimum: 0,
+              maximum: 3
+            ),
+             series: [
+              LineSeries(
+                dataSource: widget.data,
+                xValueMapper: (_SleepDatum datum, _) => datum.time,
+                yValueMapper: (_SleepDatum datum, _) => widget.levelsValues[datum.level],
+                markerSettings: const MarkerSettings(isVisible: true),
+                pointColorMapper: (_SleepDatum datum, _) => widget.colors[widget.levelsValues[datum.level]!],
+                width: 1,
+                dataLabelSettings: const DataLabelSettings(isVisible: true, labelAlignment: ChartDataLabelAlignment.middle, color: Colors.transparent)
+              )
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(height: 10, width: 10, color: widget.colors[0]),
+            const SizedBox(width: 10),
+            const Text('0: deep sleep'),
+            const SizedBox(width: 20),
+            Container(height: 10, width: 10, color: widget.colors[1]),
+            const SizedBox(width: 10),
+            const Text('1: light sleep')
+          ],
+        ),
+        const SizedBox(height: 5),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(height: 10, width: 10, color: widget.colors[2]),
+            const SizedBox(width: 10),
+            const Text('2: rem sleep'),
+            const SizedBox(width: 20),
+            Container(height: 10, width: 10, color: widget.colors[3]),
+            const SizedBox(width: 10),
+            const Text('3: awake')
+          ],
+        )
+      ]
     );
   }
 }
