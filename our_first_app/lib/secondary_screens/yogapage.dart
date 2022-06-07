@@ -28,12 +28,13 @@ class YogaPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      'Based on your recent activity, here are 3 suggested yoga poses for you',
+                      'Based on your recent activity,\n here are 3 suggested yoga poses for you',
+                      maxLines: 20,
                       textAlign: TextAlign.center,
-                      style: TextStyle(height: 10)
+                      style: TextStyle(height: 1)
                     ),
                     Card(
-                      margin: const EdgeInsets.only(left: 25, top: 50, bottom: 100, right: 30),
+                      margin: const EdgeInsets.only(left: 20, top: 70, bottom: 100, right: 30),
                       shadowColor: const Color.fromARGB(0, 190, 228, 193),
                       color: const Color.fromARGB(255, 224, 245, 223),
                       elevation: 10,
