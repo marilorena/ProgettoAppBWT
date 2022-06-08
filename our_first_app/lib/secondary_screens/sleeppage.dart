@@ -35,6 +35,10 @@ class SleepPage extends StatelessWidget{
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
     final now = DateTime.now();
+    // if not running, start the chronometer (N.B.: before stopQueries)
+    if(!QueriesCounter.chronometer.isRunning){
+      QueriesCounter.getInstance().start();
+    }
     final stopQueries = await QueriesCounter.getInstance().check();
     final isTokenValid = await FitbitConnector.isTokenValid();
     if(!isTokenValid || stopQueries){

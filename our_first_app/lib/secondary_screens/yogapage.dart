@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/yogapose.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
+import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class YogaPage extends StatelessWidget {
@@ -12,6 +13,11 @@ class YogaPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // if not running, start the chronometer
+    if(!QueriesCounter.chronometer.isRunning){
+      QueriesCounter.getInstance().start();
+    }
+
     return Scaffold(
       body: Center(
         child: FutureBuilder(
@@ -65,7 +71,23 @@ class YogaPage extends StatelessWidget {
                 ),
               );
             } else {
-              return const CircularProgressIndicator();
+              return FutureBuilder(
+                future: _isTokenValid(),
+                builder: (context, snapshot){
+                  if(snapshot.hasData){
+                    final isTokenValid = snapshot.data as bool;
+                    if(!isTokenValid){
+                      return _showIfNotAuthorized(context);
+                    } else if(QueriesCounter.getInstance().getStopQueries()){
+                      return const Text('Limit rate of requests exceeded...', style: TextStyle(fontSize: 16));
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                }
+              );
             }
           }
         )
@@ -79,34 +101,40 @@ class YogaPage extends StatelessWidget {
     );
   }
 
-  Future<List<YogaPose>> _fetchPose() async{
+  // fetch methods
+  Future<List<YogaPose>?> _fetchPose() async{
+    List<YogaPose>? poses;
     final steps = await _fetchSteps();
-    double numOfSteps = steps[0].value ?? 0;
-    List<int> id = [];
-    if (numOfSteps > 20000){
-      id = [18, 4, 12];
-    } else if (numOfSteps <= 20000 && numOfSteps > 15000){
-      id = [9, 6, 14];
-    } else if (numOfSteps <= 15000 && numOfSteps > 10000){
-      id = [21, 23, 41];
-    } else if (numOfSteps <= 10000 && numOfSteps > 5000){
-      id = [15, 20, 24];
-    } else if (numOfSteps <= 5000){
-      id = [10, 28, 30];
-    }
+    if(steps != null){
+      double? numOfSteps = steps[0].value;
+      List<int> id = [];
+      if(numOfSteps != null){
+        if(numOfSteps > 20000){
+          id = [18, 4, 12];
+        } else if(numOfSteps <= 20000 && numOfSteps > 15000){
+          id = [9, 6, 14];
+        } else if(numOfSteps <= 15000 && numOfSteps > 10000){
+          id = [21, 23, 41];
+        } else if(numOfSteps <= 10000 && numOfSteps > 5000){
+          id = [15, 20, 24];
+        } else if(numOfSteps <= 5000){
+          id = [10, 28, 30];
+        }
+      }
 
-    List<YogaPose> poses = [];
-    for(var item in id){
-      final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/$item';
-      final response = await http.get(Uri.parse(url));
-      if(response.statusCode == 200){
-        poses.add(YogaPose.fromJson(jsonDecode(response.body)));
+      poses = [];
+      for(var item in id){
+        final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/$item';
+        final response = await http.get(Uri.parse(url));
+        if(response.statusCode == 200){
+          poses.add(YogaPose.fromJson(jsonDecode(response.body)));
+        }
       }
     }
     return poses;
   }
 
-  Future<List<FitbitActivityTimeseriesData>> _fetchSteps() async {
+  Future<List<FitbitActivityTimeseriesData>?> _fetchSteps() async {
     FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManager = FitbitActivityTimeseriesDataManager(
       clientID: Credentials.getCredentials().id,
       clientSecret: Credentials.getCredentials().secret,
@@ -114,12 +142,56 @@ class YogaPage extends StatelessWidget {
     );
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
-    return await fitbitActivityTimeseriesDataManager
-      .fetch(FitbitActivityTimeseriesAPIURL.dayWithResource(
-        date: DateTime.now(),
-        userID: userID,
-        resource: fitbitActivityTimeseriesDataManager.type
-      )
-    ) as List<FitbitActivityTimeseriesData>;
+    // if not running, start the chronometer (N.B.: before stopQueries)
+    if(!QueriesCounter.chronometer.isRunning){
+      QueriesCounter.getInstance().start();
+    }
+    final stopQueries = await QueriesCounter.getInstance().check();
+    final isTokenValid = await FitbitConnector.isTokenValid();
+    if(!isTokenValid || stopQueries){
+      return null;
+    } else {
+      return await fitbitActivityTimeseriesDataManager
+        .fetch(FitbitActivityTimeseriesAPIURL.dayWithResource(
+          date: DateTime.now(),
+          userID: userID,
+          resource: fitbitActivityTimeseriesDataManager.type
+        )
+      ) as List<FitbitActivityTimeseriesData>;
+    }
+  }
+
+  // utils
+  Future<bool> _isTokenValid() async{
+    return await FitbitConnector.isTokenValid();
+  }
+
+  // UI blocks
+  Widget _showIfNotAuthorized(BuildContext context){
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('To get data, please authorize', style: TextStyle(fontSize: 16)),
+        const SizedBox(height: 5),
+        ElevatedButton(
+          onPressed: () async{
+            final credentials = Credentials.getCredentials();
+            String? userID = await FitbitConnector.authorize(
+              context: context,
+              clientID: credentials.id,
+              clientSecret: credentials.secret,
+              redirectUri: 'example://fitbit/auth',
+              callbackUrlScheme: 'example'
+            );
+            final sp = await SharedPreferences.getInstance();
+            if(userID != null){
+              sp.setString('userID', userID);
+            }
+            Navigator.pushReplacementNamed(context, '/yoga/');
+          },
+          child: const Text('Authorize'),
+        )
+      ],
+    );
   }
 }

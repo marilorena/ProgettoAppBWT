@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:our_first_app/utils/queries_counter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -14,11 +13,6 @@ class _HomePageState extends State<HomePage>{
   
   @override
   Widget build(BuildContext context) {
-    // if, when starting the app, the first page is this, start the chronometer
-    if(!QueriesCounter.chronometer.isRunning){
-      QueriesCounter.getInstance().start();
-    }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(150, 195, 181, 236),

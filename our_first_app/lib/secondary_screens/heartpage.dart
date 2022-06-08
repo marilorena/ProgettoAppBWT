@@ -6,16 +6,11 @@ import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class HeartPage extends StatefulWidget{
+class HeartPage extends StatelessWidget{
   const HeartPage({Key? key}) : super(key: key);
 
   @override
-  State<HeartPage> createState() => _HeartPageState();
-}
-
-class _HeartPageState extends State<HeartPage> {
-  @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context){    
     int subtractedDays = ModalRoute.of(context)!.settings.arguments as int;
     return Scaffold(
       appBar: AppBar(
@@ -77,6 +72,10 @@ class _HeartPageState extends State<HeartPage> {
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
     final now = DateTime.now();
+    // if not running, start the chronometer (N.B.: before stopQueries)
+    if(!QueriesCounter.chronometer.isRunning){
+      QueriesCounter.getInstance().start();
+    }
     final stopQueries = await QueriesCounter.getInstance().check();
     final isTokenValid = await FitbitConnector.isTokenValid();
     if(!isTokenValid || stopQueries){
