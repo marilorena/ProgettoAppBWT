@@ -45,11 +45,11 @@ class _HeartPageState extends State<HeartPage> {
               );
             } else {
               return FutureBuilder(
-                future: SharedPreferences.getInstance(),
+                future: _isTokenValid(),
                 builder: (context, snapshot){
                   if(snapshot.hasData){
-                    final sp = snapshot.data as SharedPreferences;
-                    if(sp.getString('userID') == null){
+                    final isTokenValid = snapshot.data as bool;
+                    if(!isTokenValid){
                       return _showIfNotAuthorized(context);
                     } else if(QueriesCounter.getInstance().getStopQueries()){
                       return const Text('Limit rate of requests exceeded...', style: TextStyle(fontSize: 16));
@@ -78,7 +78,8 @@ class _HeartPageState extends State<HeartPage> {
     final userID = sp.getString('userID');
     final now = DateTime.now();
     final stopQueries = await QueriesCounter.getInstance().check();
-    if(userID == null || stopQueries){
+    final isTokenValid = await FitbitConnector.isTokenValid();
+    if(!isTokenValid || stopQueries){
       return null;
     } else {
       return await fitbitHeartDataManager.fetch(
@@ -116,6 +117,10 @@ class _HeartPageState extends State<HeartPage> {
         settings: RouteSettings(arguments: subtractedDays)
       ),
     );
+  }
+
+  Future<bool> _isTokenValid() async{
+    return await FitbitConnector.isTokenValid();
   }
 
   // UI blocks
