@@ -105,6 +105,32 @@ class YogaPage extends StatelessWidget {
   Future<List<YogaPose>?> _fetchPose() async{
     List<YogaPose>? poses;
     final steps = await _fetchSteps();
+    
+    if(steps != null){
+      double? numOfSteps = steps[0].value;
+      List<int> id = [];
+      if(numOfSteps != null){
+        if(numOfSteps > 20000){
+          id = [18];
+        } else if(numOfSteps <= 20000 && numOfSteps > 15000){
+          id = [9, 6, 14];
+        } else if(numOfSteps <= 15000 && numOfSteps > 10000){
+          id = [21, 23, 41];
+        } else if(numOfSteps <= 10000 && numOfSteps > 5000){
+          id = [15, 20, 24];
+        } else if(numOfSteps <= 5000){
+          id = [10, 28, 30];
+        }
+      }
+
+      poses = [];
+        final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/${id[0]}';
+        final response = await http.get(Uri.parse(url));
+        if(response.statusCode == 200){
+          poses.add(YogaPose.fromJson(jsonDecode(response.body)));
+        }
+    }
+
     if(steps != null){
       double? numOfSteps = steps[0].value;
       List<int> id = [];
@@ -155,6 +181,52 @@ class YogaPage extends StatelessWidget {
       ) as List<FitbitActivityTimeseriesData>;
     }
   }
+
+
+  Future<List<FitbitSleepData>?> _fetchSleep(int subtracted) async {
+    final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(
+      clientID: Credentials.getCredentials().id,
+      clientSecret: Credentials.getCredentials().secret,
+    );
+    final sp = await SharedPreferences.getInstance();
+    final userID = sp.getString('userID');
+    final now = DateTime.now();
+    final stopQueries = await QueriesCounter.getInstance().check();
+    final isTokenValid = await FitbitConnector.isTokenValid();
+    if(!isTokenValid || stopQueries){
+      return null;
+    } else {
+      return await fitbitSleepDataManager.fetch(
+        FitbitSleepAPIURL.withUserIDAndDay(
+          date: DateTime.utc(now.year, now.month, now.day+subtracted),
+          userID: userID,
+        )
+      ) as List<FitbitSleepData>; 
+    }
+  }
+
+  Future<List<FitbitHeartData>?> _fetchHeartData(int subtracted) async {
+    FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(
+      clientID: Credentials.getCredentials().id,
+      clientSecret: Credentials.getCredentials().secret
+    );
+    final sp = await SharedPreferences.getInstance();
+    final userID = sp.getString('userID');
+    final now = DateTime.now();
+    final stopQueries = await QueriesCounter.getInstance().check();
+    final isTokenValid = await FitbitConnector.isTokenValid();
+    if(!isTokenValid || stopQueries){
+      return null;
+    } else {
+      return await fitbitHeartDataManager.fetch(
+        FitbitHeartAPIURL.dayWithUserID(
+          date: DateTime.utc(now.year, now.month, now.day+subtracted),
+          userID: userID,
+        )
+      ) as List<FitbitHeartData>;
+    }
+  }
+
 
   // utils
   Future<bool> _isTokenValid() async{
