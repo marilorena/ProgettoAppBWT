@@ -13,11 +13,6 @@ class YogaPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // if not running, start the chronometer
-    if(!QueriesCounter.chronometer.isRunning){
-      QueriesCounter.getInstance().start();
-    }
-
     return Scaffold(
       body: Center(
         child: FutureBuilder(
@@ -142,10 +137,6 @@ class YogaPage extends StatelessWidget {
     );
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
-    // if not running, start the chronometer (N.B.: before stopQueries)
-    if(!QueriesCounter.chronometer.isRunning){
-      QueriesCounter.getInstance().start();
-    }
     final stopQueries = await QueriesCounter.getInstance().check();
     final isTokenValid = await FitbitConnector.isTokenValid();
     if(!isTokenValid || stopQueries){

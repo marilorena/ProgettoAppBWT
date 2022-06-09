@@ -109,8 +109,10 @@ class ProfilePage extends StatelessWidget{
   
   Future<void> _toLoginPage(BuildContext context) async{ 
     final sp = await SharedPreferences.getInstance();
-    sp.remove('username');
-    sp.remove('userID');
+    final keys = sp.getKeys().toList();
+    for(var item in keys){
+      sp.remove(item);
+    } // remove all the key-value objects in the database
 
     Navigator.pushReplacementNamed(context, '/login/');
 
@@ -119,7 +121,5 @@ class ProfilePage extends StatelessWidget{
       clientID: credentials.id,
       clientSecret: credentials.secret
     );
-
-    QueriesCounter.getInstance().stop();
   }
 }

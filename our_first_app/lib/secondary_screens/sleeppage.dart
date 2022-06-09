@@ -35,10 +35,6 @@ class SleepPage extends StatelessWidget{
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
     final now = DateTime.now();
-    // if not running, start the chronometer (N.B.: before stopQueries)
-    if(!QueriesCounter.chronometer.isRunning){
-      QueriesCounter.getInstance().start();
-    }
     final stopQueries = await QueriesCounter.getInstance().check();
     final isTokenValid = await FitbitConnector.isTokenValid();
     if(!isTokenValid || stopQueries){
@@ -304,7 +300,7 @@ class _SleepDatum {
   _SleepDatum(this.time, this.level);
 }
 
-class _Chart extends StatefulWidget{
+class _Chart extends StatelessWidget{
   final List<_SleepDatum> data;
   final Map<String, int> levelsValues;
   final List<Color> colors;
@@ -312,54 +308,59 @@ class _Chart extends StatefulWidget{
   const _Chart({Key? key, required this.data, required this.levelsValues, required this.colors, required this.times}) : super(key: key);
 
   @override
-  State<_Chart> createState() => _ChartState();
-}
-
-class _ChartState extends State<_Chart> {
-  String? time;
-  String? level;
-
-  @override
-  void initState() {
-    time = '';
-    level = '';
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context){
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('$time - $level', style: const TextStyle(fontSize: 16)),
-        SizedBox(
-          height: 200,
-          child: SfCartesianChart(
-            onDataLabelTapped: (details) => setState((){
-              time = widget.times[details.pointIndex];
-              level = widget.levelsValues.keys.toList()[int.parse(details.text)];
-            }),
-            enableAxisAnimation: true,
-            primaryXAxis: CategoryAxis(majorGridLines: const MajorGridLines(width: 0)),
-            primaryYAxis: NumericAxis(
-              maximumLabels: 2,
-              minimum: 0,
-              maximum: 3
-            ),
-             series: [
-              LineSeries(
-                dataSource: widget.data,
-                xValueMapper: (_SleepDatum datum, _) => datum.time,
-                yValueMapper: (_SleepDatum datum, _) => widget.levelsValues[datum.level],
-                markerSettings: const MarkerSettings(isVisible: true),
-                pointColorMapper: (_SleepDatum datum, _) => widget.colors[widget.levelsValues[datum.level]!],
-                width: 1,
-                dataLabelSettings: const DataLabelSettings(isVisible: true, labelAlignment: ChartDataLabelAlignment.middle, opacity: 0.3)
-              )
-            ],
+    return SizedBox(
+      height: 200,
+      child: SfCartesianChart(
+        trackballBehavior: TrackballBehavior(
+          enable: true,
+          activationMode: ActivationMode.singleTap,
+          tooltipDisplayMode: TrackballDisplayMode.nearestPoint,
+          markerSettings: const TrackballMarkerSettings(
+            markerVisibility: TrackballVisibilityMode.visible,
+            color: Colors.black,
+            shape: DataMarkerType.circle,
+            height: 8,
+            width: 8
           ),
-        )
-      ]
+          tooltipAlignment: ChartAlignment.center,
+          lineWidth: 1.5,
+          builder: (BuildContext context, TrackballDetails details){
+            final time = details.pointIndex == null ? '' : times[details.pointIndex!];
+            final String level;
+            if(details.point == null || details.point!.yValue == null){
+              level = '';
+            } else {
+              level = levelsValues.keys.toList()[details.point!.yValue];
+            }
+            return Card(
+              elevation: 5,
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                child: Text('$time - $level', style: const TextStyle(fontSize: 16)),
+                decoration: BoxDecoration(color: Colors.white, border: Border.all(color: Colors.black)),
+              ),
+            );
+          }
+        ),
+        enableAxisAnimation: true,
+        primaryXAxis: CategoryAxis(majorGridLines: const MajorGridLines(width: 0)),
+        primaryYAxis: NumericAxis(
+          maximumLabels: 2,
+          minimum: 0,
+          maximum: 3
+        ),
+        series: [
+          LineSeries(
+            dataSource: data,
+            xValueMapper: (_SleepDatum datum, _) => datum.time,
+            yValueMapper: (_SleepDatum datum, _) => levelsValues[datum.level],
+            markerSettings: const MarkerSettings(isVisible: true),
+            pointColorMapper: (_SleepDatum datum, _) => colors[levelsValues[datum.level]!],
+            width: 1
+          )
+        ],
+      ),
     );
   }
 }

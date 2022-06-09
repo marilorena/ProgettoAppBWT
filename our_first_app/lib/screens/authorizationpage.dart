@@ -27,11 +27,8 @@ class AuthorizationPage extends StatelessWidget {
     );
   }
 
-  // data fetching methods
-  Future<void> _fetchAccount(BuildContext context)async{
-    // start the chronometer and initialize the queries counter
-    QueriesCounter.getInstance().start();
-
+  // data fetching method
+  Future<void> _fetchData(BuildContext context)async{
     FitbitAccountDataManager fitbitAccountDataManager = FitbitAccountDataManager(
       clientID: Credentials.getCredentials().id,
       clientSecret: Credentials.getCredentials().secret
@@ -86,7 +83,7 @@ class AuthorizationPage extends StatelessWidget {
       await showDialog(
         context: context,
         builder: (context) => FutureBuilder(
-          future: _fetchAccount(context),
+          future: _fetchData(context),
           builder: (context, snapshot){
             return Container(
               color: Colors.white,
