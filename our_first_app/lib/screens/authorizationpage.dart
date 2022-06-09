@@ -15,10 +15,39 @@ class AuthorizationPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () async {
-                await _authorize(context);
-                await _fetch(context); 
-              },
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) => Center(
+                  child: Card(
+                    elevation: 5,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      height: MediaQuery.of(context).size.height*0.35,
+                      width: MediaQuery.of(context).size.width*0.8,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('We\'re going to fetch your data', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), maxLines: 1, textAlign: TextAlign.center),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'They will be used just for visualization purposes and to retrieve simple possible solutions to improve your wellbeing to advice you with.\nThey will be stored on the local storage of your smartphone, but never shared with any third-party application or system.',
+                            textAlign: TextAlign.justify,
+                            style: TextStyle(fontSize: 16)
+                          ),
+                          const SizedBox(height: 20),
+                          GestureDetector(
+                            child: const Text('Got it', style: TextStyle(fontSize: 18, color: Colors.blue)),
+                            onTap: () async{
+                              await _authorize(context);
+                              await _fetch(context); 
+                            }
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               child: const Text('Authorize and fetch', style: TextStyle(fontSize: 18)),
             )
           ]
@@ -38,6 +67,7 @@ class AuthorizationPage extends StatelessWidget {
     final stopQueries = await QueriesCounter.getInstance().check();
     if(stopQueries){
       Navigator.pop(context);
+      Navigator.pop(context);
       ScaffoldMessenger.of(context)
       ..removeCurrentSnackBar()
       ..showSnackBar(const SnackBar(
@@ -56,6 +86,7 @@ class AuthorizationPage extends StatelessWidget {
       );
       // save data
 
+      Navigator.pop(context);
       Navigator.pop(context);
       Navigator.pushReplacementNamed(context, '/home/');
       return;

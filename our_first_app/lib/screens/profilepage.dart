@@ -1,6 +1,5 @@
 import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
-import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -37,45 +36,44 @@ class ProfilePage extends StatelessWidget{
                     child: Card(
                       elevation: 5,
                       margin: const EdgeInsets.fromLTRB(70, 20, 70, 20),
-                          child: Container(
-                            padding: const EdgeInsets.all(20),
-                            height: MediaQuery.of(context).size.height/3.2,
-                            child: Column(
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        height: MediaQuery.of(context).size.height/3.2,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('Are you sure to log out?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 10),
+                            const Text(
+                              'If you log out, all your (locally storaged) data will be deleted.\nOnce you log in again, they will need to be fetched another time.',
+                              textAlign: TextAlign.justify,
+                              style: TextStyle(fontSize: 16)
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text('Are you sure to log out?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'If you log out, all your (locally storaged) data will be deleted.\nOnce you log in again, they will need to be fetched another time.',
-                                  textAlign: TextAlign.justify,
-                                  style: TextStyle(fontSize: 16)
+                                SizedBox(width: MediaQuery.of(context).size.width/3/6),
+                                GestureDetector(
+                                  child: const Text('Cancel', style: TextStyle(fontSize: 18, color: Colors.blue)),
+                                  onTap: () => Navigator.pop(context)
                                 ),
-                                const SizedBox(height: 20),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SizedBox(width: MediaQuery.of(context).size.width/3/6),
-                                    GestureDetector(
-                                      child: const Text('Cancel', style: TextStyle(fontSize: 18, color: Colors.blue)),
-                                      onTap: () => Navigator.pop(context)
-                                    ),
-                                    SizedBox(width: MediaQuery.of(context).size.width/3/3),
-                                    GestureDetector(
-                                      child: const Text('Log out', style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 158, 158, 158))),
-                                      onTap: () => _toLoginPage(context)
-                                    ),
-                                    SizedBox(width: MediaQuery.of(context).size.width/3/6)
-                                  ],
-                                )
+                                SizedBox(width: MediaQuery.of(context).size.width/3/3),
+                                GestureDetector(
+                                  child: const Text('Log out', style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 158, 158, 158))),
+                                  onTap: () => _toLoginPage(context)
+                                ),
+                                SizedBox(width: MediaQuery.of(context).size.width/3/6)
                               ],
-                            ),
-                          ),
+                            )
+                          ],
                         ),
                       ),
                     ),
-                  )
-                )
-              
+                  ),
+                ),
+              )
+            ) 
           ],
         )
       ),
@@ -114,6 +112,7 @@ class ProfilePage extends StatelessWidget{
       sp.remove(item);
     } // remove all the key-value objects in the database
 
+    Navigator.pop(context);
     Navigator.pushReplacementNamed(context, '/login/');
 
     final credentials = Credentials.getCredentials();
