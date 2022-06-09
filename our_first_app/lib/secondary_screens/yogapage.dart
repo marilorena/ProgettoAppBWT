@@ -20,50 +20,55 @@ class YogaPage extends StatelessWidget {
           builder: (context, snapshot) {
             if(snapshot.hasData){
               final poses = snapshot.data as List<YogaPose>;
-              return ListView.builder(
-                cacheExtent: 0,
-                scrollDirection: Axis.horizontal,
-                itemCount: poses.length,
-                itemBuilder: (context, index) => Column( 
-                  crossAxisAlignment: CrossAxisAlignment.center, 
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Based on your recent activity,\n here are 3 suggested yoga poses for you',
-                      maxLines: 20,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(height: 1)
-                    ),
-                    Card(
-                      margin: const EdgeInsets.only(left: 20, top: 70, bottom: 100, right: 30),
-                      shadowColor: const Color.fromARGB(0, 190, 228, 193),
-                      color: const Color.fromARGB(255, 224, 245, 223),
-                      elevation: 10,
-                      child: Padding(
-                        padding: const EdgeInsets.all(50),
-                        child: FittedBox(
-                          child: Column(
-                            children: [
-                              Text(poses[index].name),
-                              Text(
-                                poses[index].sanskritName,
-                                style: const TextStyle(
-                                fontStyle: FontStyle.italic,
-                                  color: Colors.green
-                                )
+              return Column(
+                children: [
+                  const Text(
+                    'Based on your recent activity,\n here are 3 suggested yoga poses for you',
+                    maxLines: 20,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(height: 1)
+                  ),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    cacheExtent: 0,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: poses.length,
+                    itemBuilder: (context, index) => Column( 
+                      crossAxisAlignment: CrossAxisAlignment.center, 
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Card(
+                          margin: const EdgeInsets.only(left: 20, top: 70, bottom: 100, right: 30),
+                          shadowColor: const Color.fromARGB(0, 190, 228, 193),
+                          color: const Color.fromARGB(255, 224, 245, 223),
+                          elevation: 10,
+                          child: Padding(
+                            padding: const EdgeInsets.all(50),
+                            child: FittedBox(
+                              child: Column(
+                                children: [
+                                  Text(poses[index].name),
+                                  Text(
+                                    poses[index].sanskritName,
+                                    style: const TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                      color: Colors.green
+                                    )
+                                  ),
+                                  const SizedBox(height: 15),
+                                  SvgPicture.network(
+                                    poses[index].imageUrl,
+                                    height: 250
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 15),
-                              SvgPicture.network(
-                                poses[index].imageUrl,
-                                height: 250
-                              ),
-                            ],
-                          ),
+                            ),
+                          )
                         ),
-                      )
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               );
             } else {
               return FutureBuilder(
@@ -105,7 +110,7 @@ class YogaPage extends StatelessWidget {
       List<int> id = [];
       if(numOfSteps != null){
         if(numOfSteps > 20000){
-          id = [18, 4, 12];
+          id = [18];
         } else if(numOfSteps <= 20000 && numOfSteps > 15000){
           id = [9, 6, 14];
         } else if(numOfSteps <= 15000 && numOfSteps > 10000){
@@ -118,14 +123,13 @@ class YogaPage extends StatelessWidget {
       }
 
       poses = [];
-      for(var item in id){
-        final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/$item';
+        final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/${id[0]}';
         final response = await http.get(Uri.parse(url));
         if(response.statusCode == 200){
           poses.add(YogaPose.fromJson(jsonDecode(response.body)));
         }
-      }
     }
+
     return poses;
   }
 
