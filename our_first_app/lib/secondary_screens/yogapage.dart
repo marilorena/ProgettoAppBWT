@@ -105,7 +105,12 @@ class YogaPage extends StatelessWidget {
   Future<List<YogaPose>?> _fetchPose() async{
     List<YogaPose>? poses;
     final steps = await _fetchSteps();
-    final sleep = await _fetchSleep(1);
+    final sleepData = await _fetchSleep(0);
+    final heartData = await _fetchHeartData(0);
+    final startDate = sleepData![0].entryDateTime;
+    final endDate = sleepData[sleepData.length-1].entryDateTime;
+    final time = (endDate!.millisecondsSinceEpoch - startDate!.millisecondsSinceEpoch)~/1000; //dovrebbe essere in secondi
+    final heart = heartData![0].minutesPeak;
     if(steps != null){
       double? numOfSteps = steps[0].value;
       List<int> id = [];
@@ -113,13 +118,13 @@ class YogaPage extends StatelessWidget {
         if(numOfSteps > 20000){
           id = [18];
         } else if(numOfSteps <= 20000 && numOfSteps > 15000){
-          id = [9, 6, 14];
+          id = [9];
         } else if(numOfSteps <= 15000 && numOfSteps > 10000){
-          id = [21, 23, 41];
+          id = [21];
         } else if(numOfSteps <= 10000 && numOfSteps > 5000){
-          id = [15, 20, 24];
+          id = [15];
         } else if(numOfSteps <= 5000){
-          id = [10, 28, 30];
+          id = [10];
         }
       }
 
@@ -131,32 +136,66 @@ class YogaPage extends StatelessWidget {
         }
     }
 
-    if(sleep != null){
-      List<int>? dura = [];
-      double? duration = dura as double ;
+    if(sleepData != null){
+
+      int duration = time;
       List<int> id = [];
 
       if(duration != null){
-        if(duration > 20000){
-          id = [18];
-        } else if(duration <= 20000 && duration> 15000){
-          id = [9, 6, 14];
-        } else if(duration <= 15000 && duration> 10000){
-          id = [21, 23, 41];
-        } else if(duration <= 10000 && duration> 5000){
-          id = [15, 20, 24];
-        } else if(duration <= 5000){
-          id = [10, 28, 30];
+        if(duration > 36000){ //10 ore
+          id = [4];
+        } else if(duration <= 36000 && duration> 28800){ //10 a 8 ore
+          id = [6];
+        } else if(duration <= 28800 && duration> 21600){ //8 a 6 ore
+          id = [23];
+        } else if(duration <= 21600 && duration> 14400){ //6 a 4 ore
+          id = [20];
+        } else if(duration <= 14400){ //sotto le 4 ore
+          id = [28];
         }
       }
 
-      poses = [];
+      if (poses == null){
+         poses = [];
+      }else{
+      
         final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/${id[0]}';
         final response = await http.get(Uri.parse(url));
         if(response.statusCode == 200){
           poses.add(YogaPose.fromJson(jsonDecode(response.body)));
         }
+      }
     }
+
+   if(heartData != null){
+      int? minutesOfPeak = heart;
+      List<int> id = [];
+      if(minutesOfPeak != null){
+        if(minutesOfPeak > 20){ //minuti di peak rate
+          id = [12];
+        } else if( minutesOfPeak <= 20 && minutesOfPeak > 15){
+          id = [14];
+        } else if(minutesOfPeak <= 15 && minutesOfPeak > 10){
+          id = [41];
+        } else if(minutesOfPeak <= 10 && minutesOfPeak > 5){
+          id = [24];
+        } else if(minutesOfPeak <= 5){
+          id = [30];
+        }
+      }
+
+      if (poses == null) {
+        poses = [];
+      }else{
+        final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/${id[0]}';
+        final response = await http.get(Uri.parse(url));
+        if(response.statusCode == 200){
+          poses.add(YogaPose.fromJson(jsonDecode(response.body)));
+        }
+      }
+    }
+
+
 
     return poses;
   }
@@ -200,7 +239,7 @@ class YogaPage extends StatelessWidget {
     } else {
       return await fitbitSleepDataManager.fetch(
         FitbitSleepAPIURL.withUserIDAndDay(
-          date: DateTime.utc(now.year, now.month, now.day+subtracted),
+          date: DateTime.utc(now.year, now.month, now.day-subtracted),
           userID: userID,
         )
       ) as List<FitbitSleepData>; 
@@ -229,17 +268,6 @@ class YogaPage extends StatelessWidget {
     }
   }
 
-
-   List<int>? _getSleepDuration(DateTime? startDate, DateTime? endDate){
-    if(startDate == null || endDate == null){
-      return null;
-    } else {
-      final duration = (endDate.millisecondsSinceEpoch - startDate.millisecondsSinceEpoch)~/1000~/60;
-      int h = duration ~/ 60;
-      int m = duration - (h * 60);
-      return [h,m];
-    }
-  }
 
 
   // utils
