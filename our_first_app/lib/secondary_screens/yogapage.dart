@@ -105,8 +105,8 @@ class YogaPage extends StatelessWidget {
   Future<List<YogaPose>?> _fetchPose() async{
     List<YogaPose>? poses;
     final steps = await _fetchSteps();
-    final sleepData = await _fetchSleep(0);
-    final heartData = await _fetchHeartData(0);
+    final sleepData = await _fetchSleep();
+    final heartData = await _fetchHeartData();
    
     
     if(steps != null){
@@ -141,7 +141,7 @@ class YogaPage extends StatelessWidget {
        final time = (endDate!.millisecondsSinceEpoch - startDate!.millisecondsSinceEpoch)~/1000; //dovrebbe essere in secondi
        List<int> id = [];
 
-      if(time != null){
+     // if(time != null){
         if(time > 36000){ //10 ore
           id = [4];
         } else if(time <= 36000 && time > 28800){ //10 a 8 ore
@@ -153,7 +153,7 @@ class YogaPage extends StatelessWidget {
         } else if(time <= 14400){ //sotto le 4 ore
           id = [28];
         }
-      }
+     // }
 
       if (poses == null){
          poses = [];
@@ -224,7 +224,7 @@ class YogaPage extends StatelessWidget {
   }
 
 
-  Future<List<FitbitSleepData>?> _fetchSleep(int subtracted) async {
+  Future<List<FitbitSleepData>?> _fetchSleep() async {
     final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(
       clientID: Credentials.getCredentials().id,
       clientSecret: Credentials.getCredentials().secret,
@@ -239,14 +239,14 @@ class YogaPage extends StatelessWidget {
     } else {
       return await fitbitSleepDataManager.fetch(
         FitbitSleepAPIURL.withUserIDAndDay(
-          date: DateTime.utc(now.year, now.month, now.day-subtracted),
+          date: DateTime.utc(now.year, now.month, now.day),
           userID: userID,
         )
       ) as List<FitbitSleepData>; 
     }
   }
 
-  Future<List<FitbitHeartData>?> _fetchHeartData(int subtracted) async {
+  Future<List<FitbitHeartData>?> _fetchHeartData() async {
     FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(
       clientID: Credentials.getCredentials().id,
       clientSecret: Credentials.getCredentials().secret
@@ -261,7 +261,7 @@ class YogaPage extends StatelessWidget {
     } else {
       return await fitbitHeartDataManager.fetch(
         FitbitHeartAPIURL.dayWithUserID(
-          date: DateTime.utc(now.year, now.month, now.day+subtracted),
+          date: DateTime.utc(now.year, now.month, now.day),
           userID: userID,
         )
       ) as List<FitbitHeartData>;
