@@ -107,10 +107,8 @@ class YogaPage extends StatelessWidget {
     final steps = await _fetchSteps();
     final sleepData = await _fetchSleep(0);
     final heartData = await _fetchHeartData(0);
-    final startDate = sleepData![0].entryDateTime;
-    final endDate = sleepData[sleepData.length-1].entryDateTime;
-    final time = (endDate!.millisecondsSinceEpoch - startDate!.millisecondsSinceEpoch)~/1000; //dovrebbe essere in secondi
-    final heart = heartData![0].minutesPeak;
+   
+    
     if(steps != null){
       double? numOfSteps = steps[0].value;
       List<int> id = [];
@@ -138,19 +136,21 @@ class YogaPage extends StatelessWidget {
 
     if(sleepData != null){
 
-      int duration = time;
-      List<int> id = [];
+       final startDate = sleepData[0].entryDateTime;
+       final endDate = sleepData[sleepData.length-1].entryDateTime;
+       final time = (endDate!.millisecondsSinceEpoch - startDate!.millisecondsSinceEpoch)~/1000; //dovrebbe essere in secondi
+       List<int> id = [];
 
-      if(duration != null){
-        if(duration > 36000){ //10 ore
+      if(time != null){
+        if(time > 36000){ //10 ore
           id = [4];
-        } else if(duration <= 36000 && duration> 28800){ //10 a 8 ore
+        } else if(time <= 36000 && time > 28800){ //10 a 8 ore
           id = [6];
-        } else if(duration <= 28800 && duration> 21600){ //8 a 6 ore
+        } else if(time <= 28800 && time > 21600){ //8 a 6 ore
           id = [23];
-        } else if(duration <= 21600 && duration> 14400){ //6 a 4 ore
+        } else if(time <= 21600 && time > 14400){ //6 a 4 ore
           id = [20];
-        } else if(duration <= 14400){ //sotto le 4 ore
+        } else if(time <= 14400){ //sotto le 4 ore
           id = [28];
         }
       }
@@ -168,7 +168,7 @@ class YogaPage extends StatelessWidget {
     }
 
    if(heartData != null){
-      int? minutesOfPeak = heart;
+      final minutesOfPeak = heartData[0].minutesPeak;
       List<int> id = [];
       if(minutesOfPeak != null){
         if(minutesOfPeak > 20){ //minuti di peak rate
