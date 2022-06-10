@@ -105,7 +105,7 @@ class YogaPage extends StatelessWidget {
   Future<List<YogaPose>?> _fetchPose() async{
     List<YogaPose>? poses;
     final steps = await _fetchSteps();
-    
+    final sleep = await _fetchSleep(1);
     if(steps != null){
       double? numOfSteps = steps[0].value;
       List<int> id = [];
@@ -131,19 +131,21 @@ class YogaPage extends StatelessWidget {
         }
     }
 
-    if(steps != null){
-      double? numOfSteps = steps[0].value;
+    if(sleep != null){
+      List<int>? dura = [];
+      double? duration = dura as double ;
       List<int> id = [];
-      if(numOfSteps != null){
-        if(numOfSteps > 20000){
+
+      if(duration != null){
+        if(duration > 20000){
           id = [18];
-        } else if(numOfSteps <= 20000 && numOfSteps > 15000){
+        } else if(duration <= 20000 && duration> 15000){
           id = [9, 6, 14];
-        } else if(numOfSteps <= 15000 && numOfSteps > 10000){
+        } else if(duration <= 15000 && duration> 10000){
           id = [21, 23, 41];
-        } else if(numOfSteps <= 10000 && numOfSteps > 5000){
+        } else if(duration <= 10000 && duration> 5000){
           id = [15, 20, 24];
-        } else if(numOfSteps <= 5000){
+        } else if(duration <= 5000){
           id = [10, 28, 30];
         }
       }
@@ -224,6 +226,18 @@ class YogaPage extends StatelessWidget {
           userID: userID,
         )
       ) as List<FitbitHeartData>;
+    }
+  }
+
+
+   List<int>? _getSleepDuration(DateTime? startDate, DateTime? endDate){
+    if(startDate == null || endDate == null){
+      return null;
+    } else {
+      final duration = (endDate.millisecondsSinceEpoch - startDate.millisecondsSinceEpoch)~/1000~/60;
+      int h = duration ~/ 60;
+      int m = duration - (h * 60);
+      return [h,m];
     }
   }
 
