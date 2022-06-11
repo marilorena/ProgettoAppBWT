@@ -17,58 +17,58 @@ class YogaPage extends StatelessWidget {
       body: Center(
         child: FutureBuilder(
           future: _fetchPose(),
-          builder: (context, snapshot) {
+          builder: (context, snapshot){
             if(snapshot.hasData){
               final poses = snapshot.data as List<YogaPose>;
-              return Column(
-                children: [
-                  const Text(
-                    'Based on your recent activity,\n here are 3 suggested yoga poses for you',
-                    maxLines: 20,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(height: 1)
-                  ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    cacheExtent: 0,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: poses.length,
-                    itemBuilder: (context, index) => Column( 
-                      crossAxisAlignment: CrossAxisAlignment.center, 
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Card(
-                          margin: const EdgeInsets.only(left: 20, top: 70, bottom: 100, right: 30),
+              return SizedBox(
+                height: MediaQuery.of(context).size.height*0.8,
+                width: MediaQuery.of(context).size.width*0.8,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Based on your today\'s data,\n here are 3 suggested yoga poses for you',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16)
+                    ),
+                    SizedBox(
+                      height: 350,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        cacheExtent: 0,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: poses.length,
+                        padding: const EdgeInsets.all(10),
+                        itemBuilder: (context, index) => Card(
                           shadowColor: const Color.fromARGB(0, 190, 228, 193),
                           color: const Color.fromARGB(255, 224, 245, 223),
                           elevation: 10,
-                          child: Padding(
+                          child: Container(
+                            height: 300,
+                            width: 200,
                             padding: const EdgeInsets.all(50),
-                            child: FittedBox(
-                              child: Column(
-                                children: [
-                                  Text(poses[index].name),
-                                  Text(
-                                    poses[index].sanskritName,
-                                    style: const TextStyle(
+                            child: Column(
+                              children: [
+                                Text(poses[index].name),
+                                Text(
+                                  poses[index].sanskritName,
+                                  style: const TextStyle(
                                     fontStyle: FontStyle.italic,
-                                      color: Colors.green
-                                    )
-                                  ),
-                                  const SizedBox(height: 15),
-                                  SvgPicture.network(
-                                    poses[index].imageUrl,
-                                    height: 250
-                                  ),
-                                ],
-                              ),
+                                    color: Colors.green
+                                  )
+                                ),
+                                const SizedBox(height: 15),
+                                SvgPicture.network(
+                                  poses[index].imageUrl
+                                ),
+                              ],
                             ),
-                          )
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                          ),
+                        )
+                      ),
+                    )         
+                  ]
+                ),
               );
             } else {
               return FutureBuilder(
@@ -107,59 +107,56 @@ class YogaPage extends StatelessWidget {
     final steps = await _fetchSteps();
     final sleepData = await _fetchSleep();
     final heartData = await _fetchHeartData();
-   
     
     if(steps != null){
       double? numOfSteps = steps[0].value;
-      List<int> id = [];
+      int? id;
       if(numOfSteps != null){
         if(numOfSteps > 20000){
-          id = [18];
+          id = 18;
         } else if(numOfSteps <= 20000 && numOfSteps > 15000){
-          id = [9];
+          id = 9;
         } else if(numOfSteps <= 15000 && numOfSteps > 10000){
-          id = [21];
+          id = 21;
         } else if(numOfSteps <= 10000 && numOfSteps > 5000){
-          id = [15];
+          id = 15;
         } else if(numOfSteps <= 5000){
-          id = [10];
+          id = 10;
         }
       }
 
-      poses = [];
-        final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/${id[0]}';
+      if(id != null){
+        poses = [];
+        final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/$id';
         final response = await http.get(Uri.parse(url));
         if(response.statusCode == 200){
           poses.add(YogaPose.fromJson(jsonDecode(response.body)));
         }
+      }
     }
 
     if(sleepData != null){
-
-       final startDate = sleepData[0].entryDateTime;
-       final endDate = sleepData[sleepData.length-1].entryDateTime;
-       final time = (endDate!.millisecondsSinceEpoch - startDate!.millisecondsSinceEpoch)~/1000; //dovrebbe essere in secondi
-       List<int> id = [];
-
-     // if(time != null){
-        if(time > 36000){ //10 ore
-          id = [4];
-        } else if(time <= 36000 && time > 28800){ //10 a 8 ore
-          id = [6];
-        } else if(time <= 28800 && time > 21600){ //8 a 6 ore
-          id = [23];
-        } else if(time <= 21600 && time > 14400){ //6 a 4 ore
-          id = [20];
-        } else if(time <= 14400){ //sotto le 4 ore
-          id = [28];
+      DateTime? startDate = sleepData[0].entryDateTime;
+      DateTime? endDate = sleepData[sleepData.length-1].entryDateTime;
+      int? id;
+      if(startDate != null && endDate != null){
+        int duration = (endDate.millisecondsSinceEpoch - startDate.millisecondsSinceEpoch)~/1000~/60~/60; // hours
+        if(duration > 10){
+          id = 4;
+        } else if(duration <= 10 && duration > 8){
+          id = 6;
+        } else if(duration <= 8 && duration > 6){
+          id = 23;
+        } else if(duration <= 6 && duration > 4){
+          id = 20;
+        } else if(duration <= 4){
+          id = 28;
         }
-     // }
+      }
 
-      if (poses == null){
-         poses = [];
-      }else{
-      
-        final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/${id[0]}';
+      if(id != null){
+        poses ??= []; // if(poses == null){poses=[];}
+        final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/$id';
         final response = await http.get(Uri.parse(url));
         if(response.statusCode == 200){
           poses.add(YogaPose.fromJson(jsonDecode(response.body)));
@@ -168,35 +165,31 @@ class YogaPage extends StatelessWidget {
     }
 
    if(heartData != null){
-      final minutesOfPeak = heartData[0].minutesPeak;
-      List<int> id = [];
+      int? minutesOfPeak = heartData[0].minutesPeak;
+      int? id;
       if(minutesOfPeak != null){
-        if(minutesOfPeak > 20){ //minuti di peak rate
-          id = [12];
+        if(minutesOfPeak > 20){
+          id = 12;
         } else if( minutesOfPeak <= 20 && minutesOfPeak > 15){
-          id = [14];
+          id = 14;
         } else if(minutesOfPeak <= 15 && minutesOfPeak > 10){
-          id = [41];
+          id = 41;
         } else if(minutesOfPeak <= 10 && minutesOfPeak > 5){
-          id = [24];
+          id = 24;
         } else if(minutesOfPeak <= 5){
-          id = [30];
+          id = 30;
         }
       }
 
-      if (poses == null) {
-        poses = [];
-      }else{
-        final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/${id[0]}';
+      if(id != null){
+        poses ??= [];
+        final url = 'https://lightning-yoga-api.herokuapp.com/yoga_poses/$id';
         final response = await http.get(Uri.parse(url));
         if(response.statusCode == 200){
           poses.add(YogaPose.fromJson(jsonDecode(response.body)));
         }
       }
     }
-
-
-
     return poses;
   }
 
@@ -267,8 +260,6 @@ class YogaPage extends StatelessWidget {
       ) as List<FitbitHeartData>;
     }
   }
-
-
 
   // utils
   Future<bool> _isTokenValid() async{
