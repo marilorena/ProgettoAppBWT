@@ -78,12 +78,18 @@ class ActivityPage extends StatelessWidget{
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
     final now = DateTime.now();
-    final stopQueries = await QueriesCounter.getInstance().check();
-    final isTokenValid = await FitbitConnector.isTokenValid();
-    if(!isTokenValid || stopQueries){
+    bool stopQueries = await QueriesCounter.getInstance().check();
+    if(stopQueries){
       return null;
     } else {
-      return await fitbitActivityTimeseriesDataManagerSteps.fetch(
+      final isTokenValid = await FitbitConnector.isTokenValid();
+      if(!isTokenValid){
+        return null;
+      }
+      stopQueries = await QueriesCounter.getInstance().check();
+      return stopQueries
+      ? null
+      : await fitbitActivityTimeseriesDataManagerSteps.fetch(
         FitbitActivityTimeseriesAPIURL.dayWithResource(
           date: DateTime.utc(now.year, now.month, now.day+subtracted),
           userID: userID,
@@ -102,12 +108,18 @@ class ActivityPage extends StatelessWidget{
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
     final now = DateTime.now();
-    final stopQueries = await QueriesCounter.getInstance().check();
-    final isTokenValid = await FitbitConnector.isTokenValid();
-    if(!isTokenValid || stopQueries){
+    bool stopQueries = await QueriesCounter.getInstance().check();
+    if(stopQueries){
       return null;
     } else {
-      return await fitbitActivityTimeseriesDataManagerFloors.fetch(
+      final isTokenValid = await FitbitConnector.isTokenValid();
+      if(!isTokenValid){
+        return null;
+      }
+      stopQueries = await QueriesCounter.getInstance().check();
+      return stopQueries
+      ? null
+      : await fitbitActivityTimeseriesDataManagerFloors.fetch(
         FitbitActivityTimeseriesAPIURL.dayWithResource(
           date: DateTime.utc(now.year, now.month, now.day+subtracted),
           userID: userID,
@@ -125,12 +137,18 @@ class ActivityPage extends StatelessWidget{
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
     final now = DateTime.now();
-    final stopQueries = await QueriesCounter.getInstance().check();
-    final isTokenValid = await FitbitConnector.isTokenValid();
-    if(!isTokenValid || stopQueries){
+    bool stopQueries = await QueriesCounter.getInstance().check();
+    if(stopQueries){
       return null;
     } else {
-      return await fitbitActivityDataManager.fetch(
+      final isTokenValid = await FitbitConnector.isTokenValid();
+      if(!isTokenValid){
+        return null;
+      }
+      stopQueries = await QueriesCounter.getInstance().check();
+      return stopQueries
+      ? null
+      : await fitbitActivityDataManager.fetch(
         FitbitActivityAPIURL.day(
           date: DateTime.utc(now.year, now.month, now.day+subtracted),
           userID: userID
@@ -151,18 +169,26 @@ class ActivityPage extends StatelessWidget{
       type: 'minutesSedentary'
     );
     bool stopQueries = await QueriesCounter.getInstance().check();
-    final isTokenValid = await FitbitConnector.isTokenValid();
     List<FitbitActivityTimeseriesData> sedentary;
-    if(!isTokenValid || stopQueries){
+    if(stopQueries){
       return null;
     } else {
-      sedentary = await fitbitActivityTimeseriesDataManagerSedentary.fetch(
+      final isTokenValid = await FitbitConnector.isTokenValid();
+      if(!isTokenValid){
+        return null;
+      }
+      stopQueries = await QueriesCounter.getInstance().check();
+      if(stopQueries){
+        return null;
+      } else {
+        sedentary = await fitbitActivityTimeseriesDataManagerSedentary.fetch(
         FitbitActivityTimeseriesAPIURL.dayWithResource(
           date: DateTime.utc(now.year, now.month, now.day+subtracted),
           userID: userID,
           resource: fitbitActivityTimeseriesDataManagerSedentary.type
         )
       ) as List<FitbitActivityTimeseriesData>;
+      }
     }
 
     // lightly active

@@ -35,12 +35,18 @@ class SleepPage extends StatelessWidget{
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
     final now = DateTime.now();
-    final stopQueries = await QueriesCounter.getInstance().check();
-    final isTokenValid = await FitbitConnector.isTokenValid();
-    if(!isTokenValid || stopQueries){
+    bool stopQueries = await QueriesCounter.getInstance().check();
+    if(stopQueries){
       return null;
     } else {
-      return await fitbitSleepDataManager.fetch(
+      final isTokenValid = await FitbitConnector.isTokenValid();
+      if(!isTokenValid){
+        return null;
+      }
+      stopQueries = await QueriesCounter.getInstance().check();
+      return stopQueries
+      ? null
+      : await fitbitSleepDataManager.fetch(
         FitbitSleepAPIURL.withUserIDAndDay(
           date: DateTime.utc(now.year, now.month, now.day+subtracted),
           userID: userID,
