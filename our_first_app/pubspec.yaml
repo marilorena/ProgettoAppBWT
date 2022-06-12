@@ -34,7 +34,6 @@ dependencies:
   fitbitter: ^1.1.1
   http: ^0.13.4
   shared_preferences: ^2.0.15
-  flutter_svg: ^1.0.3
   pie_chart: ^5.3.1
   intl: ^0.17.0
   simple_lane_chart: ^0.0.9
@@ -82,8 +81,24 @@ flutter:
   assets:
     - asset/icons/icon_launcher.png
     - asset/icons/icon_launcher_adaptive_fore.png
+    - asset/icons/yoga.png
     - asset/sfondo5.jpg
     - asset/sfondo7.jpg
+    - asset/yoga/4.png
+    - asset/yoga/6.png
+    - asset/yoga/9.png
+    - asset/yoga/10.png
+    - asset/yoga/12.png
+    - asset/yoga/14.png
+    - asset/yoga/15.png
+    - asset/yoga/18.png
+    - asset/yoga/20.png
+    - asset/yoga/21.png
+    - asset/yoga/23.png
+    - asset/yoga/24.png
+    - asset/yoga/28.png
+    - asset/yoga/30.png
+    - asset/yoga/41.png
   
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

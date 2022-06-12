@@ -43,7 +43,8 @@ class _HomePageState extends State<HomePage>{
                 height: 100,
                 child: const Icon(
                   MdiIcons.heartPulse,
-                  size: 50, color: Colors.white
+                  size: 60,
+                  color: Colors.white
                 ),
                 decoration: BoxDecoration(
                   color: col,
@@ -64,7 +65,7 @@ class _HomePageState extends State<HomePage>{
                 height: 100,
                 child: const Icon(
                   MdiIcons.run,
-                  size: 50,
+                  size: 65,
                   color: Colors.white
                 ),
                 decoration: BoxDecoration(
@@ -86,7 +87,7 @@ class _HomePageState extends State<HomePage>{
               height: 100,
               child: const Icon(
                 MdiIcons.bed,
-                size: 50,
+                size: 60,
                 color: Colors.white
               ),
               decoration: BoxDecoration(
@@ -111,7 +112,7 @@ class _HomePageState extends State<HomePage>{
               borderRadius: BorderRadius.circular(45),
               image: const DecorationImage(
                 image: AssetImage(
-                  'asset/icons/icon_launcher_adaptive_fore.png'
+                  'asset/icons/yoga.png'
                 ),
                 fit: BoxFit.none,
                 scale: 3.5

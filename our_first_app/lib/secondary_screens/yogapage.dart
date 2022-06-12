@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:fitbitter/fitbitter.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:our_first_app/model/yogapose.dart';
@@ -20,55 +19,61 @@ class YogaPage extends StatelessWidget {
           builder: (context, snapshot){
             if(snapshot.hasData){
               final poses = snapshot.data as List<YogaPose>;
-              return SizedBox(
-                height: MediaQuery.of(context).size.height*0.8,
-                width: MediaQuery.of(context).size.width*0.8,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Based on your today\'s data,\n here are 3 suggested yoga poses for you',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16)
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Based on your today\'s data,\n here are 3 suggested yoga poses for you',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16)
+                  ),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height*0.5,
+                      maxWidth: MediaQuery.of(context).size.width*0.8
                     ),
-                    SizedBox(
-                      height: 350,
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        cacheExtent: 0,
-                        scrollDirection: Axis.horizontal,
-                        itemCount: poses.length,
-                        padding: const EdgeInsets.all(10),
-                        itemBuilder: (context, index) => Card(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      cacheExtent: 0,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: poses.length,
+                      padding: const EdgeInsets.fromLTRB(10, 30, 10, 30),
+                      separatorBuilder: (context, index) => const SizedBox(width: 20),
+                      itemBuilder: (context, index) => SizedBox(
+                        height: MediaQuery.of(context).size.height*0.5,
+                        width: MediaQuery.of(context).size.width*0.75,
+                        child: Card(
                           shadowColor: const Color.fromARGB(0, 190, 228, 193),
                           color: const Color.fromARGB(255, 224, 245, 223),
                           elevation: 10,
-                          child: Container(
-                            height: 300,
-                            width: 200,
-                            padding: const EdgeInsets.all(50),
-                            child: Column(
-                              children: [
-                                Text(poses[index].name),
-                                Text(
-                                  poses[index].sanskritName,
-                                  style: const TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                    color: Colors.green
+                          child: FittedBox(
+                            child: Padding(
+                              padding: const EdgeInsets.all(50),
+                              child: Column(
+                                children: [
+                                  Text(poses[index].name, style: const TextStyle(fontSize: 16)),
+                                  Text(
+                                    poses[index].sanskritName,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontStyle: FontStyle.italic,
+                                      color: Colors.green
+                                    )
+                                  ),
+                                  const SizedBox(height: 15),
+                                  Image.asset(
+                                    'asset/yoga/${poses[index].id}.png',
+                                    height: MediaQuery.of(context).size.height*0.2
                                   )
-                                ),
-                                const SizedBox(height: 15),
-                                SvgPicture.network(
-                                  poses[index].imageUrl
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        )
-                      ),
-                    )         
-                  ]
-                ),
+                        ),
+                      )
+                    ),
+                  )         
+                ]
               );
             } else {
               return FutureBuilder(

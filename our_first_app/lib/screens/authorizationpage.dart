@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitbitter/fitbitter.dart';
+import 'package:our_first_app/database/entities/account_entity.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,7 +65,7 @@ class AuthorizationPage extends StatelessWidget {
     );
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
-    final stopQueries = await QueriesCounter.getInstance().check();
+    final stopQueries = await QueriesCounter.getInstance().check(); // x number of queries to do, in this way no data will be fetched if the total number of queries is too much, so it won't happen that some data are fetched and others not
     if(stopQueries){
       Navigator.pop(context);
       Navigator.pop(context);
@@ -79,12 +80,25 @@ class AuthorizationPage extends StatelessWidget {
       ));
       return;
     } else {
+      // ACCOUNT DATA
+      // fetch
       final accountData = await fitbitAccountDataManager.fetch(
         FitbitUserAPIURL.withUserID(
           userID: userID
         )
+      ) as List<FitbitAccountData>;
+      // save
+      final Account account = Account(
+        id: null,
+        name: accountData[0].fullName,
+        age: accountData[0].age,
+        avatar: accountData[0].avatar,
+        dateOfBirth: accountData[0].dateOfBirth,
+        gender: accountData[0].gender,
+        height: accountData[0].height,
+        legalTermsAcceptRequired: accountData[0].legalTermsAcceptRequired,
+        weight: accountData[0].weight
       );
-      // save data
 
       Navigator.pop(context);
       Navigator.pop(context);
