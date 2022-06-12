@@ -1,6 +1,8 @@
 import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
+import 'package:our_first_app/database/repository/database_repository.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatelessWidget{
@@ -22,62 +24,78 @@ class ProfilePage extends StatelessWidget{
           )
         ),
       ),
-      body: Center(
-        child: Column(
-          children: [
-            Card(
-              elevation: 5,
-              child: ListTile(
-                title: const Text('Logout', style: TextStyle(fontSize: 18)),
-                trailing: const Icon(Icons.logout),
-                onTap: () => showDialog(
-                  context: context,
-                  builder: (context) => Center(
-                    child: Card(
-                      elevation: 5,
-                      margin: const EdgeInsets.fromLTRB(70, 20, 70, 20),
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        height: MediaQuery.of(context).size.height/3.2,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('Are you sure to log out?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 10),
-                            const Text(
-                              'If you log out, all your (locally storaged) data will be deleted.\nOnce you log in again, they will need to be fetched another time.',
-                              textAlign: TextAlign.justify,
-                              style: TextStyle(fontSize: 16)
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('asset/sfondo5.jpg'),
+            fit: BoxFit.fitHeight
+          )
+        ),
+        child: Center(
+          child: Column(
+            children: [
+
+              // altri children, dentro una Card contenuta in un Padding
+
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Card(
+                  elevation: 5,
+                  child: ListTile(
+                    title: const Text('Logout', style: TextStyle(fontSize: 18)),
+                    trailing: const Icon(Icons.logout),
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (context) => Center(
+                        child: Card(
+                          elevation: 5,
+                          margin: const EdgeInsets.fromLTRB(70, 20, 70, 20),
+                          child: Container(
+                            padding: const EdgeInsets.all(20),
+                            height: MediaQuery.of(context).size.height/3.2,
+                            child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                SizedBox(width: MediaQuery.of(context).size.width/3/6),
-                                GestureDetector(
-                                  child: const Text('Cancel', style: TextStyle(fontSize: 18, color: Colors.blue)),
-                                  onTap: () => Navigator.pop(context)
+                                const Text('Are you sure to log out?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 10),
+                                const Text(
+                                  'If you log out, all your (locally storaged) data will be deleted.\nOnce you log in again, they will need to be fetched another time.',
+                                  textAlign: TextAlign.justify,
+                                  style: TextStyle(fontSize: 16)
                                 ),
-                                SizedBox(width: MediaQuery.of(context).size.width/3/3),
-                                GestureDetector(
-                                  child: const Text('Log out', style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 158, 158, 158))),
-                                  onTap: () => _toLoginPage(context)
-                                ),
-                                SizedBox(width: MediaQuery.of(context).size.width/3/6)
+                                const SizedBox(height: 20),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(width: MediaQuery.of(context).size.width/3/6),
+                                    GestureDetector(
+                                      child: const Text('Cancel', style: TextStyle(fontSize: 18, color: Colors.blue)),
+                                      onTap: () => Navigator.pop(context)
+                                    ),
+                                    SizedBox(width: MediaQuery.of(context).size.width/3/3),
+                                    GestureDetector(
+                                      child: const Text('Log out', style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 158, 158, 158))),
+                                      onTap: () => _toLoginPage(context)
+                                    ),
+                                    SizedBox(width: MediaQuery.of(context).size.width/3/6)
+                                  ],
+                                )
                               ],
-                            )
-                          ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  )
                 ),
               )
-            ) 
-          ],
-        )
+            ],
+          )
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        elevation: 0,
+        backgroundColor: const Color.fromARGB(56, 240, 235, 160),
         items: [
           BottomNavigationBarItem(
             icon: IconButton(
@@ -105,12 +123,15 @@ class ProfilePage extends StatelessWidget{
     );
   }
   
-  Future<void> _toLoginPage(BuildContext context) async{ 
+  Future<void> _toLoginPage(BuildContext context) async{
+    // remove all the key-value objects in the database
     final sp = await SharedPreferences.getInstance();
     final keys = sp.getKeys().toList();
     for(var item in keys){
       sp.remove(item);
-    } // remove all the key-value objects in the database
+    }
+    // remove all the tables in the database
+    await Provider.of<DatabaseRepository>(context).deleteAccount();
 
     Navigator.pop(context);
     Navigator.pushReplacementNamed(context, '/login/');

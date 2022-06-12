@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fitbitter/fitbitter.dart';
 import 'package:our_first_app/database/entities/account_entity.dart';
+import 'package:our_first_app/database/repository/database_repository.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthorizationPage extends StatelessWidget {
@@ -31,7 +33,7 @@ class AuthorizationPage extends StatelessWidget {
                           const Text('We\'re going to fetch your data', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), maxLines: 1, textAlign: TextAlign.center),
                           const SizedBox(height: 10),
                           const Text(
-                            'They will be used just for visualization purposes and to retrieve simple possible solutions to improve your wellbeing to advice you with.\nThey will be stored on the local storage of your smartphone, but never shared with any third-party application or system.',
+                            'They will be used just for visualization purposes and to retrieve simple possible solutions to improve your wellbeing to advice you with.\nOnly the data which is necessary for this purpose will be stored on the local storage of your smartphone, but never shared with any third-party.',
                             textAlign: TextAlign.justify,
                             style: TextStyle(fontSize: 16)
                           ),
@@ -99,6 +101,7 @@ class AuthorizationPage extends StatelessWidget {
         legalTermsAcceptRequired: accountData[0].legalTermsAcceptRequired,
         weight: accountData[0].weight
       );
+      await Provider.of<DatabaseRepository>(context).insertAccount(account);
 
       Navigator.pop(context);
       Navigator.pop(context);

@@ -11,12 +11,12 @@ class DatabaseRepository extends ChangeNotifier{
     return await database.accountDao.getAccount();
   }
 
-  Future<void> insertAccount(Account account) async {
+  Future<void> insertAccount(Account account) async{
     await database.accountDao.insertAccount(account);
     notifyListeners();
   }
 
-  Future<void> deleteAccount(Account account) async{
+  Future<void> deleteAccount() async{
     await database.accountDao.deleteAccount();
     notifyListeners();
   }
