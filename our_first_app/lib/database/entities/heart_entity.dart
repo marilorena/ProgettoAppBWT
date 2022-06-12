@@ -1,7 +1,7 @@
 import 'package:floor/floor.dart';
 
 @Entity(primaryKeys: ['date'])
-class HeartData {
+class Heart {
   @PrimaryKey()
   final DateTime? date;
 
@@ -11,5 +11,5 @@ class HeartData {
   final int? minutesCardio;
   final int? minutesPeak;
 
-  HeartData({required this.date, required this.restingHR, required this.minutesOutOfRange, required this.minutesFatBurn, required this.minutesCardio, required this.minutesPeak});
+  Heart({required this.date, required this.restingHR, required this.minutesOutOfRange, required this.minutesFatBurn, required this.minutesCardio, required this.minutesPeak});
 }
