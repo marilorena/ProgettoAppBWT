@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:our_first_app/database/database.dart';
+import 'package:our_first_app/database/repository/database_repository.dart';
 import 'package:our_first_app/screens/authorizationpage.dart';
 import 'package:our_first_app/screens/loginpage.dart';
 import 'package:our_first_app/screens/homepage.dart';
@@ -8,13 +10,18 @@ import 'package:our_first_app/secondary_screens/activitysettingspage.dart';
 import 'package:our_first_app/secondary_screens/heartpage.dart';
 import 'package:our_first_app/secondary_screens/sleeppage.dart';
 import 'package:our_first_app/secondary_screens/yogapage.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  final AppDatabase database = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
+  final databaseRepository = DatabaseRepository(database: database);
 
-
-
-void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider<DatabaseRepository>(
+    create: (context) => DatabaseRepository(database: database),
+    child: const MyApp()
+  ));
 }
 
 class MyApp extends StatelessWidget{

@@ -131,7 +131,7 @@ class ProfilePage extends StatelessWidget{
       sp.remove(item);
     }
     // remove all the tables in the database
-    await Provider.of<DatabaseRepository>(context).deleteAccount();
+    await Provider.of<DatabaseRepository>(context, listen: false).deleteAccount();
 
     Navigator.pop(context);
     Navigator.pushReplacementNamed(context, '/login/');

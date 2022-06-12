@@ -82,7 +82,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `account` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT, `age` INTEGER, `dateOfBirth` INTEGER, `gender` TEXT, `height` REAL, `weight` REAL, `legalTermsAcceptRequired` INTEGER, `avatar` TEXT)');
+            'CREATE TABLE IF NOT EXISTS `Account` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT, `age` INTEGER, `dateOfBirth` TEXT, `gender` TEXT, `height` REAL, `weight` REAL, `legalTermsAcceptRequired` INTEGER, `avatar` TEXT)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -101,12 +101,12 @@ class _$AccountDao extends AccountDao {
       : _queryAdapter = QueryAdapter(database),
         _accountInsertionAdapter = InsertionAdapter(
             database,
-            'account',
+            'Account',
             (Account item) => <String, Object?>{
                   'id': item.id,
                   'name': item.name,
                   'age': item.age,
-                  'dateOfBirth': _dateTimeConverter.encode(item.dateOfBirth),
+                  'dateOfBirth': item.dateOfBirth,
                   'gender': item.gender,
                   'height': item.height,
                   'weight': item.weight,
@@ -133,7 +133,7 @@ class _$AccountDao extends AccountDao {
             name: row['name'] as String?,
             age: row['age'] as int?,
             avatar: row['avatar'] as String?,
-            dateOfBirth: _dateTimeConverter.decode(row['dateOfBirth'] as int?),
+            dateOfBirth: row['dateOfBirth'] as String?,
             gender: row['gender'] as String?,
             height: row['height'] as double?,
             legalTermsAcceptRequired: row['legalTermsAcceptRequired'] == null

@@ -1,13 +1,13 @@
 import 'package:floor/floor.dart';
 
-@Entity(tableName: 'account')
+@entity
 class Account {
   @PrimaryKey(autoGenerate: true)
   final int? id;
 
   final String? name;
   final int? age;
-  final DateTime? dateOfBirth;
+  final String? dateOfBirth;
   final String? gender;
   final double? height;
   final double? weight;

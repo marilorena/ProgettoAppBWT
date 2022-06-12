@@ -88,20 +88,20 @@ class AuthorizationPage extends StatelessWidget {
         FitbitUserAPIURL.withUserID(
           userID: userID
         )
-      ) as List<FitbitAccountData>;
+      );
       // save
       final Account account = Account(
         id: null,
-        name: accountData[0].fullName,
-        age: accountData[0].age,
-        avatar: accountData[0].avatar,
-        dateOfBirth: accountData[0].dateOfBirth,
-        gender: accountData[0].gender,
-        height: accountData[0].height,
-        legalTermsAcceptRequired: accountData[0].legalTermsAcceptRequired,
-        weight: accountData[0].weight
+        name: accountData[0].toJson()['fullName'],
+        age: accountData[0].toJson()['age'],
+        avatar: accountData[0].toJson()['avatar'],
+        dateOfBirth: accountData[0].toJson()['dateOfBirth'],
+        gender: accountData[0].toJson()['gender'],
+        height: accountData[0].toJson()['height'],
+        legalTermsAcceptRequired: accountData[0].toJson()['legalTermsAcceptRequired'],
+        weight: accountData[0].toJson()['weight']
       );
-      await Provider.of<DatabaseRepository>(context).insertAccount(account);
+      await Provider.of<DatabaseRepository>(context, listen: false).insertAccount(account);
 
       Navigator.pop(context);
       Navigator.pop(context);
