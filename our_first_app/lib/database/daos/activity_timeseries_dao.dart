@@ -9,8 +9,10 @@ abstract class ActivityTimeseriesDao {
   @insert
   Future<void> insertActivityTimeseries(List<ActivityTimeseries> activityTimeseriesList);
 
-  @update
-  Future<void> updateActivityTimeseries(ActivityTimeseries activityTimeseries);
+  // delete the most recent data
+  // also to update today's data
+  @Query('DELETE FROM ActivityTimeseries WHERE date = (SELECT MAX(date) FROM ActivityTimeseries)')
+  Future<void> deleteRecentActivityTimeseries();
 
   @Query('DELETE FROM ActivityTimeseries')
   Future<void> deleteAllActivityTimeseries();

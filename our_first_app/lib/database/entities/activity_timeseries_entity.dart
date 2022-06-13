@@ -3,7 +3,7 @@ import 'package:floor/floor.dart';
 @Entity(primaryKeys: ['date'])
 class ActivityTimeseries {
   @PrimaryKey()
-  final DateTime? date;
+  final DateTime date;
 
   final int? steps;
   final int? floors;
