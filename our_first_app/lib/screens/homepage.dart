@@ -146,9 +146,9 @@ class _HomePageState extends State<HomePage>{
         BottomNavigationBarItem(
           icon: IconButton(
             icon: const Icon(Icons.person),
-              onPressed: () async {
+              onPressed: () {
                 
-                Navigator.popAndPushNamed(context, '/profile/');
+                _toProfilePage(context);
                 
               },
             ),
@@ -161,4 +161,11 @@ class _HomePageState extends State<HomePage>{
       )
     );
   }
+}
+
+Future<void> _toProfilePage(BuildContext context) async {
+  await Provider.of<DatabaseRepository>(context, listen: false)
+                .insertAccount(Account(name: '', gender: '', dateOfBirth: '', age: null, id: null, avatar: '', height: null, weight: null, legalTermsAcceptRequired: null,));
+     
+    Navigator.popAndPushNamed(context, '/profile/');
 }

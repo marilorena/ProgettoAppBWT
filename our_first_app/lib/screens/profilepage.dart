@@ -34,9 +34,7 @@ class ProfilePage extends StatelessWidget{
           )
         ),
         child: Center(
-          child: Column( 
-            children: [
-             
+          child: 
             Consumer<DatabaseRepository>(
             builder: (context, dbr, child) {
               return FutureBuilder(
@@ -52,53 +50,8 @@ class ProfilePage extends StatelessWidget{
                         return  Card(
                                 key: UniqueKey(),
                                 elevation: 5,
-                                child: ListView(
-                                  children: [Text(account.name!), Text(account.dateOfBirth!), Text(account.gender!), ListTile(
-                                    title: const Text('Logout', style: TextStyle(fontSize: 18)),
-                                    trailing: const Icon(Icons.logout),
-                                    onTap: () => showDialog(
-                                    context: context,
-                                    builder: (context) => Center(
-                                      child: Card(
-                                        elevation: 5,
-                                        margin: const EdgeInsets.fromLTRB(70, 20, 70, 20),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(20),
-                                          height: MediaQuery.of(context).size.height/3.2,
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              const Text('Are you sure to log out?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                              const SizedBox(height: 10),
-                                              const Text(
-                                                'If you log out, all your (locally storaged) data will be deleted.\nOnce you log in again, they will need to be fetched another time.',
-                                                textAlign: TextAlign.justify,
-                                                style: TextStyle(fontSize: 16)
-                                              ),
-                                              const SizedBox(height: 20),
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                children: [
-                                                  SizedBox(width: MediaQuery.of(context).size.width/3/6),
-                                                  GestureDetector(
-                                                    child: const Text('Cancel', style: TextStyle(fontSize: 18, color: Colors.blue)),
-                                                    onTap: () => Navigator.pop(context)
-                                                  ),
-                                                  SizedBox(width: MediaQuery.of(context).size.width/3/3),
-                                                  GestureDetector(
-                                                    child: const Text('Log out', style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 158, 158, 158))),
-                                                    onTap: () => _toLoginPage(context)
-                                                  ),
-                                                  SizedBox(width: MediaQuery.of(context).size.width/3/6)
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  )]
+                                child: ListTile(
+                                  title: Text(account.name!)
                                 )
                               );
                              }
@@ -111,8 +64,11 @@ class ProfilePage extends StatelessWidget{
               );
             },
           ),
-         
-      BottomNavigationBar(
+        
+     )
+    ),
+     
+     bottomNavigationBar: BottomNavigationBar(
         elevation: 0,
         backgroundColor: const Color.fromARGB(56, 240, 235, 160),
         items: [
@@ -138,10 +94,7 @@ class ProfilePage extends StatelessWidget{
         currentIndex: 1,
         selectedItemColor: Colors.green,
         unselectedLabelStyle: const TextStyle(fontSize: 14)
-      )
-     ])
-    ),
-    )
+      ),
    );
   }
   
