@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:our_first_app/database/entities/account_entity.dart';
+import 'package:provider/provider.dart';
+
+import '../database/repository/database_repository.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -142,8 +146,10 @@ class _HomePageState extends State<HomePage>{
         BottomNavigationBarItem(
           icon: IconButton(
             icon: const Icon(Icons.person),
-              onPressed: () {
+              onPressed: () async {
+                
                 Navigator.popAndPushNamed(context, '/profile/');
+                
               },
             ),
             label: 'Profile'
