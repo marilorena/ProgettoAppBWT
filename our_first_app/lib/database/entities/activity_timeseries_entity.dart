@@ -5,12 +5,12 @@ class ActivityTimeseries {
   @PrimaryKey()
   final DateTime date;
 
-  final int? steps;
-  final int? floors;
-  final int? minutesSedentary;
-  final int? minutesLightly;
-  final int? minutesFairly;
-  final int? minutesVery;
+  final double? steps;
+  final double? floors;
+  final double? minutesSedentary;
+  final double? minutesLightly;
+  final double? minutesFairly;
+  final double? minutesVery;
 
   ActivityTimeseries({required this.date, required this.steps, required this.floors, required this.minutesSedentary, required this.minutesLightly, required this.minutesFairly, required this.minutesVery});
 }

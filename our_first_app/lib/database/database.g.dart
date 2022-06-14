@@ -92,13 +92,13 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `Account` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT, `age` INTEGER, `dateOfBirth` TEXT, `gender` TEXT, `height` REAL, `weight` REAL, `legalTermsAcceptRequired` INTEGER, `avatar` TEXT)');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Activity` (`date` INTEGER NOT NULL, `type` TEXT, `distance` REAL, `duration` REAL, `startTime` INTEGER NOT NULL, `calories` REAL, PRIMARY KEY (`date`))');
+            'CREATE TABLE IF NOT EXISTS `Activity` (`id` INTEGER, `date` INTEGER NOT NULL, `type` TEXT, `distance` REAL, `duration` REAL, `startTime` INTEGER NOT NULL, `calories` REAL, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `ActivityTimeseries` (`date` INTEGER NOT NULL, `steps` INTEGER, `floors` INTEGER, `minutesSedentary` INTEGER, `minutesLightly` INTEGER, `minutesFairly` INTEGER, `minutesVery` INTEGER, PRIMARY KEY (`date`))');
+            'CREATE TABLE IF NOT EXISTS `ActivityTimeseries` (`date` INTEGER NOT NULL, `steps` REAL, `floors` REAL, `minutesSedentary` REAL, `minutesLightly` REAL, `minutesFairly` REAL, `minutesVery` REAL, PRIMARY KEY (`date`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `Heart` (`date` INTEGER NOT NULL, `restingHR` INTEGER, `minutesOutOfRange` INTEGER, `minutesFatBurn` INTEGER, `minutesCardio` INTEGER, `minutesPeak` INTEGER, PRIMARY KEY (`date`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Sleep` (`date` INTEGER NOT NULL, `entryDateTime` INTEGER NOT NULL, `level` TEXT, PRIMARY KEY (`date`))');
+            'CREATE TABLE IF NOT EXISTS `Sleep` (`id` INTEGER, `date` INTEGER NOT NULL, `entryDateTime` INTEGER NOT NULL, `level` TEXT, PRIMARY KEY (`id`))');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -197,6 +197,7 @@ class _$ActivityDao extends ActivityDao {
             database,
             'Activity',
             (Activity item) => <String, Object?>{
+                  'id': item.id,
                   'date': _dateTimeConverter.encode(item.date),
                   'type': item.type,
                   'distance': item.distance,
@@ -217,6 +218,7 @@ class _$ActivityDao extends ActivityDao {
   Future<List<Activity>> getActivityDataByDate(DateTime date) async {
     return _queryAdapter.queryList('SELECT * FROM Activity WHERE date = ?1',
         mapper: (Map<String, Object?> row) => Activity(
+            id: row['id'] as int?,
             date: _dateTimeConverter.decode(row['date'] as int),
             type: row['type'] as String?,
             distance: row['distance'] as double?,
@@ -275,12 +277,12 @@ class _$ActivityTimeseriesDao extends ActivityTimeseriesDao {
         'SELECT * FROM ActivityTimeseries WHERE date = ?1',
         mapper: (Map<String, Object?> row) => ActivityTimeseries(
             date: _dateTimeConverter.decode(row['date'] as int),
-            steps: row['steps'] as int?,
-            floors: row['floors'] as int?,
-            minutesSedentary: row['minutesSedentary'] as int?,
-            minutesLightly: row['minutesLightly'] as int?,
-            minutesFairly: row['minutesFairly'] as int?,
-            minutesVery: row['minutesVery'] as int?),
+            steps: row['steps'] as double?,
+            floors: row['floors'] as double?,
+            minutesSedentary: row['minutesSedentary'] as double?,
+            minutesLightly: row['minutesLightly'] as double?,
+            minutesFairly: row['minutesFairly'] as double?,
+            minutesVery: row['minutesVery'] as double?),
         arguments: [_dateTimeConverter.encode(date)]);
   }
 
@@ -369,6 +371,7 @@ class _$SleepDao extends SleepDao {
             database,
             'Sleep',
             (Sleep item) => <String, Object?>{
+                  'id': item.id,
                   'date': _dateTimeConverter.encode(item.date),
                   'entryDateTime':
                       _dateTimeConverter.encode(item.entryDateTime),
@@ -387,6 +390,7 @@ class _$SleepDao extends SleepDao {
   Future<List<Sleep>> getSleepDataByDate(DateTime date) async {
     return _queryAdapter.queryList('SELECT * FROM Sleep WHERE date = ?1',
         mapper: (Map<String, Object?> row) => Sleep(
+            id: row['id'] as int?,
             date: _dateTimeConverter.decode(row['date'] as int),
             entryDateTime:
                 _dateTimeConverter.decode(row['entryDateTime'] as int),

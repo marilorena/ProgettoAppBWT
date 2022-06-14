@@ -4,6 +4,7 @@ import 'package:our_first_app/database/entities/account_entity.dart';
 import 'package:our_first_app/database/entities/activity_entity.dart';
 import 'package:our_first_app/database/entities/activity_timeseries_entity.dart';
 import 'package:our_first_app/database/entities/heart_entity.dart';
+import 'package:our_first_app/database/entities/sleep_entity.dart';
 
 class DatabaseRepository extends ChangeNotifier{
   final AppDatabase database;
@@ -86,6 +87,21 @@ class DatabaseRepository extends ChangeNotifier{
 
   Future<void> deleteAllHeartData() async{
     await database.heartDao.deleteAllHeartData();
+    notifyListeners();
+  }
+
+  // sleep
+  Future<List<Sleep>> getSleepDataByDate(DateTime date) async{
+    return await database.sleepDao.getSleepDataByDate(date);
+  }
+
+  Future<void> insertSleepData(List<Sleep> sleepDataList) async{
+    await database.sleepDao.insertSleepData(sleepDataList);
+    notifyListeners();
+  }
+
+  Future<void> deleteAllSleepData() async{
+    await database.sleepDao.deleteAllSleepData();
     notifyListeners();
   }
 }
