@@ -3,7 +3,7 @@ import 'package:our_first_app/database/entities/activity_entity.dart';
 
 @dao
 abstract class ActivityDao {
-  @Query('SELECT * FROM Activity WHERE date = :date')
+  @Query('SELECT * FROM activityTable WHERE date = :date')
   Future<List<Activity>> getActivityDataByDate(DateTime date);
 
   @insert
@@ -11,9 +11,9 @@ abstract class ActivityDao {
 
   // delete the most recent data
   // also to update today's data
-  @Query('DELETE FROM ActivityTimeseries WHERE date = (SELECT MAX(date) FROM ActivityTimeseries)')
+  @Query('DELETE FROM activityTable WHERE date = (SELECT MAX(date) FROM activityTable)')
   Future<void> deleteRecentActivityData();
 
-  @Query('DELETE FROM Activity')
+  @Query('DELETE FROM activityTable')
   Future<void> deleteAllActivity();
 }

@@ -3,7 +3,7 @@ import 'package:our_first_app/database/entities/sleep_entity.dart';
 
 @dao
 abstract class SleepDao {
-  @Query('SELECT * FROM Sleep WHERE date = :date')
+  @Query('SELECT * FROM sleepTable WHERE date = :date')
   Future<List<Sleep>> getSleepDataByDate(DateTime date);
 
   @insert
@@ -11,6 +11,6 @@ abstract class SleepDao {
 
   // no update method
 
-  @Query('DELETE FROM Sleep')
+  @Query('DELETE FROM sleepTable')
   Future<void> deleteAllSleepData();  
 }

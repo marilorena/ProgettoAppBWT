@@ -90,15 +90,15 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Account` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT, `age` INTEGER, `dateOfBirth` TEXT, `gender` TEXT, `height` REAL, `weight` REAL, `legalTermsAcceptRequired` INTEGER, `avatar` TEXT)');
+            'CREATE TABLE IF NOT EXISTS `accountTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT, `age` INTEGER, `dateOfBirth` TEXT, `gender` TEXT, `height` REAL, `weight` REAL, `legalTermsAcceptRequired` INTEGER, `avatar` TEXT)');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Activity` (`id` INTEGER, `date` INTEGER NOT NULL, `type` TEXT, `distance` REAL, `duration` REAL, `startTime` INTEGER NOT NULL, `calories` REAL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `activityTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `date` INTEGER NOT NULL, `type` TEXT, `distance` REAL, `duration` REAL, `startTime` INTEGER NOT NULL, `calories` REAL)');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `ActivityTimeseries` (`date` INTEGER NOT NULL, `steps` REAL, `floors` REAL, `minutesSedentary` REAL, `minutesLightly` REAL, `minutesFairly` REAL, `minutesVery` REAL, PRIMARY KEY (`date`))');
+            'CREATE TABLE IF NOT EXISTS `activityTimeseriesTable` (`date` INTEGER NOT NULL, `steps` REAL, `floors` REAL, `minutesSedentary` REAL, `minutesLightly` REAL, `minutesFairly` REAL, `minutesVery` REAL, PRIMARY KEY (`date`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Heart` (`date` INTEGER NOT NULL, `restingHR` INTEGER, `minutesOutOfRange` INTEGER, `minutesFatBurn` INTEGER, `minutesCardio` INTEGER, `minutesPeak` INTEGER, PRIMARY KEY (`date`))');
+            'CREATE TABLE IF NOT EXISTS `heartTable` (`date` INTEGER NOT NULL, `restingHR` INTEGER, `minutesOutOfRange` INTEGER, `minutesFatBurn` INTEGER, `minutesCardio` INTEGER, `minutesPeak` INTEGER, PRIMARY KEY (`date`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Sleep` (`id` INTEGER, `date` INTEGER NOT NULL, `entryDateTime` INTEGER NOT NULL, `level` TEXT, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `sleepTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `date` INTEGER NOT NULL, `entryDateTime` INTEGER NOT NULL, `level` TEXT)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -138,7 +138,7 @@ class _$AccountDao extends AccountDao {
       : _queryAdapter = QueryAdapter(database),
         _accountInsertionAdapter = InsertionAdapter(
             database,
-            'Account',
+            'accountTable',
             (Account item) => <String, Object?>{
                   'id': item.id,
                   'name': item.name,
@@ -164,7 +164,7 @@ class _$AccountDao extends AccountDao {
 
   @override
   Future<List<Account>> getAccount() async {
-    return _queryAdapter.queryList('SELECT * FROM Account',
+    return _queryAdapter.queryList('SELECT * FROM accountTable',
         mapper: (Map<String, Object?> row) => Account(
             id: row['id'] as int?,
             name: row['name'] as String?,
@@ -181,7 +181,7 @@ class _$AccountDao extends AccountDao {
 
   @override
   Future<void> deleteAccount() async {
-    await _queryAdapter.queryNoReturn('DELETE FROM Account');
+    await _queryAdapter.queryNoReturn('DELETE FROM accountTable');
   }
 
   @override
@@ -195,7 +195,7 @@ class _$ActivityDao extends ActivityDao {
       : _queryAdapter = QueryAdapter(database),
         _activityInsertionAdapter = InsertionAdapter(
             database,
-            'Activity',
+            'activityTable',
             (Activity item) => <String, Object?>{
                   'id': item.id,
                   'date': _dateTimeConverter.encode(item.date),
@@ -216,7 +216,8 @@ class _$ActivityDao extends ActivityDao {
 
   @override
   Future<List<Activity>> getActivityDataByDate(DateTime date) async {
-    return _queryAdapter.queryList('SELECT * FROM Activity WHERE date = ?1',
+    return _queryAdapter.queryList(
+        'SELECT * FROM activityTable WHERE date = ?1',
         mapper: (Map<String, Object?> row) => Activity(
             id: row['id'] as int?,
             date: _dateTimeConverter.decode(row['date'] as int),
@@ -231,12 +232,12 @@ class _$ActivityDao extends ActivityDao {
   @override
   Future<void> deleteRecentActivityData() async {
     await _queryAdapter.queryNoReturn(
-        'DELETE FROM ActivityTimeseries WHERE date = (SELECT MAX(date) FROM ActivityTimeseries)');
+        'DELETE FROM activityTable WHERE date = (SELECT MAX(date) FROM activityTable)');
   }
 
   @override
   Future<void> deleteAllActivity() async {
-    await _queryAdapter.queryNoReturn('DELETE FROM Activity');
+    await _queryAdapter.queryNoReturn('DELETE FROM activityTable');
   }
 
   @override
@@ -251,7 +252,7 @@ class _$ActivityTimeseriesDao extends ActivityTimeseriesDao {
       : _queryAdapter = QueryAdapter(database),
         _activityTimeseriesInsertionAdapter = InsertionAdapter(
             database,
-            'ActivityTimeseries',
+            'activityTimeseriesTable',
             (ActivityTimeseries item) => <String, Object?>{
                   'date': _dateTimeConverter.encode(item.date),
                   'steps': item.steps,
@@ -274,7 +275,7 @@ class _$ActivityTimeseriesDao extends ActivityTimeseriesDao {
   @override
   Future<ActivityTimeseries?> getActivityTimeseriesByDate(DateTime date) async {
     return _queryAdapter.query(
-        'SELECT * FROM ActivityTimeseries WHERE date = ?1',
+        'SELECT * FROM activityTimeseriesTable WHERE date = ?1',
         mapper: (Map<String, Object?> row) => ActivityTimeseries(
             date: _dateTimeConverter.decode(row['date'] as int),
             steps: row['steps'] as double?,
@@ -289,12 +290,12 @@ class _$ActivityTimeseriesDao extends ActivityTimeseriesDao {
   @override
   Future<void> deleteRecentActivityTimeseries() async {
     await _queryAdapter.queryNoReturn(
-        'DELETE FROM ActivityTimeseries WHERE date = (SELECT MAX(date) FROM ActivityTimeseries)');
+        'DELETE FROM activityTimeseriesTable WHERE date = (SELECT MAX(date) FROM activityTimeseriesTable)');
   }
 
   @override
   Future<void> deleteAllActivityTimeseries() async {
-    await _queryAdapter.queryNoReturn('DELETE FROM ActivityTimeseries');
+    await _queryAdapter.queryNoReturn('DELETE FROM activityTimeseriesTable');
   }
 
   @override
@@ -310,7 +311,7 @@ class _$HeartDao extends HeartDao {
       : _queryAdapter = QueryAdapter(database),
         _heartInsertionAdapter = InsertionAdapter(
             database,
-            'Heart',
+            'heartTable',
             (Heart item) => <String, Object?>{
                   'date': _dateTimeConverter.encode(item.date),
                   'restingHR': item.restingHR,
@@ -330,7 +331,7 @@ class _$HeartDao extends HeartDao {
 
   @override
   Future<Heart?> getHeartDataByDate(DateTime date) async {
-    return _queryAdapter.query('SELECT * FROM Heart WHERE date = ?1',
+    return _queryAdapter.query('SELECT * FROM heartTable WHERE date = ?1',
         mapper: (Map<String, Object?> row) => Heart(
             date: _dateTimeConverter.decode(row['date'] as int),
             restingHR: row['restingHR'] as int?,
@@ -343,18 +344,18 @@ class _$HeartDao extends HeartDao {
 
   @override
   Future<DateTime?> getRecentHeartDate() async {
-    await _queryAdapter.queryNoReturn('SELECT MAX(date) FROM Heart');
+    await _queryAdapter.queryNoReturn('SELECT * MAX(date) FROM heartTable');
   }
 
   @override
   Future<void> deleteRecentHeartData() async {
     await _queryAdapter.queryNoReturn(
-        'DELETE FROM Heart WHERE date = (SELECT MAX(date) FROM Heart)');
+        'DELETE FROM heartTable WHERE date = (SELECT MAX(date) FROM heartTable)');
   }
 
   @override
   Future<void> deleteAllHeartData() async {
-    await _queryAdapter.queryNoReturn('DELETE FROM Heart');
+    await _queryAdapter.queryNoReturn('DELETE FROM heartTable');
   }
 
   @override
@@ -369,7 +370,7 @@ class _$SleepDao extends SleepDao {
       : _queryAdapter = QueryAdapter(database),
         _sleepInsertionAdapter = InsertionAdapter(
             database,
-            'Sleep',
+            'sleepTable',
             (Sleep item) => <String, Object?>{
                   'id': item.id,
                   'date': _dateTimeConverter.encode(item.date),
@@ -388,7 +389,7 @@ class _$SleepDao extends SleepDao {
 
   @override
   Future<List<Sleep>> getSleepDataByDate(DateTime date) async {
-    return _queryAdapter.queryList('SELECT * FROM Sleep WHERE date = ?1',
+    return _queryAdapter.queryList('SELECT * FROM sleepTable WHERE date = ?1',
         mapper: (Map<String, Object?> row) => Sleep(
             id: row['id'] as int?,
             date: _dateTimeConverter.decode(row['date'] as int),
@@ -400,7 +401,7 @@ class _$SleepDao extends SleepDao {
 
   @override
   Future<void> deleteAllSleepData() async {
-    await _queryAdapter.queryNoReturn('DELETE FROM Sleep');
+    await _queryAdapter.queryNoReturn('DELETE FROM sleepTable');
   }
 
   @override

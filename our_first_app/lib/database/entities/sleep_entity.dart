@@ -1,6 +1,6 @@
 import 'package:floor/floor.dart';
 
-@Entity(primaryKeys: ['id'])
+@Entity(tableName: 'sleepTable')
 class Sleep {
   @PrimaryKey(autoGenerate: true)
   final int? id;

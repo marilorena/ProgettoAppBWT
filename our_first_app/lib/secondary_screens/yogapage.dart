@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:fitbitter/fitbitter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:our_first_app/database/repository/database_repository.dart';
 import 'package:our_first_app/model/yogapose.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class YogaPage extends StatelessWidget {
@@ -15,7 +17,7 @@ class YogaPage extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: FutureBuilder(
-          future: _fetchPose(),
+          future: _fetchPose(context),
           builder: (context, snapshot){
             if(snapshot.hasData){
               final poses = snapshot.data as List<YogaPose>;
@@ -23,7 +25,7 @@ class YogaPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Based on your today\'s data,\n here are 3 suggested yoga poses for you',
+                    'Based on your today\'s data,\n here are 3 suggested yoga poses for you\n(swipe left to see all)',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16)
                   ),
@@ -107,11 +109,11 @@ class YogaPage extends StatelessWidget {
   }
 
   // fetch methods
-  Future<List<YogaPose>?> _fetchPose() async{
+  Future<List<YogaPose>?> _fetchPose(BuildContext context) async{
     List<YogaPose>? poses;
-    final steps = await _fetchSteps();
-    final sleepData = await _fetchSleep();
-    final heartData = await _fetchHeartData();
+    final steps = await _fetchSteps(context);
+    final sleepData = await _fetchSleep(context);
+    final heartData = await _fetchHeartData(context);
     
     if(steps != null){
       double? numOfSteps = steps[0].value;
@@ -198,89 +200,114 @@ class YogaPage extends StatelessWidget {
     return poses;
   }
 
-  Future<List<FitbitActivityTimeseriesData>?> _fetchSteps() async{
-    FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManager = FitbitActivityTimeseriesDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret,
-      type: 'steps'
-    );
-    final sp = await SharedPreferences.getInstance();
-    final userID = sp.getString('userID');
-    bool stopQueries = await QueriesCounter.getInstance().check();
-    if(stopQueries){
-      return null;
+  Future<List<FitbitActivityTimeseriesData>?> _fetchSteps(BuildContext context) async{
+    DateTime now = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityTimeseriesByDate(now);
+    if(activityFromDB != null){
+      // if present in db
+      return [FitbitActivityTimeseriesData(value: activityFromDB.steps)];
     } else {
-      final isTokenValid = await FitbitConnector.isTokenValid();
-      if(!isTokenValid){
+      // otherwise fetch from API
+      FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManager = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'steps'
+      );
+      final sp = await SharedPreferences.getInstance();
+      final userID = sp.getString('userID');
+      bool stopQueries = await QueriesCounter.getInstance().check();
+      if(stopQueries){
         return null;
+      } else {
+        final isTokenValid = await FitbitConnector.isTokenValid();
+        if(!isTokenValid){
+          return null;
+        }
+        stopQueries = await QueriesCounter.getInstance().check();
+        return stopQueries
+        ? null
+        : await fitbitActivityTimeseriesDataManager
+          .fetch(FitbitActivityTimeseriesAPIURL.dayWithResource(
+            date: DateTime.now(),
+            userID: userID,
+            resource: fitbitActivityTimeseriesDataManager.type
+          )
+        ) as List<FitbitActivityTimeseriesData>;
       }
-      stopQueries = await QueriesCounter.getInstance().check();
-      return stopQueries
-      ? null
-      : await fitbitActivityTimeseriesDataManager
-        .fetch(FitbitActivityTimeseriesAPIURL.dayWithResource(
-          date: DateTime.now(),
-          userID: userID,
-          resource: fitbitActivityTimeseriesDataManager.type
-        )
-      ) as List<FitbitActivityTimeseriesData>;
     }
   }
 
 
-  Future<List<FitbitSleepData>?> _fetchSleep() async{
-    final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret,
-    );
-    final sp = await SharedPreferences.getInstance();
-    final userID = sp.getString('userID');
-    final now = DateTime.now();
-    bool stopQueries = await QueriesCounter.getInstance().check();
-    if(stopQueries){
-      return null;
-    } else {
-      final isTokenValid = await FitbitConnector.isTokenValid();
-      if(!isTokenValid){
-        return null;
+  Future<List<FitbitSleepData>?> _fetchSleep(BuildContext context) async{
+    DateTime now = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final sleepFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getSleepDataByDate(now);
+    if(sleepFromDB.isNotEmpty){
+      // if present in db
+      sleepFromDB.sort((a,b) => a.entryDateTime.compareTo(b.entryDateTime)); // sort by ascending entryDateTime
+      List<FitbitSleepData> sleepData = [];
+      for(var item in sleepFromDB){
+        sleepData.add(FitbitSleepData(entryDateTime: item.entryDateTime));
       }
-      stopQueries = await QueriesCounter.getInstance().check();
-      return stopQueries
-      ? null
-      : await fitbitSleepDataManager.fetch(
-        FitbitSleepAPIURL.withUserIDAndDay(
-          date: DateTime.utc(now.year, now.month, now.day),
-          userID: userID,
-        )
-      ) as List<FitbitSleepData>; 
+      return sleepData;
+    } else {
+      // otherwise fetch from API
+      final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+      );
+      final sp = await SharedPreferences.getInstance();
+      final userID = sp.getString('userID');
+      bool stopQueries = await QueriesCounter.getInstance().check();
+      if(stopQueries){
+        return null;
+      } else {
+        final isTokenValid = await FitbitConnector.isTokenValid();
+        if(!isTokenValid){
+          return null;
+        }
+        stopQueries = await QueriesCounter.getInstance().check();
+        return stopQueries
+        ? null
+        : await fitbitSleepDataManager.fetch(
+          FitbitSleepAPIURL.withUserIDAndDay(
+            date: DateTime.now(),
+            userID: userID,
+          )
+        ) as List<FitbitSleepData>; 
+      }
     }
   }
 
-  Future<List<FitbitHeartData>?> _fetchHeartData() async {
-    FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret
-    );
-    final sp = await SharedPreferences.getInstance();
-    final userID = sp.getString('userID');
-    final now = DateTime.now();
-    bool stopQueries = await QueriesCounter.getInstance().check();
-    if(stopQueries){
-      return null;
+  Future<List<FitbitHeartData>?> _fetchHeartData(BuildContext context) async {
+    DateTime now = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final heartFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getHeartDataByDate(now);
+    if(heartFromDB != null){
+      return [FitbitHeartData(minutesPeak: heartFromDB.minutesPeak)];
     } else {
-      final isTokenValid = await FitbitConnector.isTokenValid();
-      if(!isTokenValid){
+      FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret
+      );
+      final sp = await SharedPreferences.getInstance();
+      final userID = sp.getString('userID');
+      bool stopQueries = await QueriesCounter.getInstance().check();
+      if(stopQueries){
         return null;
+      } else {
+        final isTokenValid = await FitbitConnector.isTokenValid();
+        if(!isTokenValid){
+          return null;
+        }
+        stopQueries = await QueriesCounter.getInstance().check();
+        return stopQueries
+        ? null
+        : await fitbitHeartDataManager.fetch(
+          FitbitHeartAPIURL.dayWithUserID(
+            date: DateTime.now(),
+            userID: userID,
+          )
+        ) as List<FitbitHeartData>;
       }
-      stopQueries = await QueriesCounter.getInstance().check();
-      return stopQueries
-      ? null
-      : await fitbitHeartDataManager.fetch(
-        FitbitHeartAPIURL.dayWithUserID(
-          date: DateTime.utc(now.year, now.month, now.day),
-          userID: userID,
-        )
-      ) as List<FitbitHeartData>;
     }
   }
 

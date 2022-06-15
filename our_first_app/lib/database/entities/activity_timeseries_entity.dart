@@ -1,10 +1,8 @@
 import 'package:floor/floor.dart';
 
-@Entity(primaryKeys: ['date'])
+@Entity(primaryKeys: ['date'], tableName: 'activityTimeseriesTable')
 class ActivityTimeseries {
-  @PrimaryKey()
   final DateTime date;
-
   final double? steps;
   final double? floors;
   final double? minutesSedentary;

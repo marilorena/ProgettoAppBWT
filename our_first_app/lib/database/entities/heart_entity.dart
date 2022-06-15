@@ -1,6 +1,6 @@
 import 'package:floor/floor.dart';
 
-@Entity(primaryKeys: ['date'])
+@Entity(primaryKeys: ['date'], tableName: 'heartTable')
 class Heart {
   @PrimaryKey()
   final DateTime date;
