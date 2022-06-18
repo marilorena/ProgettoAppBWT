@@ -43,20 +43,79 @@ class ProfilePage extends StatelessWidget{
                 builder: (context, snapshot) {
                   if (snapshot.hasData){
                     final data = snapshot.data as List<Account>;
-                    return ListView.builder(
+                    return  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height*1,
+                      maxWidth: MediaQuery.of(context).size.width*1
+                    ),
+                    child:
+                    ListView.builder(
+                      padding: EdgeInsets.all(10),
                       itemCount: data.length,
                       itemBuilder: (context, accountIndex){
                         final account = data[accountIndex];
-                        return  Card(
-                                key: UniqueKey(),
-                                elevation: 5,
-                                child: ListTile(
-                                  title: Text(account.name!)
-                                )
-                              );
-                             }
+                        return    ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height,
+                      maxWidth: MediaQuery.of(context).size.width
+                    ),
+                    child: ListView( padding: EdgeInsets.fromLTRB(10, 10, 10, 20),
+                                  children: [ListTile(title: Text(account.name!, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))) , 
+                                  ListTile(title: Text(account.gender!, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))) , 
+                                  ListTile(title: Text(account.dateOfBirth!, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))), 
+                                  ListTile(
+                                      title: const Text('Logout', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                      trailing: const Icon(Icons.logout),
+                                      onTap: () => showDialog(
+                                        context: context,
+                                        builder: (context) => Center(
+                                          child: Card(
+                                            elevation: 5,
+                                            margin: const EdgeInsets.fromLTRB(70, 20, 70, 20),
+                                            child: Container(
+                                              padding: const EdgeInsets.all(20),
+                                              height: MediaQuery.of(context).size.height/3.2,
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  const Text('Are you sure to log out?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                                  const SizedBox(height: 10),
+                                                  const Text(
+                                                    'If you log out, all your (locally storaged) data will be deleted.\nOnce you log in again, they will need to be fetched another time.',
+                                                    textAlign: TextAlign.justify,
+                                                    style: TextStyle(fontSize: 16)
+                                                  ),
+                                                  const SizedBox(height: 20),
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      SizedBox(width: MediaQuery.of(context).size.width/3/6),
+                                                      GestureDetector(
+                                                        child: const Text('Cancel', style: TextStyle(fontSize: 18, color: Colors.blue)),
+                                                        onTap: () => Navigator.pop(context)),
+                                                        SizedBox(width: MediaQuery.of(context).size.width/3/3),
+                                                                    GestureDetector(
+                                                                      child: const Text('Log out', style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 158, 158, 158))),
+                                                                      onTap: () => _toLoginPage(context)
+                                                                    ),
+                                                                    SizedBox(width: MediaQuery.of(context).size.width/3/6)
+                                                        ]
+                                                  )
+                                                ]
+                                              )
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+                                  ]
+                              )
+                        );
                                 
-                          );
+                    }
+                                
+                      )  
+                    );
                     } else {
                     return CircularProgressIndicator();
                   }
