@@ -103,7 +103,6 @@ class AuthorizationPage extends StatelessWidget {
       final Account account = Account(
         id: null,
         name: accountData[0].toJson()['fullName'],
-        age: accountData[0].toJson()['age'],
         avatar: accountData[0].toJson()['avatar'],
         dateOfBirth: accountData[0].toJson()['dateOfBirth'],
         gender: accountData[0].toJson()['gender'],

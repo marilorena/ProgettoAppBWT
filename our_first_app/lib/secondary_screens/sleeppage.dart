@@ -35,7 +35,6 @@ class SleepPage extends StatelessWidget{
   Future<List<FitbitSleepData>?> _fetchSleep(BuildContext context, int subtracted) async {
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
     final sleepFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getSleepDataByDate(date);
-    print(sleepFromDB);
     if(sleepFromDB.isNotEmpty){
       // if present in db...
       List<FitbitSleepData> sleepData = [];

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:fitbitter/fitbitter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:our_first_app/database/entities/heart_entity.dart';
+import 'package:our_first_app/database/entities/sleep_entity.dart';
 import 'package:our_first_app/database/repository/database_repository.dart';
 import 'package:our_first_app/model/yogapose.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
@@ -270,14 +272,29 @@ class YogaPage extends StatelessWidget {
           return null;
         }
         stopQueries = await QueriesCounter.getInstance().check();
-        return stopQueries
-        ? null
-        : await fitbitSleepDataManager.fetch(
-          FitbitSleepAPIURL.withUserIDAndDay(
-            date: DateTime.now(),
-            userID: userID,
-          )
-        ) as List<FitbitSleepData>; 
+        if(stopQueries){
+          return null;
+        } else {
+          final fetchedData = await fitbitSleepDataManager.fetch(
+            FitbitSleepAPIURL.withUserIDAndDay(
+              date: DateTime.now(),
+              userID: userID,
+            )
+          ) as List<FitbitSleepData>;
+          if(fetchedData.isNotEmpty){
+            List<Sleep> toBeInsert = [];
+            for(var item in fetchedData){
+              toBeInsert.add(Sleep(
+                id: null,
+                date: item.dateOfSleep!,
+                entryDateTime: item.entryDateTime!,
+                level: item.level
+              ));
+            }
+            await Provider.of<DatabaseRepository>(context, listen: false).insertSleepData(toBeInsert);
+          }
+          return fetchedData;
+        }
       }
     }
   }
@@ -303,14 +320,31 @@ class YogaPage extends StatelessWidget {
           return null;
         }
         stopQueries = await QueriesCounter.getInstance().check();
-        return stopQueries
-        ? null
-        : await fitbitHeartDataManager.fetch(
-          FitbitHeartAPIURL.dayWithUserID(
-            date: DateTime.now(),
-            userID: userID,
-          )
-        ) as List<FitbitHeartData>;
+        if(stopQueries){
+          return null;
+        } else {
+          final fetchedData = await fitbitHeartDataManager.fetch(
+            FitbitHeartAPIURL.dayWithUserID(
+              date: DateTime.now(),
+              userID: userID,
+            )
+          ) as List<FitbitHeartData>;
+          if(fetchedData.isNotEmpty){
+            await Provider.of<DatabaseRepository>(context, listen: false).insertHeartData([Heart(
+              date: fetchedData[0].dateOfMonitoring?? DateTime.fromMillisecondsSinceEpoch(0),
+              restingHR: fetchedData[0].restingHeartRate,
+              minimumOutOfRange: fetchedData[0].minimumOutOfRange,
+              minutesOutOfRange: fetchedData[0].minutesOutOfRange,
+              minimumFatBurn: fetchedData[0].minimumFatBurn,
+              minutesFatBurn: fetchedData[0].minutesFatBurn,
+              minimumCardio: fetchedData[0].minimumCardio,
+              minutesCardio: fetchedData[0].minutesCardio,
+              minimumPeak: fetchedData[0].minimumPeak,
+              minutesPeak: fetchedData[0].minutesPeak
+            )]);
+          }
+          return fetchedData;
+        }
       }
     }
   }

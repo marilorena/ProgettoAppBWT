@@ -37,7 +37,7 @@ class ActivitySettings extends StatelessWidget{
                         min: 5000,
                         max: 50000,
                         divisions: 9,
-                        label: targets.steps.toString()
+                        label: targets.steps.toInt().toString()
                       ),
                       const SizedBox(height: 50),
                       const Text('Daily floors\' target:', style: TextStyle(fontSize: 16)),
@@ -50,7 +50,7 @@ class ActivitySettings extends StatelessWidget{
                         min: 1,
                         max: 100,
                         divisions: 10,
-                        label: targets.floors.toString()
+                        label: targets.floors.toInt().toString()
                       )
                     ],
                   ),

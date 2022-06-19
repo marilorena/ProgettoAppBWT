@@ -90,7 +90,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `accountTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT, `age` INTEGER, `dateOfBirth` TEXT, `gender` TEXT, `height` REAL, `weight` REAL, `legalTermsAcceptRequired` INTEGER, `avatar` TEXT)');
+            'CREATE TABLE IF NOT EXISTS `accountTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT, `dateOfBirth` TEXT, `gender` TEXT, `height` REAL, `weight` REAL, `legalTermsAcceptRequired` INTEGER, `avatar` TEXT)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `activityTable` (`id` INTEGER, `date` INTEGER NOT NULL, `type` TEXT, `distance` REAL, `duration` REAL, `startTime` INTEGER NOT NULL, `calories` REAL, PRIMARY KEY (`date`))');
         await database.execute(
@@ -142,7 +142,6 @@ class _$AccountDao extends AccountDao {
             (Account item) => <String, Object?>{
                   'id': item.id,
                   'name': item.name,
-                  'age': item.age,
                   'dateOfBirth': item.dateOfBirth,
                   'gender': item.gender,
                   'height': item.height,
@@ -168,7 +167,6 @@ class _$AccountDao extends AccountDao {
         mapper: (Map<String, Object?> row) => Account(
             id: row['id'] as int?,
             name: row['name'] as String?,
-            age: row['age'] as int?,
             avatar: row['avatar'] as String?,
             dateOfBirth: row['dateOfBirth'] as String?,
             gender: row['gender'] as String?,
