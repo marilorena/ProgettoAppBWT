@@ -2,9 +2,7 @@ import 'package:floor/floor.dart';
 
 @Entity(primaryKeys: ['date'], tableName: 'heartTable')
 class Heart {
-  @PrimaryKey()
   final DateTime date;
-
   final int? restingHR;
   final int? minutesOutOfRange;
   final int? minutesFatBurn;

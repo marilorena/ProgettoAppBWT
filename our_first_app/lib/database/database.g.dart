@@ -92,7 +92,7 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `accountTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT, `age` INTEGER, `dateOfBirth` TEXT, `gender` TEXT, `height` REAL, `weight` REAL, `legalTermsAcceptRequired` INTEGER, `avatar` TEXT)');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `activityTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `date` INTEGER NOT NULL, `type` TEXT, `distance` REAL, `duration` REAL, `startTime` INTEGER NOT NULL, `calories` REAL)');
+            'CREATE TABLE IF NOT EXISTS `activityTable` (`date` INTEGER NOT NULL, `type` TEXT, `distance` REAL, `duration` REAL, `startTime` INTEGER NOT NULL, `calories` REAL, PRIMARY KEY (`date`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `activityTimeseriesTable` (`date` INTEGER NOT NULL, `steps` REAL, `floors` REAL, `minutesSedentary` REAL, `minutesLightly` REAL, `minutesFairly` REAL, `minutesVery` REAL, PRIMARY KEY (`date`))');
         await database.execute(
@@ -197,7 +197,6 @@ class _$ActivityDao extends ActivityDao {
             database,
             'activityTable',
             (Activity item) => <String, Object?>{
-                  'id': item.id,
                   'date': _dateTimeConverter.encode(item.date),
                   'type': item.type,
                   'distance': item.distance,
@@ -219,7 +218,6 @@ class _$ActivityDao extends ActivityDao {
     return _queryAdapter.queryList(
         'SELECT * FROM activityTable WHERE date = ?1',
         mapper: (Map<String, Object?> row) => Activity(
-            id: row['id'] as int?,
             date: _dateTimeConverter.decode(row['date'] as int),
             type: row['type'] as String?,
             distance: row['distance'] as double?,

@@ -129,7 +129,6 @@ class AuthorizationPage extends StatelessWidget {
       List<Activity> activityDataList = [];
       for(var item in activityData){
         activityDataList.add(Activity(
-          id: null,
           date: item.dateOfMonitoring?? DateTime.fromMillisecondsSinceEpoch(0),
           type: item.name,
           distance: item.distance,

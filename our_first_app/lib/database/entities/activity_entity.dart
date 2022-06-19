@@ -1,10 +1,7 @@
 import 'package:floor/floor.dart';
 
-@Entity(tableName: 'activityTable')
+@Entity(primaryKeys: ['date'], tableName: 'activityTable')
 class Activity {
-  @PrimaryKey(autoGenerate: true)
-  final int? id;
-
   final DateTime date;
   final String? type;
   final double? distance;
@@ -12,5 +9,5 @@ class Activity {
   final DateTime startTime;
   final double? calories;
 
-  Activity({required this.id, required this.date, required this.type, required this.distance, required this.duration, required this.startTime, required this.calories});
+  Activity({required this.date, required this.type, required this.distance, required this.duration, required this.startTime, required this.calories});
 }

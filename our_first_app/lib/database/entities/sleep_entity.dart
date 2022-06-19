@@ -1,10 +1,8 @@
 import 'package:floor/floor.dart';
 
-@Entity(tableName: 'sleepTable')
+@Entity(primaryKeys: ['date'], tableName: 'sleepTable')
 class Sleep {
-  @PrimaryKey()
   final DateTime date;
-  
   final DateTime entryDateTime;
   final String? level;
 
