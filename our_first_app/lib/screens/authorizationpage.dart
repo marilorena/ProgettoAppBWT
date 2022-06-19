@@ -129,6 +129,7 @@ class AuthorizationPage extends StatelessWidget {
       List<Activity> activityDataList = [];
       for(var item in activityData){
         activityDataList.add(Activity(
+          id: null,
           date: item.dateOfMonitoring?? DateTime.fromMillisecondsSinceEpoch(0),
           type: item.name,
           distance: item.distance,
@@ -265,16 +266,17 @@ class AuthorizationPage extends StatelessWidget {
         clientSecret: Credentials.getCredentials().secret
       );
       final sleepData = await fitbitSleepDataManager.fetch(
-        FitbitSleepAPIURL.listWithUserIDAndAfterDate(
+        FitbitSleepAPIURL.withUserIDAndDateRange(
           userID: userID,
-          afterDate: DateTime.now().subtract(const Duration(days: 7)),
-          limit: 7
+          startDate: DateTime.now().subtract(const Duration(days: 6)),
+          endDate: DateTime.now()
         )
       ) as List<FitbitSleepData>;
       // save
       List<Sleep> sleepDataList = [];
       for(var item in sleepData){
         sleepDataList.add(Sleep(
+          id: null,
           date: item.dateOfSleep?? DateTime.fromMillisecondsSinceEpoch(0),
           entryDateTime: item.entryDateTime?? (item.dateOfSleep?? DateTime.fromMillisecondsSinceEpoch(0)),
           level: item.level

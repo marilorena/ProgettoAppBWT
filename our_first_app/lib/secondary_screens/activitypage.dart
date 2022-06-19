@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:our_first_app/database/entities/activity_entity.dart';
 import 'package:our_first_app/database/entities/activity_timeseries_entity.dart';
 import 'package:our_first_app/database/repository/database_repository.dart';
+import 'package:our_first_app/model/targets.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:pie_chart/pie_chart.dart';
@@ -88,7 +89,6 @@ class _ActivityPageState extends State<ActivityPage> {
 
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
     final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityTimeseriesByDate(date);
-    print(activityFromDB);
     if(activityFromDB != null){
       return [FitbitActivityTimeseriesData(dateOfMonitoring: activityFromDB.date, value: activityFromDB.steps)];
     } else {
@@ -147,26 +147,17 @@ class _ActivityPageState extends State<ActivityPage> {
     if(stopQueries){
       return null;
     } else {
-      final isTokenValid = await FitbitConnector.isTokenValid();
-      if(!isTokenValid){
-        return null;
+      final fetchedData = await fitbitActivityTimeseriesDataManagerFloors.fetch(
+        FitbitActivityTimeseriesAPIURL.dayWithResource(
+          date: DateTime.utc(now.year, now.month, now.day+subtracted),
+          userID: userID,
+          resource: fitbitActivityTimeseriesDataManagerFloors.type
+        )
+      ) as List<FitbitActivityTimeseriesData>;
+      if(fetchedData.isNotEmpty){
+        floors = fetchedData[0].value;
       }
-      stopQueries = await QueriesCounter.getInstance().check();
-      if(stopQueries){
-        return null;
-      } else {
-        final fetchedData = await fitbitActivityTimeseriesDataManagerFloors.fetch(
-          FitbitActivityTimeseriesAPIURL.dayWithResource(
-            date: DateTime.utc(now.year, now.month, now.day+subtracted),
-            userID: userID,
-            resource: fitbitActivityTimeseriesDataManagerFloors.type
-          )
-        ) as List<FitbitActivityTimeseriesData>;
-        if(fetchedData.isNotEmpty){
-          floors = fetchedData[0].value;
-        }
-        return fetchedData;
-      }
+      return fetchedData;
     }
   }
 
@@ -200,32 +191,24 @@ class _ActivityPageState extends State<ActivityPage> {
       if(stopQueries){
         return null;
       } else {
-        final isTokenValid = await FitbitConnector.isTokenValid();
-        if(!isTokenValid){
-          return null;
+        final fetchedData = await fitbitActivityDataManager.fetch(
+          FitbitActivityAPIURL.day(
+            date: DateTime.utc(now.year, now.month, now.day+subtracted),
+            userID: userID
+          )
+        ) as List<FitbitActivityData>;
+        if(fetchedData.isNotEmpty){
+          await Provider.of<DatabaseRepository>(context, listen: false).insertActivityData([Activity(
+            id: null,
+            date: fetchedData[0].dateOfMonitoring!,
+            type: fetchedData[0].name,
+            distance: fetchedData[0].distance,
+            duration: fetchedData[0].duration,
+            startTime: fetchedData[0].startTime!,
+            calories: fetchedData[0].calories
+          )]);
         }
-        stopQueries = await QueriesCounter.getInstance().check();
-        if(stopQueries){
-          return null;
-        } else {
-          final fetchedData = await fitbitActivityDataManager.fetch(
-            FitbitActivityAPIURL.day(
-              date: DateTime.utc(now.year, now.month, now.day+subtracted),
-              userID: userID
-            )
-          ) as List<FitbitActivityData>;
-          if(fetchedData.isNotEmpty){
-            await Provider.of<DatabaseRepository>(context, listen: false).insertActivityData([Activity(
-              date: fetchedData[0].dateOfMonitoring!,
-              type: fetchedData[0].name,
-              distance: fetchedData[0].distance,
-              duration: fetchedData[0].duration,
-              startTime: fetchedData[0].startTime!,
-              calories: fetchedData[0].calories
-            )]);
-          }
-          return fetchedData;
-        }
+        return fetchedData;
       }
     }
   }
@@ -256,22 +239,13 @@ class _ActivityPageState extends State<ActivityPage> {
     if(stopQueries){
       return null;
     } else {
-      final isTokenValid = await FitbitConnector.isTokenValid();
-      if(!isTokenValid){
-        return null;
-      }
-      stopQueries = await QueriesCounter.getInstance().check();
-      if(stopQueries){
-        return null;
-      } else {
-        sedentary = await fitbitActivityTimeseriesDataManagerSedentary.fetch(
+      sedentary = await fitbitActivityTimeseriesDataManagerSedentary.fetch(
         FitbitActivityTimeseriesAPIURL.dayWithResource(
           date: DateTime.utc(now.year, now.month, now.day+subtracted),
           userID: userID,
           resource: fitbitActivityTimeseriesDataManagerSedentary.type
         )
       ) as List<FitbitActivityTimeseriesData>;
-      }
     }
 
     // lightly active
@@ -422,7 +396,9 @@ class _ActivityPageState extends State<ActivityPage> {
           if(pickedDate != null){
             final now = DateTime.now();
             final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
-            _navigate(context, -difference);
+            if(difference>=0){
+              _navigate(context, -difference);
+            }
           }
         },
         icon: const Icon(Icons.calendar_month)
@@ -492,40 +468,39 @@ class _ActivityPageState extends State<ActivityPage> {
   }
 
   Widget _buildLaneChart(bool isSteps, List<FitbitActivityTimeseriesData> data){
-    return FutureBuilder(
-      future: SharedPreferences.getInstance(),
-      builder: (context, snapshot){
-        if(snapshot.hasData){
-          final sp = snapshot.data as SharedPreferences;
-          int? total;
-          if(isSteps){
-            if(sp.getInt('steps')==null){sp.setInt('steps', 5000);}
-            total = sp.getInt('steps');
+    return Consumer<Targets>(
+      builder: (context, targets, child) => FutureBuilder(
+        future: SharedPreferences.getInstance(),
+        builder: (context, snapshot){
+          if(snapshot.hasData){
+            int? total;
+            if(isSteps){
+              total = targets.steps.toInt();
+            } else {
+              total = targets.floors.toInt();
+            }
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(40, 10, 40, 10),
+              child: Column(
+                children: [
+                  Text(isSteps ? 'Steps' : 'Floors', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 5),
+                  SimpleLaneChart(
+                    data[0].value == null ? 0 : data[0].value!.toInt(),
+                    total,
+                    calFrom100Perc: true,
+                    bgColor: Colors.green.withOpacity(0.3),
+                    gradientForChart: const LinearGradient(colors: [Colors.green, Color.fromARGB(255, 157, 225, 159)]),
+                    height: 20
+                  ),
+                ],
+              ),
+            );
           } else {
-            if(sp.getInt('floors')==null){sp.setInt('floors', 1);}
-            total = sp.getInt('floors');
+            return Container();
           }
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(40, 10, 40, 10),
-            child: Column(
-              children: [
-                Text(isSteps ? 'Steps' : 'Floors', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 5),
-                SimpleLaneChart(
-                  data[0].value == null ? 0 : data[0].value!.toInt(),
-                  total!,
-                  calFrom100Perc: true,
-                  bgColor: Colors.green.withOpacity(0.3),
-                  gradientForChart: const LinearGradient(colors: [Colors.green, Color.fromARGB(255, 157, 225, 159)]),
-                  height: 20
-                ),
-              ],
-            ),
-          );
-        } else {
-          return Container();
         }
-      }
+      ),
     );
   }
 

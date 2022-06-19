@@ -186,7 +186,9 @@ class HeartPage extends StatelessWidget{
           if(pickedDate != null){
             final now = DateTime.now();
             final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
-            _navigate(context, -difference);
+            if(difference>0){
+              _navigate(context, -difference);
+            }
           }
         },
         icon: const Icon(Icons.calendar_month)

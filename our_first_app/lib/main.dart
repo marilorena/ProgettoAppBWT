@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:our_first_app/database/database.dart';
 import 'package:our_first_app/database/repository/database_repository.dart';
+import 'package:our_first_app/model/targets.dart';
 import 'package:our_first_app/screens/authorizationpage.dart';
 import 'package:our_first_app/screens/loginpage.dart';
 import 'package:our_first_app/screens/homepage.dart';
@@ -18,10 +19,16 @@ void main() async{
   final AppDatabase database = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
   final databaseRepository = DatabaseRepository(database: database);
 
-  runApp(ChangeNotifierProvider<DatabaseRepository>(
-    create: (context) => DatabaseRepository(database: database),
-    child: const MyApp()
-  ));
+  final sp = await SharedPreferences.getInstance();
+  final stepsTarget = sp.getInt('steps')?? 5000;
+  final floorsTarget = sp.getInt('floors')?? 1;
+
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider<DatabaseRepository>(create: (context) => databaseRepository),
+      ChangeNotifierProvider<Targets>(create: (context) => Targets(steps: stepsTarget+.0, floors: floorsTarget+.0))
+    ],
+    child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget{
@@ -59,7 +66,7 @@ class MyApp extends StatelessWidget{
   }
 
   Future<SharedPreferences> _whenOpening() async{
-    await Future.delayed(const Duration(milliseconds: 1500));
+    await Future.delayed(const Duration(seconds: 1));
     return await SharedPreferences.getInstance();
   }
 }

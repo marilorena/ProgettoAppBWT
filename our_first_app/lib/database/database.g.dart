@@ -92,13 +92,13 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `accountTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT, `age` INTEGER, `dateOfBirth` TEXT, `gender` TEXT, `height` REAL, `weight` REAL, `legalTermsAcceptRequired` INTEGER, `avatar` TEXT)');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `activityTable` (`date` INTEGER NOT NULL, `type` TEXT, `distance` REAL, `duration` REAL, `startTime` INTEGER NOT NULL, `calories` REAL, PRIMARY KEY (`date`))');
+            'CREATE TABLE IF NOT EXISTS `activityTable` (`id` INTEGER, `date` INTEGER NOT NULL, `type` TEXT, `distance` REAL, `duration` REAL, `startTime` INTEGER NOT NULL, `calories` REAL, PRIMARY KEY (`date`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `activityTimeseriesTable` (`date` INTEGER NOT NULL, `steps` REAL, `floors` REAL, `minutesSedentary` REAL, `minutesLightly` REAL, `minutesFairly` REAL, `minutesVery` REAL, PRIMARY KEY (`date`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `heartTable` (`date` INTEGER NOT NULL, `restingHR` INTEGER, `minimumOutOfRange` INTEGER, `minutesOutOfRange` INTEGER, `minimumFatBurn` INTEGER, `minutesFatBurn` INTEGER, `minimumCardio` INTEGER, `minutesCardio` INTEGER, `minimumPeak` INTEGER, `minutesPeak` INTEGER, PRIMARY KEY (`date`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `sleepTable` (`date` INTEGER NOT NULL, `entryDateTime` INTEGER NOT NULL, `level` TEXT, PRIMARY KEY (`date`))');
+            'CREATE TABLE IF NOT EXISTS `sleepTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `date` INTEGER NOT NULL, `entryDateTime` INTEGER NOT NULL, `level` TEXT)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -197,6 +197,7 @@ class _$ActivityDao extends ActivityDao {
             database,
             'activityTable',
             (Activity item) => <String, Object?>{
+                  'id': item.id,
                   'date': _dateTimeConverter.encode(item.date),
                   'type': item.type,
                   'distance': item.distance,
@@ -218,6 +219,7 @@ class _$ActivityDao extends ActivityDao {
     return _queryAdapter.queryList(
         'SELECT * FROM activityTable WHERE date = ?1',
         mapper: (Map<String, Object?> row) => Activity(
+            id: row['id'] as int?,
             date: _dateTimeConverter.decode(row['date'] as int),
             type: row['type'] as String?,
             distance: row['distance'] as double?,
@@ -373,17 +375,17 @@ class _$HeartDao extends HeartDao {
 
 class _$SleepDao extends SleepDao {
   _$SleepDao(this.database, this.changeListener)
-      : _queryAdapter = QueryAdapter(database, changeListener),
+      : _queryAdapter = QueryAdapter(database),
         _sleepInsertionAdapter = InsertionAdapter(
             database,
             'sleepTable',
             (Sleep item) => <String, Object?>{
+                  'id': item.id,
                   'date': _dateTimeConverter.encode(item.date),
                   'entryDateTime':
                       _dateTimeConverter.encode(item.entryDateTime),
                   'level': item.level
-                },
-            changeListener);
+                });
 
   final sqflite.DatabaseExecutor database;
 
@@ -394,16 +396,15 @@ class _$SleepDao extends SleepDao {
   final InsertionAdapter<Sleep> _sleepInsertionAdapter;
 
   @override
-  Stream<Sleep?> getSleepDataByDate(DateTime date) {
-    return _queryAdapter.queryStream('SELECT * FROM sleepTable WHERE date = ?1',
+  Future<List<Sleep>> getSleepDataByDate(DateTime date) async {
+    return _queryAdapter.queryList('SELECT * FROM sleepTable WHERE date = ?1',
         mapper: (Map<String, Object?> row) => Sleep(
+            id: row['id'] as int?,
             date: _dateTimeConverter.decode(row['date'] as int),
             entryDateTime:
                 _dateTimeConverter.decode(row['entryDateTime'] as int),
             level: row['level'] as String?),
-        arguments: [_dateTimeConverter.encode(date)],
-        queryableName: 'sleepTable',
-        isView: false);
+        arguments: [_dateTimeConverter.encode(date)]);
   }
 
   @override
