@@ -246,9 +246,13 @@ class AuthorizationPage extends StatelessWidget {
         heartDataList.add(Heart(
           date: item.dateOfMonitoring?? DateTime.fromMillisecondsSinceEpoch(0),
           restingHR: item.restingHeartRate,
+          minimumOutOfRange: item.minimumOutOfRange,
           minutesOutOfRange: item.minutesOutOfRange,
+          minimumFatBurn: item.minimumFatBurn,
           minutesFatBurn: item.minutesFatBurn,
+          minimumCardio: item.minimumCardio,
           minutesCardio: item.minutesCardio,
+          minimumPeak: item.minimumPeak,
           minutesPeak: item.minutesPeak
         ));
       }

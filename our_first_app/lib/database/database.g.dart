@@ -96,7 +96,7 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `activityTimeseriesTable` (`date` INTEGER NOT NULL, `steps` REAL, `floors` REAL, `minutesSedentary` REAL, `minutesLightly` REAL, `minutesFairly` REAL, `minutesVery` REAL, PRIMARY KEY (`date`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `heartTable` (`date` INTEGER NOT NULL, `restingHR` INTEGER, `minutesOutOfRange` INTEGER, `minutesFatBurn` INTEGER, `minutesCardio` INTEGER, `minutesPeak` INTEGER, PRIMARY KEY (`date`))');
+            'CREATE TABLE IF NOT EXISTS `heartTable` (`date` INTEGER NOT NULL, `restingHR` INTEGER, `minimumOutOfRange` INTEGER, `minutesOutOfRange` INTEGER, `minimumFatBurn` INTEGER, `minutesFatBurn` INTEGER, `minimumCardio` INTEGER, `minutesCardio` INTEGER, `minimumPeak` INTEGER, `minutesPeak` INTEGER, PRIMARY KEY (`date`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `sleepTable` (`date` INTEGER NOT NULL, `entryDateTime` INTEGER NOT NULL, `level` TEXT, PRIMARY KEY (`date`))');
 
@@ -313,9 +313,13 @@ class _$HeartDao extends HeartDao {
             (Heart item) => <String, Object?>{
                   'date': _dateTimeConverter.encode(item.date),
                   'restingHR': item.restingHR,
+                  'minimumOutOfRange': item.minimumOutOfRange,
                   'minutesOutOfRange': item.minutesOutOfRange,
+                  'minimumFatBurn': item.minimumFatBurn,
                   'minutesFatBurn': item.minutesFatBurn,
+                  'minimumCardio': item.minimumCardio,
                   'minutesCardio': item.minutesCardio,
+                  'minimumPeak': item.minimumPeak,
                   'minutesPeak': item.minutesPeak
                 });
 
@@ -333,9 +337,13 @@ class _$HeartDao extends HeartDao {
         mapper: (Map<String, Object?> row) => Heart(
             date: _dateTimeConverter.decode(row['date'] as int),
             restingHR: row['restingHR'] as int?,
+            minimumOutOfRange: row['minimumOutOfRange'] as int?,
             minutesOutOfRange: row['minutesOutOfRange'] as int?,
+            minimumFatBurn: row['minimumFatBurn'] as int?,
             minutesFatBurn: row['minutesFatBurn'] as int?,
+            minimumCardio: row['minimumCardio'] as int?,
             minutesCardio: row['minutesCardio'] as int?,
+            minimumPeak: row['minimumPeak'] as int?,
             minutesPeak: row['minutesPeak'] as int?),
         arguments: [_dateTimeConverter.encode(date)]);
   }
