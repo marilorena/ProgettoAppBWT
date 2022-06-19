@@ -121,7 +121,12 @@ class HeartPage extends StatelessWidget{
   }
 
   Future<bool> _isTokenValid() async{
-    return await FitbitConnector.isTokenValid();
+    final stopQueries = await QueriesCounter.getInstance().check();
+    if(stopQueries){
+      return true;
+    } else {
+      return await FitbitConnector.isTokenValid();
+    }
   }
 
   // UI blocks

@@ -98,7 +98,7 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `heartTable` (`date` INTEGER NOT NULL, `restingHR` INTEGER, `minutesOutOfRange` INTEGER, `minutesFatBurn` INTEGER, `minutesCardio` INTEGER, `minutesPeak` INTEGER, PRIMARY KEY (`date`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `sleepTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `date` INTEGER NOT NULL, `entryDateTime` INTEGER NOT NULL, `level` TEXT)');
+            'CREATE TABLE IF NOT EXISTS `sleepTable` (`date` INTEGER NOT NULL, `entryDateTime` INTEGER NOT NULL, `level` TEXT, PRIMARY KEY (`date`))');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -344,7 +344,7 @@ class _$HeartDao extends HeartDao {
 
   @override
   Future<DateTime?> getRecentHeartDate() async {
-    await _queryAdapter.queryNoReturn('SELECT * MAX(date) FROM heartTable');
+    await _queryAdapter.queryNoReturn('SELECT MAX(date) FROM heartTable');
   }
 
   @override
@@ -372,7 +372,6 @@ class _$SleepDao extends SleepDao {
             database,
             'sleepTable',
             (Sleep item) => <String, Object?>{
-                  'id': item.id,
                   'date': _dateTimeConverter.encode(item.date),
                   'entryDateTime':
                       _dateTimeConverter.encode(item.entryDateTime),
@@ -391,7 +390,6 @@ class _$SleepDao extends SleepDao {
   Future<List<Sleep>> getSleepDataByDate(DateTime date) async {
     return _queryAdapter.queryList('SELECT * FROM sleepTable WHERE date = ?1',
         mapper: (Map<String, Object?> row) => Sleep(
-            id: row['id'] as int?,
             date: _dateTimeConverter.decode(row['date'] as int),
             entryDateTime:
                 _dateTimeConverter.decode(row['entryDateTime'] as int),

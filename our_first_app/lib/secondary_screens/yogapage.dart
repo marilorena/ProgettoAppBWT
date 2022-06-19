@@ -115,7 +115,7 @@ class YogaPage extends StatelessWidget {
     final sleepData = await _fetchSleep(context);
     final heartData = await _fetchHeartData(context);
     
-    if(steps != null){
+    if(steps != null && steps.isNotEmpty){
       double? numOfSteps = steps[0].value;
       int? id;
       if(numOfSteps != null){
@@ -142,7 +142,7 @@ class YogaPage extends StatelessWidget {
       }
     }
 
-    if(sleepData != null){
+    if(sleepData != null && sleepData.isNotEmpty){
       DateTime? startDate = sleepData[0].entryDateTime;
       DateTime? endDate = sleepData[sleepData.length-1].entryDateTime;
       int? id;
@@ -171,7 +171,7 @@ class YogaPage extends StatelessWidget {
       }
     }
 
-   if(heartData != null){
+   if(heartData != null && heartData.isNotEmpty){
       int? minutesOfPeak = heartData[0].minutesPeak;
       int? id;
       if(minutesOfPeak != null){
@@ -201,7 +201,7 @@ class YogaPage extends StatelessWidget {
   }
 
   Future<List<FitbitActivityTimeseriesData>?> _fetchSteps(BuildContext context) async{
-    DateTime now = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    DateTime now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityTimeseriesByDate(now);
     if(activityFromDB != null){
       // if present in db
@@ -239,8 +239,9 @@ class YogaPage extends StatelessWidget {
 
 
   Future<List<FitbitSleepData>?> _fetchSleep(BuildContext context) async{
-    DateTime now = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    DateTime now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     final sleepFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getSleepDataByDate(now);
+    print(sleepFromDB);
     if(sleepFromDB.isNotEmpty){
       // if present in db
       sleepFromDB.sort((a,b) => a.entryDateTime.compareTo(b.entryDateTime)); // sort by ascending entryDateTime
@@ -279,7 +280,7 @@ class YogaPage extends StatelessWidget {
   }
 
   Future<List<FitbitHeartData>?> _fetchHeartData(BuildContext context) async {
-    DateTime now = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    DateTime now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     final heartFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getHeartDataByDate(now);
     if(heartFromDB != null){
       return [FitbitHeartData(minutesPeak: heartFromDB.minutesPeak)];
@@ -313,7 +314,12 @@ class YogaPage extends StatelessWidget {
 
   // utils
   Future<bool> _isTokenValid() async{
-    return await FitbitConnector.isTokenValid();
+    final stopQueries = await QueriesCounter.getInstance().check();
+    if(stopQueries){
+      return true;
+    } else {
+      return await FitbitConnector.isTokenValid();
+    }
   }
 
   // UI blocks

@@ -272,7 +272,6 @@ class AuthorizationPage extends StatelessWidget {
       List<Sleep> sleepDataList = [];
       for(var item in sleepData){
         sleepDataList.add(Sleep(
-          id: null,
           date: item.dateOfSleep?? DateTime.fromMillisecondsSinceEpoch(0),
           entryDateTime: item.entryDateTime?? (item.dateOfSleep?? DateTime.fromMillisecondsSinceEpoch(0)),
           level: item.level
