@@ -240,15 +240,20 @@ class YogaPage extends StatelessWidget {
 
   Future<List<FitbitSleepData>?> _fetchSleep(BuildContext context) async{
     DateTime now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-    final sleepFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getSleepDataByDate(now);
-    print(sleepFromDB);
-    if(sleepFromDB.isNotEmpty){
-      // if present in db
-      sleepFromDB.sort((a,b) => a.entryDateTime.compareTo(b.entryDateTime)); // sort by ascending entryDateTime
-      List<FitbitSleepData> sleepData = [];
-      for(var item in sleepFromDB){
-        sleepData.add(FitbitSleepData(entryDateTime: item.entryDateTime));
+    final sleepStreamFromDB = Provider.of<DatabaseRepository>(context, listen: false).getSleepDataByDate(now);
+    List<FitbitSleepData> sleepData = [];
+    await for(var item in sleepStreamFromDB){
+      if(item != null){
+        sleepData.add(FitbitSleepData(
+          dateOfSleep: item.date,
+          entryDateTime: item.entryDateTime,
+          level: item.level
+        ));
       }
+    }
+    print(sleepData);
+    if(sleepData.isNotEmpty){
+      sleepData.sort((a,b) => a.entryDateTime!.compareTo(b.entryDateTime!)); // sort by ascending entryDateTime
       return sleepData;
     } else {
       // otherwise fetch from API

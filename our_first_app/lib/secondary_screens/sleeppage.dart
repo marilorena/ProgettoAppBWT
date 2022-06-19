@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -31,14 +33,20 @@ class SleepPage extends StatelessWidget{
   // fetch method
   Future<List<FitbitSleepData>?> _fetchSleep(BuildContext context, int subtracted) async {
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
-    final sleepFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getSleepDataByDate(date);
-    print(sleepFromDB);
-    if(sleepFromDB.isNotEmpty){
-      sleepFromDB.sort((a,b) => a.entryDateTime.compareTo(b.entryDateTime)); // sort by ascending entryDateTime
-      List<FitbitSleepData> sleepData = [];
-      for(var item in sleepFromDB){
-        sleepData.add(FitbitSleepData(entryDateTime: item.entryDateTime));
+    final sleepFromDB = Provider.of<DatabaseRepository>(context, listen: false).getSleepDataByDate(date);
+    List<FitbitSleepData> sleepData = [];
+    await for(var item in sleepFromDB){
+      if(item != null){
+        sleepData.add(FitbitSleepData(
+          dateOfSleep: item.date,
+          entryDateTime: item.entryDateTime,
+          level: item.level
+        ));
       }
+    }
+    print(sleepData);
+    if(sleepData.isNotEmpty){
+      sleepData.sort((a,b) => a.entryDateTime!.compareTo(b.entryDateTime!)); // sort by ascending entryDateTime
       return sleepData;
     } else {
       final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(

@@ -91,8 +91,8 @@ class DatabaseRepository extends ChangeNotifier{
   }
 
   // sleep
-  Future<List<Sleep>> getSleepDataByDate(DateTime date) async{
-    return await database.sleepDao.getSleepDataByDate(date);
+  Stream<Sleep?> getSleepDataByDate(DateTime date){
+    return database.sleepDao.getSleepDataByDate(date);
   }
 
   Future<void> insertSleepData(List<Sleep> sleepDataList) async{

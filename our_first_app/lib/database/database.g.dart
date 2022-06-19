@@ -373,7 +373,7 @@ class _$HeartDao extends HeartDao {
 
 class _$SleepDao extends SleepDao {
   _$SleepDao(this.database, this.changeListener)
-      : _queryAdapter = QueryAdapter(database),
+      : _queryAdapter = QueryAdapter(database, changeListener),
         _sleepInsertionAdapter = InsertionAdapter(
             database,
             'sleepTable',
@@ -382,7 +382,8 @@ class _$SleepDao extends SleepDao {
                   'entryDateTime':
                       _dateTimeConverter.encode(item.entryDateTime),
                   'level': item.level
-                });
+                },
+            changeListener);
 
   final sqflite.DatabaseExecutor database;
 
@@ -393,14 +394,16 @@ class _$SleepDao extends SleepDao {
   final InsertionAdapter<Sleep> _sleepInsertionAdapter;
 
   @override
-  Future<List<Sleep>> getSleepDataByDate(DateTime date) async {
-    return _queryAdapter.queryList('SELECT * FROM sleepTable WHERE date = ?1',
+  Stream<Sleep?> getSleepDataByDate(DateTime date) {
+    return _queryAdapter.queryStream('SELECT * FROM sleepTable WHERE date = ?1',
         mapper: (Map<String, Object?> row) => Sleep(
             date: _dateTimeConverter.decode(row['date'] as int),
             entryDateTime:
                 _dateTimeConverter.decode(row['entryDateTime'] as int),
             level: row['level'] as String?),
-        arguments: [_dateTimeConverter.encode(date)]);
+        arguments: [_dateTimeConverter.encode(date)],
+        queryableName: 'sleepTable',
+        isView: false);
   }
 
   @override
