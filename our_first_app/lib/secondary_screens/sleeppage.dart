@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:our_first_app/database/entities/sleep_entity.dart';
+import 'package:our_first_app/database/repository/database_repository.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -21,37 +26,69 @@ class SleepPage extends StatelessWidget{
         actions: _showActions(context, subtractedDays)
       ),
       body: Center(
-        child: _showSleep(subtractedDays)
+        child: _showSleep(context, subtractedDays)
       )
     );
   }
 
   // fetch method
-  Future<List<FitbitSleepData>?> _fetchSleep(int subtracted) async {
-    final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret,
-    );
-    final sp = await SharedPreferences.getInstance();
-    final userID = sp.getString('userID');
-    final now = DateTime.now();
-    bool stopQueries = await QueriesCounter.getInstance().check();
-    if(stopQueries){
-      return null;
-    } else {
-      final isTokenValid = await FitbitConnector.isTokenValid();
-      if(!isTokenValid){
-        return null;
+  Future<List<FitbitSleepData>?> _fetchSleep(BuildContext context, int subtracted) async {
+    DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
+    final sleepFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getSleepDataByDate(date);
+    print(sleepFromDB);
+    if(sleepFromDB.isNotEmpty){
+      // if present in db...
+      List<FitbitSleepData> sleepData = [];
+      for(var item in sleepFromDB){
+        sleepData.add(FitbitSleepData(
+          dateOfSleep: item.date,
+          entryDateTime: item.entryDateTime,
+          level: item.level
+        ));
       }
-      stopQueries = await QueriesCounter.getInstance().check();
-      return stopQueries
-      ? null
-      : await fitbitSleepDataManager.fetch(
-        FitbitSleepAPIURL.withUserIDAndDay(
-          date: DateTime.utc(now.year, now.month, now.day+subtracted),
-          userID: userID,
-        )
-      ) as List<FitbitSleepData>; 
+      sleepData.sort((a,b) => a.entryDateTime!.compareTo(b.entryDateTime!)); // sort by ascending entryDateTime
+      return sleepData;
+    } else {
+      final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+      );
+      final sp = await SharedPreferences.getInstance();
+      final userID = sp.getString('userID');
+      final now = DateTime.now();
+      bool stopQueries = await QueriesCounter.getInstance().check();
+      if(stopQueries){
+        return null;
+      } else {
+        final isTokenValid = await FitbitConnector.isTokenValid();
+        if(!isTokenValid){
+          return null;
+        }
+        stopQueries = await QueriesCounter.getInstance().check();
+        if(stopQueries){
+          return null;
+        } else {
+          final fetchedData = await fitbitSleepDataManager.fetch(
+            FitbitSleepAPIURL.withUserIDAndDay(
+              date: DateTime.utc(now.year, now.month, now.day+subtracted),
+              userID: userID,
+            )
+          ) as List<FitbitSleepData>;
+          if(fetchedData.isNotEmpty){
+            List<Sleep> toBeInsert = [];
+            for(var item in fetchedData){
+              toBeInsert.add(Sleep(
+                id: null,
+                date: item.dateOfSleep!,
+                entryDateTime: item.entryDateTime!,
+                level: item.level
+              ));
+            }
+            await Provider.of<DatabaseRepository>(context, listen: false).insertSleepData(toBeInsert);
+          }
+          return fetchedData;
+        } 
+      }
     }
   }
 
@@ -85,7 +122,12 @@ class SleepPage extends StatelessWidget{
   }
 
   Future<bool> _isTokenValid() async{
-    return await FitbitConnector.isTokenValid();
+    final stopQueries = await QueriesCounter.getInstance().check();
+    if(stopQueries){
+      return true;
+    } else {
+      return await FitbitConnector.isTokenValid();
+    }
   }
 
   // UI blocks
@@ -102,7 +144,9 @@ class SleepPage extends StatelessWidget{
           if(pickedDate != null){
             final now = DateTime.now();
             final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
-            _navigate(context, -difference);
+            if(difference>0){
+              _navigate(context, -difference);
+            }
           }
         },
         icon: const Icon(Icons.calendar_month)
@@ -224,14 +268,14 @@ class SleepPage extends StatelessWidget{
     );
   }
 
-  Widget _showSleep(int subtractedDays){
+  Widget _showSleep(BuildContext context, int subtractedDays){
     return FutureBuilder(
-      future: _fetchSleep(subtractedDays),
+      future: _fetchSleep(context, subtractedDays),
       builder: (context, snapshot){
         if(snapshot.hasData){
           final sleepData = snapshot.data as List<FitbitSleepData>;
-          final startDate = sleepData[0].entryDateTime;
-          final endDate = sleepData[sleepData.length-1].entryDateTime;
+          final startDate = sleepData.isEmpty ? null : sleepData[0].entryDateTime;
+          final endDate = sleepData.isEmpty ? null : sleepData[sleepData.length-1].entryDateTime;
           return Column(
             children: [
               const SizedBox(height: 20),

@@ -1,15 +1,29 @@
 import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:our_first_app/database/entities/activity_entity.dart';
+import 'package:our_first_app/database/entities/activity_timeseries_entity.dart';
+import 'package:our_first_app/database/repository/database_repository.dart';
+import 'package:our_first_app/model/targets.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_lane_chart/simple_lane_chart.dart';
 
-class ActivityPage extends StatelessWidget{
+class ActivityPage extends StatefulWidget{
   const ActivityPage({Key? key}) : super(key: key);
 
+  @override
+  State<ActivityPage> createState() => _ActivityPageState();
+}
+
+class _ActivityPageState extends State<ActivityPage> {
+  DateTime? dateOfMonitoring;
+  double? steps;
+  double? floors;
+  
   @override
   Widget build(BuildContext context){
     int subtractedDays = ModalRoute.of(context)!.settings.arguments as int;
@@ -21,7 +35,7 @@ class ActivityPage extends StatelessWidget{
       ),
       body: Center(
         child: FutureBuilder(
-          future: _fetchSteps(subtractedDays),
+          future: _fetchSteps(context, subtractedDays),
           builder: (context, snapshot){
             if(snapshot.hasData){
               final stepsData = snapshot.data as List<FitbitActivityTimeseriesData>;
@@ -30,9 +44,9 @@ class ActivityPage extends StatelessWidget{
                   const SizedBox(height: 20),
                   _showHeader(context, subtractedDays, stepsData[0].dateOfMonitoring),
                   const SizedBox(height: 20),
-                  _showStepsAndFloors(subtractedDays, stepsData),
+                  _showStepsAndFloors(context, subtractedDays, stepsData),
                   const SizedBox(height: 20),
-                  _showMinutes(subtractedDays),
+                  _showMinutes(context, subtractedDays),
                   const SizedBox(height: 40),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -69,37 +83,58 @@ class ActivityPage extends StatelessWidget{
   }
 
   // fetch methods
-  Future<List<FitbitActivityTimeseriesData>?> _fetchSteps(int subtracted) async {
-    final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerSteps = FitbitActivityTimeseriesDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret,
-      type: 'steps'
-    );
-    final sp = await SharedPreferences.getInstance();
-    final userID = sp.getString('userID');
-    final now = DateTime.now();
-    bool stopQueries = await QueriesCounter.getInstance().check();
-    if(stopQueries){
-      return null;
+  Future<List<FitbitActivityTimeseriesData>?> _fetchSteps(BuildContext context, int subtracted) async {
+    // delete most recent data
+    await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+
+    DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
+    final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityTimeseriesByDate(date);
+    if(activityFromDB != null){
+      return [FitbitActivityTimeseriesData(dateOfMonitoring: activityFromDB.date, value: activityFromDB.steps)];
     } else {
-      final isTokenValid = await FitbitConnector.isTokenValid();
-      if(!isTokenValid){
+      final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerSteps = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'steps'
+      );
+      final sp = await SharedPreferences.getInstance();
+      final userID = sp.getString('userID');
+      final now = DateTime.now();
+      bool stopQueries = await QueriesCounter.getInstance().check();
+      if(stopQueries){
         return null;
+      } else {
+        final isTokenValid = await FitbitConnector.isTokenValid();
+        if(!isTokenValid){
+          return null;
+        }
+        stopQueries = await QueriesCounter.getInstance().check();
+        if(stopQueries){
+          return null;
+        } else {
+          final fetchedData = await fitbitActivityTimeseriesDataManagerSteps.fetch(
+            FitbitActivityTimeseriesAPIURL.dayWithResource(
+              date: DateTime.utc(now.year, now.month, now.day+subtracted),
+              userID: userID,
+              resource: fitbitActivityTimeseriesDataManagerSteps.type
+            )
+          ) as List<FitbitActivityTimeseriesData>;
+          if(fetchedData.isNotEmpty){
+            dateOfMonitoring = fetchedData[0].dateOfMonitoring;
+            steps = fetchedData[0].value;
+          }
+          return fetchedData;
+        }
       }
-      stopQueries = await QueriesCounter.getInstance().check();
-      return stopQueries
-      ? null
-      : await fitbitActivityTimeseriesDataManagerSteps.fetch(
-        FitbitActivityTimeseriesAPIURL.dayWithResource(
-          date: DateTime.utc(now.year, now.month, now.day+subtracted),
-          userID: userID,
-          resource: fitbitActivityTimeseriesDataManagerSteps.type
-        )
-      ) as List<FitbitActivityTimeseriesData>;  
     }
   }
 
-  Future<List<FitbitActivityTimeseriesData>?> _fetchFloors(int subtracted) async {
+  Future<List<FitbitActivityTimeseriesData>?> _fetchFloors(BuildContext context, int subtracted) async {
+    DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
+    final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityTimeseriesByDate(date);
+    if(activityFromDB != null){
+      return [FitbitActivityTimeseriesData(value: activityFromDB.floors)];
+    }
     final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerFloors = FitbitActivityTimeseriesDataManager(
       clientID: Credentials.getCredentials().id,
       clientSecret: Credentials.getCredentials().secret,
@@ -112,52 +147,83 @@ class ActivityPage extends StatelessWidget{
     if(stopQueries){
       return null;
     } else {
-      final isTokenValid = await FitbitConnector.isTokenValid();
-      if(!isTokenValid){
-        return null;
-      }
-      stopQueries = await QueriesCounter.getInstance().check();
-      return stopQueries
-      ? null
-      : await fitbitActivityTimeseriesDataManagerFloors.fetch(
+      final fetchedData = await fitbitActivityTimeseriesDataManagerFloors.fetch(
         FitbitActivityTimeseriesAPIURL.dayWithResource(
           date: DateTime.utc(now.year, now.month, now.day+subtracted),
           userID: userID,
           resource: fitbitActivityTimeseriesDataManagerFloors.type
         )
       ) as List<FitbitActivityTimeseriesData>;
-    }
-  }
-
-  Future<List<FitbitActivityData>?> _fetchActivity(int subtracted) async {
-    final FitbitActivityDataManager fitbitActivityDataManager = FitbitActivityDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret
-    );
-    final sp = await SharedPreferences.getInstance();
-    final userID = sp.getString('userID');
-    final now = DateTime.now();
-    bool stopQueries = await QueriesCounter.getInstance().check();
-    if(stopQueries){
-      return null;
-    } else {
-      final isTokenValid = await FitbitConnector.isTokenValid();
-      if(!isTokenValid){
-        return null;
+      if(fetchedData.isNotEmpty){
+        floors = fetchedData[0].value;
       }
-      stopQueries = await QueriesCounter.getInstance().check();
-      return stopQueries
-      ? null
-      : await fitbitActivityDataManager.fetch(
-        FitbitActivityAPIURL.day(
-          date: DateTime.utc(now.year, now.month, now.day+subtracted),
-          userID: userID
-        )
-      ) as List<FitbitActivityData>;
+      return fetchedData;
     }
   }
 
-  Future<Map<String, double>?> _fetchMinutes(int subtracted) async{
+  Future<List<FitbitActivityData>?> _fetchActivity(BuildContext context, int subtracted) async {
+    // delete most recent data
+    await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
+
+    DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
+    final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityDataByDate(date);
+    if(activityFromDB.isNotEmpty){
+      List<FitbitActivityData> activityData = [];
+      for(var item in activityFromDB){
+        activityData.add(FitbitActivityData(
+          calories: item.calories,
+          distance: item.distance,
+          duration: item.duration,
+          name: item.type,
+          startTime: item.startTime
+        ));
+      }
+      return activityData;
+    } else {
+      final FitbitActivityDataManager fitbitActivityDataManager = FitbitActivityDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret
+      );
+      final sp = await SharedPreferences.getInstance();
+      final userID = sp.getString('userID');
+      final now = DateTime.now();
+      bool stopQueries = await QueriesCounter.getInstance().check();
+      if(stopQueries){
+        return null;
+      } else {
+        final fetchedData = await fitbitActivityDataManager.fetch(
+          FitbitActivityAPIURL.day(
+            date: DateTime.utc(now.year, now.month, now.day+subtracted),
+            userID: userID
+          )
+        ) as List<FitbitActivityData>;
+        if(fetchedData.isNotEmpty){
+          await Provider.of<DatabaseRepository>(context, listen: false).insertActivityData([Activity(
+            id: null,
+            date: fetchedData[0].dateOfMonitoring!,
+            type: fetchedData[0].name,
+            distance: fetchedData[0].distance,
+            duration: fetchedData[0].duration,
+            startTime: fetchedData[0].startTime!,
+            calories: fetchedData[0].calories
+          )]);
+        }
+        return fetchedData;
+      }
+    }
+  }
+
+  Future<Map<String, double>?> _fetchMinutes(BuildContext context, int subtracted) async{
+    DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
+    final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityTimeseriesByDate(date);
+    if(activityFromDB != null){
+      return {
+        'Minutes sedentary: ${(activityFromDB.minutesSedentary?? 0).toInt()}' : activityFromDB.minutesSedentary?? 0,
+        'Minutes lightly active: ${(activityFromDB.minutesLightly?? 0).toInt()}' : activityFromDB.minutesLightly?? 0,
+        'Minutes fairly active: ${(activityFromDB.minutesFairly?? 0).toInt()}' : activityFromDB.minutesFairly?? 0,
+        'Minutes very active: ${(activityFromDB.minutesVery?? 0).toInt()}' : activityFromDB.minutesVery?? 0
+      };
+    }
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
     final now = DateTime.now();
@@ -173,22 +239,13 @@ class ActivityPage extends StatelessWidget{
     if(stopQueries){
       return null;
     } else {
-      final isTokenValid = await FitbitConnector.isTokenValid();
-      if(!isTokenValid){
-        return null;
-      }
-      stopQueries = await QueriesCounter.getInstance().check();
-      if(stopQueries){
-        return null;
-      } else {
-        sedentary = await fitbitActivityTimeseriesDataManagerSedentary.fetch(
+      sedentary = await fitbitActivityTimeseriesDataManagerSedentary.fetch(
         FitbitActivityTimeseriesAPIURL.dayWithResource(
           date: DateTime.utc(now.year, now.month, now.day+subtracted),
           userID: userID,
           resource: fitbitActivityTimeseriesDataManagerSedentary.type
         )
       ) as List<FitbitActivityTimeseriesData>;
-      }
     }
 
     // lightly active
@@ -251,10 +308,22 @@ class ActivityPage extends StatelessWidget{
       ) as List<FitbitActivityTimeseriesData>;
     }
 
-    double minSedentary = sedentary[0].value?? 0;
-    double minLightly = lightly[0].value?? 0;
-    double minFairly = fairly[0].value?? 0;
-    double minVery = very[0].value?? 0;
+    double minSedentary = sedentary.isEmpty || sedentary[0].value == null ? 0 : sedentary[0].value!;
+    double minLightly = lightly.isEmpty || lightly[0].value == null ? 0 : lightly[0].value!;
+    double minFairly = fairly.isEmpty || fairly[0].value == null ? 0 : fairly[0].value!;
+    double minVery = very.isEmpty || very[0].value == null ? 0 : very[0].value!;
+
+    if(dateOfMonitoring != null){
+      await Provider.of<DatabaseRepository>(context, listen: false).insertActivityTimeseries([ActivityTimeseries(
+        date: dateOfMonitoring!,
+        steps: steps,
+        floors: floors,
+        minutesSedentary: minSedentary,
+        minutesLightly: minLightly,
+        minutesFairly: minFairly,
+        minutesVery: minVery
+      )]);
+    }
 
     return {
       'Minutes sedentary: ${minSedentary.toInt()}' : minSedentary,
@@ -298,7 +367,12 @@ class ActivityPage extends StatelessWidget{
   }
 
   Future<bool> _isTokenValid() async{
-    return await FitbitConnector.isTokenValid();
+    final stopQueries = await QueriesCounter.getInstance().check();
+    if(stopQueries){
+      return true;
+    } else {
+      return await FitbitConnector.isTokenValid();
+    }
   }
 
   // UI blocks
@@ -322,7 +396,9 @@ class ActivityPage extends StatelessWidget{
           if(pickedDate != null){
             final now = DateTime.now();
             final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
-            _navigate(context, -difference);
+            if(difference>=0){
+              _navigate(context, -difference);
+            }
           }
         },
         icon: const Icon(Icons.calendar_month)
@@ -392,50 +468,49 @@ class ActivityPage extends StatelessWidget{
   }
 
   Widget _buildLaneChart(bool isSteps, List<FitbitActivityTimeseriesData> data){
-    return FutureBuilder(
-      future: SharedPreferences.getInstance(),
-      builder: (context, snapshot){
-        if(snapshot.hasData){
-          final sp = snapshot.data as SharedPreferences;
-          int? total;
-          if(isSteps){
-            if(sp.getInt('steps')==null){sp.setInt('steps', 5000);}
-            total = sp.getInt('steps');
+    return Consumer<Targets>(
+      builder: (context, targets, child) => FutureBuilder(
+        future: SharedPreferences.getInstance(),
+        builder: (context, snapshot){
+          if(snapshot.hasData){
+            int? total;
+            if(isSteps){
+              total = targets.steps.toInt();
+            } else {
+              total = targets.floors.toInt();
+            }
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(40, 10, 40, 10),
+              child: Column(
+                children: [
+                  Text(isSteps ? 'Steps' : 'Floors', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 5),
+                  SimpleLaneChart(
+                    data[0].value == null ? 0 : data[0].value!.toInt(),
+                    total,
+                    calFrom100Perc: true,
+                    bgColor: Colors.green.withOpacity(0.3),
+                    gradientForChart: const LinearGradient(colors: [Colors.green, Color.fromARGB(255, 157, 225, 159)]),
+                    height: 20
+                  ),
+                ],
+              ),
+            );
           } else {
-            if(sp.getInt('floors')==null){sp.setInt('floors', 1);}
-            total = sp.getInt('floors');
+            return Container();
           }
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(40, 10, 40, 10),
-            child: Column(
-              children: [
-                Text(isSteps ? 'Steps' : 'Floors', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 5),
-                SimpleLaneChart(
-                  data[0].value == null ? 0 : data[0].value!.toInt(),
-                  total!,
-                  calFrom100Perc: true,
-                  bgColor: Colors.green.withOpacity(0.3),
-                  gradientForChart: const LinearGradient(colors: [Colors.green, Color.fromARGB(255, 157, 225, 159)]),
-                  height: 20
-                ),
-              ],
-            ),
-          );
-        } else {
-          return Container();
         }
-      }
+      ),
     );
   }
 
-  Widget _showStepsAndFloors(int subtractedDays, List<FitbitActivityTimeseriesData> stepsData){
+  Widget _showStepsAndFloors(BuildContext context, int subtractedDays, List<FitbitActivityTimeseriesData> stepsData){
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildLaneChart(true, stepsData),
         FutureBuilder(
-          future: _fetchFloors(subtractedDays),
+          future: _fetchFloors(context, subtractedDays),
           builder: (context, snapshot){
             if(snapshot.hasData){
               final floorsData = snapshot.data as List<FitbitActivityTimeseriesData>;
@@ -450,9 +525,9 @@ class ActivityPage extends StatelessWidget{
     );
   }
 
-  Widget _showMinutes(int subtractedDays){
+  Widget _showMinutes(BuildContext context, int subtractedDays){
     return FutureBuilder(
-      future: _fetchMinutes(subtractedDays),
+      future: _fetchMinutes(context, subtractedDays),
       builder: (context, snapshot){
         if(snapshot.hasData){
           final dataMap = snapshot.data as Map<String, double>;
@@ -477,7 +552,7 @@ class ActivityPage extends StatelessWidget{
 
   Widget _showActivity(BuildContext context, int subtractedDays){
     return FutureBuilder(
-      future: _fetchActivity(subtractedDays),
+      future: _fetchActivity(context, subtractedDays),
       builder: (context, snapshot){
         if(snapshot.hasData){
           final activityData = snapshot.data as List<FitbitActivityData>;

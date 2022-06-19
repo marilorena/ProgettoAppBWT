@@ -1,9 +1,12 @@
 import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:our_first_app/database/entities/heart_entity.dart';
+import 'package:our_first_app/database/repository/database_repository.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HeartPage extends StatelessWidget{
@@ -21,17 +24,17 @@ class HeartPage extends StatelessWidget{
       body: Center(
         child: FutureBuilder(
           initialData: null,
-          future: _fetchHeartData(subtractedDays),
+          future: _fetchHeartData(context, subtractedDays),
           builder: (context, snapshot){
             if(snapshot.hasData){
               final heartData = snapshot.data as List<FitbitHeartData>;
               return Column(
                 children: [
                   const SizedBox(height: 20),
-                  _showHeader(context, subtractedDays, heartData[0].dateOfMonitoring!),
+                  _showHeader(context, subtractedDays, heartData.isEmpty ? null : heartData[0].dateOfMonitoring),
                   const SizedBox(height: 20),
                   Text(
-                    'Resting heart rate: ${heartData[0].restingHeartRate?? '--'} bpm',
+                    'Resting heart rate: ${heartData.isEmpty || heartData[0].restingHeartRate == null ? '--' : heartData[0].restingHeartRate} bpm',
                     style: const TextStyle(fontSize: 16)
                   ),
                   const SizedBox(height: 40),
@@ -64,31 +67,71 @@ class HeartPage extends StatelessWidget{
   }
 
   // fetch method
-  Future<List<FitbitHeartData>?> _fetchHeartData(int subtracted) async {
-    FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret
-    );
-    final sp = await SharedPreferences.getInstance();
-    final userID = sp.getString('userID');
-    final now = DateTime.now();
-    bool stopQueries = await QueriesCounter.getInstance().check();
-    if(stopQueries){
-      return null;
-    } else {
-      final isTokenValid = await FitbitConnector.isTokenValid();
-      if(!isTokenValid){
+  Future<List<FitbitHeartData>?> _fetchHeartData(BuildContext context, int subtracted) async {
+    DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
+    DateTime? mostRecentDate = await Provider.of<DatabaseRepository>(context, listen: false).getRecentHeartDate();
+    if(mostRecentDate != null && date.compareTo(mostRecentDate) > 0){
+      //delete the most recent data
+      await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentHeartData();
+    }
+    final heartFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getHeartDataByDate(date);
+    print(heartFromDB);
+    if(heartFromDB != null){
+      return [FitbitHeartData(
+        dateOfMonitoring: heartFromDB.date,
+        restingHeartRate: heartFromDB.restingHR,
+        minimumOutOfRange: heartFromDB.minimumOutOfRange,
+        minutesOutOfRange: heartFromDB.minutesOutOfRange,
+        minimumFatBurn: heartFromDB.minimumFatBurn,
+        minutesFatBurn: heartFromDB.minutesFatBurn,
+        minimumCardio: heartFromDB.minimumCardio,
+        minutesCardio: heartFromDB.minutesCardio,
+        minimumPeak: heartFromDB.minimumPeak,
+        minutesPeak: heartFromDB.minutesPeak
+      )];
+    } else{
+      FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret
+      );
+      final sp = await SharedPreferences.getInstance();
+      final userID = sp.getString('userID');
+      final now = DateTime.now();
+      bool stopQueries = await QueriesCounter.getInstance().check();
+      if(stopQueries){
         return null;
+      } else {
+        final isTokenValid = await FitbitConnector.isTokenValid();
+        if(!isTokenValid){
+          return null;
+        }
+        stopQueries = await QueriesCounter.getInstance().check();
+        if(stopQueries){
+          return null;
+        } else {
+          final fetchedData = await fitbitHeartDataManager.fetch(
+            FitbitHeartAPIURL.dayWithUserID(
+              date: DateTime.utc(now.year, now.month, now.day+subtracted),
+              userID: userID,
+            )
+          ) as List<FitbitHeartData>;
+          if(fetchedData.isNotEmpty){
+            await Provider.of<DatabaseRepository>(context, listen: false).insertHeartData([Heart(
+              date: fetchedData[0].dateOfMonitoring?? DateTime.fromMillisecondsSinceEpoch(0),
+              restingHR: fetchedData[0].restingHeartRate,
+              minimumOutOfRange: fetchedData[0].minimumOutOfRange,
+              minutesOutOfRange: fetchedData[0].minutesOutOfRange,
+              minimumFatBurn: fetchedData[0].minimumFatBurn,
+              minutesFatBurn: fetchedData[0].minutesFatBurn,
+              minimumCardio: fetchedData[0].minimumCardio,
+              minutesCardio: fetchedData[0].minutesCardio,
+              minimumPeak: fetchedData[0].minimumPeak,
+              minutesPeak: fetchedData[0].minutesPeak
+            )]);
+          }
+          return fetchedData;
+        }
       }
-      stopQueries = await QueriesCounter.getInstance().check();
-      return stopQueries
-      ? null
-      : await fitbitHeartDataManager.fetch(
-        FitbitHeartAPIURL.dayWithUserID(
-          date: DateTime.utc(now.year, now.month, now.day+subtracted),
-          userID: userID,
-        )
-      ) as List<FitbitHeartData>;
     }
   }
 
@@ -121,7 +164,12 @@ class HeartPage extends StatelessWidget{
   }
 
   Future<bool> _isTokenValid() async{
-    return await FitbitConnector.isTokenValid();
+    final stopQueries = await QueriesCounter.getInstance().check();
+    if(stopQueries){
+      return true;
+    } else {
+      return await FitbitConnector.isTokenValid();
+    }
   }
 
   // UI blocks
@@ -138,7 +186,9 @@ class HeartPage extends StatelessWidget{
           if(pickedDate != null){
             final now = DateTime.now();
             final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
-            _navigate(context, -difference);
+            if(difference>0){
+              _navigate(context, -difference);
+            }
           }
         },
         icon: const Icon(Icons.calendar_month)
@@ -154,7 +204,7 @@ class HeartPage extends StatelessWidget{
     ];
   }
 
-  Widget _showHeader(BuildContext context, int subtractedDays, DateTime date){
+  Widget _showHeader(BuildContext context, int subtractedDays, DateTime? date){
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -202,24 +252,28 @@ class HeartPage extends StatelessWidget{
   }
 
   Widget _showPieChart(List<FitbitHeartData> heartData){
-    final dataMap = {
-      'Minutes out of activity range [${heartData[0].minimumOutOfRange}-${heartData[0].minimumFatBurn}]: ${_intToTime(heartData[0].minutesOutOfRange)}': heartData[0].minutesOutOfRange == null ? 0.0 : heartData[0].minutesOutOfRange! + .0,
-      'Minutes in fat-burn range [${heartData[0].minimumFatBurn}-${heartData[0].minimumCardio}]: ${_intToTime(heartData[0].minutesFatBurn)}': heartData[0].minutesFatBurn == null ? 0.0 : heartData[0].minutesFatBurn! + .0,
-      'Minutes in cardio range [${heartData[0].minimumCardio}-${heartData[0].minimumPeak}]: ${_intToTime(heartData[0].minutesCardio)}': heartData[0].minutesCardio == null ? 0.0 : heartData[0].minutesCardio! + .0,
-      'Minutes in peak range [${heartData[0].minimumPeak}-220]: ${_intToTime(heartData[0].minutesPeak)}': heartData[0].minutesPeak == null ? 0.0 : heartData[0].minutesPeak! + .0
-    };
-    return PieChart(
-      dataMap: dataMap,
-      chartType: ChartType.ring,
-      chartRadius: 220,
-      ringStrokeWidth: 40,
-      colorList: const [Colors.blue, Colors.green, Colors.yellow, Colors.red],
-      legendOptions: const LegendOptions(
-        legendPosition: LegendPosition.bottom,
-        legendTextStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.normal)
-      ),
-      chartValuesOptions: const ChartValuesOptions(showChartValuesInPercentage: true),
-    );
+    if(heartData.isEmpty){
+      return Container();
+    } else {
+      final dataMap = {
+        'Minutes out of activity range [${heartData[0].minimumOutOfRange}-${heartData[0].minimumFatBurn}]: ${_intToTime(heartData[0].minutesOutOfRange)}': heartData[0].minutesOutOfRange == null ? 0.0 : heartData[0].minutesOutOfRange! + .0,
+        'Minutes in fat-burn range [${heartData[0].minimumFatBurn}-${heartData[0].minimumCardio}]: ${_intToTime(heartData[0].minutesFatBurn)}': heartData[0].minutesFatBurn == null ? 0.0 : heartData[0].minutesFatBurn! + .0,
+        'Minutes in cardio range [${heartData[0].minimumCardio}-${heartData[0].minimumPeak}]: ${_intToTime(heartData[0].minutesCardio)}': heartData[0].minutesCardio == null ? 0.0 : heartData[0].minutesCardio! + .0,
+        'Minutes in peak range [${heartData[0].minimumPeak}-220]: ${_intToTime(heartData[0].minutesPeak)}': heartData[0].minutesPeak == null ? 0.0 : heartData[0].minutesPeak! + .0
+      };
+      return PieChart(
+        dataMap: dataMap,
+        chartType: ChartType.ring,
+        chartRadius: 220,
+        ringStrokeWidth: 40,
+        colorList: const [Colors.blue, Colors.green, Colors.yellow, Colors.red],
+        legendOptions: const LegendOptions(
+          legendPosition: LegendPosition.bottom,
+          legendTextStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.normal)
+        ),
+        chartValuesOptions: const ChartValuesOptions(showChartValuesInPercentage: true),
+      );
+    }
   }
 
   Widget _showIfNotAuthorized(BuildContext context){

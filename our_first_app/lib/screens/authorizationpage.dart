@@ -1,6 +1,12 @@
+import 'dart:math';
+import 'package:floor/floor.dart';
 import 'package:flutter/material.dart';
 import 'package:fitbitter/fitbitter.dart';
 import 'package:our_first_app/database/entities/account_entity.dart';
+import 'package:our_first_app/database/entities/activity_entity.dart';
+import 'package:our_first_app/database/entities/activity_timeseries_entity.dart';
+import 'package:our_first_app/database/entities/heart_entity.dart';
+import 'package:our_first_app/database/entities/sleep_entity.dart';
 import 'package:our_first_app/database/repository/database_repository.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:our_first_app/utils/queries_counter.dart';
@@ -60,13 +66,12 @@ class AuthorizationPage extends StatelessWidget {
   }
 
   // data fetching method
-  Future<void> _fetchData(BuildContext context)async{
-    FitbitAccountDataManager fitbitAccountDataManager = FitbitAccountDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret
-    );
+  Future<void> _fetchData(BuildContext context) async{
     final sp = await SharedPreferences.getInstance();
     final userID = sp.getString('userID');
+    for(var i=0; i<9; i++){
+      await QueriesCounter.getInstance().check();
+    }
     final stopQueries = await QueriesCounter.getInstance().check(); // x number of queries to do, in this way no data will be fetched if the total number of queries is too much, so it won't happen that some data are fetched and others not
     if(stopQueries){
       Navigator.pop(context);
@@ -82,8 +87,13 @@ class AuthorizationPage extends StatelessWidget {
       ));
       return;
     } else {
-      // ACCOUNT DATA
+
+      // ACCOUNT
       // fetch
+      FitbitAccountDataManager fitbitAccountDataManager = FitbitAccountDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret
+      );
       final accountData = await fitbitAccountDataManager.fetch(
         FitbitUserAPIURL.withUserID(
           userID: userID
@@ -102,6 +112,178 @@ class AuthorizationPage extends StatelessWidget {
         weight: accountData[0].toJson()['weight']
       );
       await Provider.of<DatabaseRepository>(context, listen: false).insertAccount(account);
+
+      // ACTIVITY (only current day)
+      // fetch
+      FitbitActivityDataManager fitbitActivityDataManager = FitbitActivityDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret
+      );
+      final activityData = await fitbitActivityDataManager.fetch(
+        FitbitActivityAPIURL.day(
+          userID: userID,
+          date: DateTime.now()
+        )
+      ) as List<FitbitActivityData>;
+      // save
+      List<Activity> activityDataList = [];
+      for(var item in activityData){
+        activityDataList.add(Activity(
+          id: null,
+          date: item.dateOfMonitoring?? DateTime.fromMillisecondsSinceEpoch(0),
+          type: item.name,
+          distance: item.distance,
+          duration: item.duration,
+          startTime: item.startTime?? DateTime.fromMillisecondsSinceEpoch(0),
+          calories: item.calories
+        ));
+      }
+      await Provider.of<DatabaseRepository>(context, listen: false).insertActivityData(activityDataList);
+
+      // ACTIVITY TIMESERIES
+      // fetch
+      FitbitActivityTimeseriesDataManager stepsDataManager = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'steps'
+      );
+      FitbitActivityTimeseriesDataManager floorsDataManager = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'floors'
+      );
+      FitbitActivityTimeseriesDataManager minutesSedentaryDataManager = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'minutesSedentary'
+      );
+      FitbitActivityTimeseriesDataManager minutesLightlyDataManager = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'minutesLightlyActive'
+      );
+      FitbitActivityTimeseriesDataManager minutesFairlyDataManager = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'minutesFairlyActive'
+      );
+      FitbitActivityTimeseriesDataManager minutesVeryDataManager = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'minutesVeryActive'
+      );
+      final stepsData = await stepsDataManager.fetch(
+        FitbitActivityTimeseriesAPIURL.weekWithResource(
+          userID: userID,
+          baseDate: DateTime.now(),
+          resource: stepsDataManager.type
+        )
+      ) as List<FitbitActivityTimeseriesData>;
+      final floorsData = await floorsDataManager.fetch(
+        FitbitActivityTimeseriesAPIURL.weekWithResource(
+          userID: userID,
+          baseDate: DateTime.now(),
+          resource: floorsDataManager.type
+        )
+      ) as List<FitbitActivityTimeseriesData>;
+      final minutesSedentaryData = await minutesSedentaryDataManager.fetch(
+        FitbitActivityTimeseriesAPIURL.weekWithResource(
+          userID: userID,
+          baseDate: DateTime.now(),
+          resource: minutesSedentaryDataManager.type
+        )
+      ) as List<FitbitActivityTimeseriesData>;
+      final minutesLightlyData = await minutesLightlyDataManager.fetch(
+        FitbitActivityTimeseriesAPIURL.weekWithResource(
+          userID: userID,
+          baseDate: DateTime.now(),
+          resource: minutesLightlyDataManager.type
+        )
+      ) as List<FitbitActivityTimeseriesData>;
+      final minutesFairlyData = await minutesFairlyDataManager.fetch(
+        FitbitActivityTimeseriesAPIURL.weekWithResource(
+          userID: userID,
+          baseDate: DateTime.now(),
+          resource: minutesFairlyDataManager.type
+        )
+      ) as List<FitbitActivityTimeseriesData>;
+      final minutesVeryData = await minutesVeryDataManager.fetch(
+        FitbitActivityTimeseriesAPIURL.weekWithResource(
+          userID: userID,
+          baseDate: DateTime.now(),
+          resource: minutesVeryDataManager.type
+        )
+      ) as List<FitbitActivityTimeseriesData>;
+      // save
+      List<ActivityTimeseries> activityTimeseriesList = [];
+      for(var i=0; i<stepsData.length; i++){
+        activityTimeseriesList.add(ActivityTimeseries(
+          date: stepsData[i].dateOfMonitoring?? DateTime.fromMillisecondsSinceEpoch(0),
+          steps: stepsData[i].value,
+          floors: floorsData[i].value,
+          minutesSedentary: minutesSedentaryData[i].value,
+          minutesLightly: minutesLightlyData[i].value,
+          minutesFairly: minutesFairlyData[i].value,
+          minutesVery: minutesVeryData[i].value
+        ));
+      }
+      await Provider.of<DatabaseRepository>(context, listen: false).insertActivityTimeseries(activityTimeseriesList);
+
+      // HEART
+      // fetch
+      FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret
+      );
+      final heartData = await fitbitHeartDataManager.fetch(
+        FitbitHeartAPIURL.weekWithUserID(
+          userID: userID,
+          baseDate: DateTime.now()
+        )
+      ) as List<FitbitHeartData>;
+      // save
+      List<Heart> heartDataList = [];
+      for(var item in heartData){
+        heartDataList.add(Heart(
+          date: item.dateOfMonitoring?? DateTime.fromMillisecondsSinceEpoch(0),
+          restingHR: item.restingHeartRate,
+          minimumOutOfRange: item.minimumOutOfRange,
+          minutesOutOfRange: item.minutesOutOfRange,
+          minimumFatBurn: item.minimumFatBurn,
+          minutesFatBurn: item.minutesFatBurn,
+          minimumCardio: item.minimumCardio,
+          minutesCardio: item.minutesCardio,
+          minimumPeak: item.minimumPeak,
+          minutesPeak: item.minutesPeak
+        ));
+      }
+      await Provider.of<DatabaseRepository>(context, listen: false).insertHeartData(heartDataList);
+
+      // SLEEP
+      // fetch
+      FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret
+      );
+      final sleepData = await fitbitSleepDataManager.fetch(
+        FitbitSleepAPIURL.withUserIDAndDateRange(
+          userID: userID,
+          startDate: DateTime.now().subtract(const Duration(days: 6)),
+          endDate: DateTime.now()
+        )
+      ) as List<FitbitSleepData>;
+      // save
+      List<Sleep> sleepDataList = [];
+      for(var item in sleepData){
+        sleepDataList.add(Sleep(
+          id: null,
+          date: item.dateOfSleep?? DateTime.fromMillisecondsSinceEpoch(0),
+          entryDateTime: item.entryDateTime?? (item.dateOfSleep?? DateTime.fromMillisecondsSinceEpoch(0)),
+          level: item.level
+        ));
+      }
+      await Provider.of<DatabaseRepository>(context, listen: false).insertSleepData(sleepDataList);
+
 
       Navigator.pop(context);
       Navigator.pop(context);
