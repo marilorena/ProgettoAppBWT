@@ -75,7 +75,6 @@ class HeartPage extends StatelessWidget{
       await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentHeartData();
     }
     final heartFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getHeartDataByDate(date);
-    print(heartFromDB);
     if(heartFromDB != null){
       return [FitbitHeartData(
         dateOfMonitoring: heartFromDB.date,

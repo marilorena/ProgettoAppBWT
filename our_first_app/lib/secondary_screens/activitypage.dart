@@ -84,9 +84,6 @@ class _ActivityPageState extends State<ActivityPage> {
 
   // fetch methods
   Future<List<FitbitActivityTimeseriesData>?> _fetchSteps(BuildContext context, int subtracted) async {
-    // delete most recent data
-    await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
-
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
     final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityTimeseriesByDate(date);
     if(activityFromDB != null){
@@ -162,8 +159,11 @@ class _ActivityPageState extends State<ActivityPage> {
   }
 
   Future<List<FitbitActivityData>?> _fetchActivity(BuildContext context, int subtracted) async {
-    // delete most recent data
-    await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
+    if(subtracted==0){
+      // delete most recent data
+      await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
+      await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+    }
 
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
     final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityDataByDate(date);
@@ -382,7 +382,10 @@ class _ActivityPageState extends State<ActivityPage> {
         visible: subtractedDays == 0 ? true : false,
         child: IconButton(
           icon: const Icon(Icons.update),
-          onPressed: () => _navigate(context, 0)
+          onPressed: () async{
+            await Future.delayed(const Duration(seconds: 8));
+            _navigate(context, 0);
+          }
         ),
       ),
       IconButton(
@@ -397,6 +400,7 @@ class _ActivityPageState extends State<ActivityPage> {
             final now = DateTime.now();
             final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
             if(difference>=0){
+              await Future.delayed(const Duration(seconds: 8));
               _navigate(context, -difference);
             }
           }
@@ -427,7 +431,10 @@ class _ActivityPageState extends State<ActivityPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
-              onPressed: () => _navigate(context, subtractedDays-1),
+              onPressed: () async{
+                await Future.delayed(const Duration(seconds: 8));
+                _navigate(context, subtractedDays-1);
+              },
               icon: const Icon(Icons.arrow_back_ios)
             ),
             Container(
@@ -457,7 +464,10 @@ class _ActivityPageState extends State<ActivityPage> {
               maintainAnimation: true,
               maintainState: true,
               child: IconButton(
-                onPressed: () => _navigate(context, subtractedDays+1),
+                onPressed: () async{
+                  await Future.delayed(const Duration(seconds: 8));
+                  _navigate(context, subtractedDays+1);
+                },
                 icon: const Icon(Icons.arrow_forward_ios)
               ),
             )

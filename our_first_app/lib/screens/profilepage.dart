@@ -261,11 +261,13 @@ class ProfilePage extends StatelessWidget{
   }
   
   Future<void> _toLoginPage(BuildContext context, DatabaseRepository dbr) async{
-    // remove all the key-value objects in the database
+    // remove all the key-value objects in the database, except fot counter and pastTime
     final sp = await SharedPreferences.getInstance();
     final keys = sp.getKeys().toList();
     for(var item in keys){
-      sp.remove(item);
+      if(item != 'counter' && item != 'pastTime'){
+        sp.remove(item);
+      }
     }
 
     // remove all the tables in the database
