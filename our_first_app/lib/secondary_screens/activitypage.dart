@@ -159,12 +159,6 @@ class _ActivityPageState extends State<ActivityPage> {
   }
 
   Future<List<FitbitActivityData>?> _fetchActivity(BuildContext context, int subtracted) async {
-    if(subtracted==0){
-      // delete most recent data
-      await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
-      await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
-    }
-
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
     final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityDataByDate(date);
     if(activityFromDB.isNotEmpty){
@@ -383,7 +377,10 @@ class _ActivityPageState extends State<ActivityPage> {
         child: IconButton(
           icon: const Icon(Icons.update),
           onPressed: () async{
-            await Future.delayed(const Duration(seconds: 8));
+            await Future.delayed(const Duration(seconds: 5));
+            // delete current day data
+            await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
+            await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
             _navigate(context, 0);
           }
         ),
@@ -400,7 +397,12 @@ class _ActivityPageState extends State<ActivityPage> {
             final now = DateTime.now();
             final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
             if(difference>=0){
-              await Future.delayed(const Duration(seconds: 8));
+              await Future.delayed(const Duration(seconds: 5));
+              if(difference==0){
+                // delete current day data
+                await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
+                await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+              }
               _navigate(context, -difference);
             }
           }
@@ -409,7 +411,8 @@ class _ActivityPageState extends State<ActivityPage> {
       ),
       IconButton(
         icon: const Icon(Icons.settings),
-        onPressed: (){
+        onPressed: () async{
+          await Future.delayed(const Duration(seconds: 5));
           Navigator.pushNamed(context, '/activitysettings/');
         }
       )
@@ -432,7 +435,7 @@ class _ActivityPageState extends State<ActivityPage> {
           children: [
             IconButton(
               onPressed: () async{
-                await Future.delayed(const Duration(seconds: 8));
+                await Future.delayed(const Duration(seconds: 5));
                 _navigate(context, subtractedDays-1);
               },
               icon: const Icon(Icons.arrow_back_ios)
@@ -465,7 +468,12 @@ class _ActivityPageState extends State<ActivityPage> {
               maintainState: true,
               child: IconButton(
                 onPressed: () async{
-                  await Future.delayed(const Duration(seconds: 8));
+                  await Future.delayed(const Duration(seconds: 5));
+                  if(subtractedDays+1==0){
+                    // delete current day data
+                    await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
+                    await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+                  }
                   _navigate(context, subtractedDays+1);
                 },
                 icon: const Icon(Icons.arrow_forward_ios)

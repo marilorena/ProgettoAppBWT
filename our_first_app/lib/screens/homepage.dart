@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:our_first_app/database/entities/account_entity.dart';
 import 'package:provider/provider.dart';
-
 import '../database/repository/database_repository.dart';
 
 class HomePage extends StatefulWidget {
@@ -77,7 +75,12 @@ class _HomePageState extends State<HomePage>{
                   borderRadius: BorderRadius.circular(45),
                 ),
               ),
-              onTap: () => Navigator.pushNamed(context, '/activity/', arguments: 0)
+              onTap: () async{
+                // delete most recent day data
+                await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
+                await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+                Navigator.pushNamed(context, '/activity/', arguments: 0);
+              }
             ),
           const Padding(
             padding: EdgeInsets.all(8.0),
