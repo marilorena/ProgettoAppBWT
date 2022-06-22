@@ -369,10 +369,10 @@ class _ActivityPageState extends State<ActivityPage> {
   List<Widget> _showActions(BuildContext context, int subtractedDays){
     return [
       FutureBuilder(
-        future: Future.delayed(const Duration(seconds: 5), () => 'ok'),
+        future: Future.delayed(const Duration(seconds: 6), () => 'ok'),
         builder: (context,snapshot) {
           return Visibility(
-            visible: snapshot.hasData || subtractedDays == 0 ? true : false,
+            visible: snapshot.hasData && subtractedDays == 0 ? true : false,
             child: IconButton(
               icon: const Icon(Icons.update),
               onPressed: () async{
@@ -386,7 +386,7 @@ class _ActivityPageState extends State<ActivityPage> {
         }
       ),
       FutureBuilder(
-        future: Future.delayed(const Duration(seconds: 5), () => 'ok'),
+        future: Future.delayed(const Duration(seconds: 6), () => 'ok'),
         builder: (context, snapshot) {
           return Visibility(
             visible: snapshot.hasData,
@@ -417,7 +417,7 @@ class _ActivityPageState extends State<ActivityPage> {
         }
       ),
       FutureBuilder(
-        future: Future.delayed(const Duration(seconds: 5), () => 'ok'),
+        future: Future.delayed(const Duration(seconds: 6), () => 'ok'),
         builder: (context, snapshot) {
           return Visibility(
             visible: snapshot.hasData,
@@ -452,6 +452,9 @@ class _ActivityPageState extends State<ActivityPage> {
               builder: (context, snapshot) {
                 return Visibility(
                   visible: snapshot.hasData,
+                  maintainSize: true,
+                  maintainAnimation: true,
+                  maintainState: true,
                   child: IconButton(
                     onPressed: () async{
                       _navigate(context, subtractedDays-1);
