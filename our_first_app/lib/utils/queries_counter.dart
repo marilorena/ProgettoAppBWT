@@ -24,7 +24,7 @@ class QueriesCounter{ // to detect if the rate limit of queries is reached
       return stopQueries; // queries can be done
     } else { // otherwise, within each hour...
       sp.setInt('counter', counter + 1);
-      if(counter >= 100){ // rate limit: 100 queries per hour
+      if(counter >= 85){ // rate limit: 85 queries per hour
         stopQueries = true;
         return stopQueries; // queries cannot be done
       } else {

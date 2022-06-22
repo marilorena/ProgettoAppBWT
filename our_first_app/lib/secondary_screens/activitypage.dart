@@ -183,15 +183,19 @@ class _ActivityPageState extends State<ActivityPage> {
           )
         ) as List<FitbitActivityData>;
         if(fetchedData.isNotEmpty){
-          await Provider.of<DatabaseRepository>(context, listen: false).insertActivityData([Activity(
-            id: null,
-            date: fetchedData[0].dateOfMonitoring!,
-            type: fetchedData[0].name,
-            distance: fetchedData[0].distance,
-            duration: fetchedData[0].duration,
-            startTime: fetchedData[0].startTime!,
-            calories: fetchedData[0].calories
-          )]);
+          List<Activity> toBeInsert = [];
+          for(var item in fetchedData){
+            toBeInsert.add(Activity(
+              id: null,
+              date: item.dateOfMonitoring!,
+              type: item.name,
+              distance: item.distance,
+              duration: item.duration,
+              startTime: item.startTime!,
+              calories: item.calories
+            ));
+          }
+          await Provider.of<DatabaseRepository>(context, listen: false).insertActivityData(toBeInsert);
         }
         return fetchedData;
       }
@@ -369,7 +373,6 @@ class _ActivityPageState extends State<ActivityPage> {
         child: IconButton(
           icon: const Icon(Icons.update),
           onPressed: () async{
-            await Future.delayed(const Duration(seconds: 5));
             // delete current day data
             await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
             await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
@@ -389,7 +392,6 @@ class _ActivityPageState extends State<ActivityPage> {
             final now = DateTime.now();
             final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
             if(difference>=0){
-              await Future.delayed(const Duration(seconds: 5));
               if(difference==0){
                 // delete current day data
                 await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
@@ -404,7 +406,6 @@ class _ActivityPageState extends State<ActivityPage> {
       IconButton(
         icon: const Icon(Icons.settings),
         onPressed: () async{
-          await Future.delayed(const Duration(seconds: 5));
           Navigator.pushNamed(context, '/activitysettings/');
         }
       )
@@ -427,7 +428,6 @@ class _ActivityPageState extends State<ActivityPage> {
           children: [
             IconButton(
               onPressed: () async{
-                await Future.delayed(const Duration(seconds: 5));
                 _navigate(context, subtractedDays-1);
               },
               icon: const Icon(Icons.arrow_back_ios)
@@ -460,7 +460,6 @@ class _ActivityPageState extends State<ActivityPage> {
               maintainState: true,
               child: IconButton(
                 onPressed: () async{
-                  await Future.delayed(const Duration(seconds: 5));
                   if(subtractedDays+1==0){
                     // delete current day data
                     await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
@@ -569,14 +568,16 @@ class _ActivityPageState extends State<ActivityPage> {
           return Container(
             alignment: Alignment.center,
             height: 200,
+            width: MediaQuery.of(context).size.width/3,
             child: activityData.isEmpty
             ? const Text('none', style: TextStyle(fontSize: 14))
-            : ListView.builder(
+            : ListView.separated(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.all(10),
               cacheExtent: 0,
               itemCount: activityData.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 10),
               itemBuilder: (context, index){
                 final dynamic distance;
                 if(activityData[index].distance == null){
