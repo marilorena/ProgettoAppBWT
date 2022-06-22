@@ -264,6 +264,7 @@ class ProfilePage extends StatelessWidget{
     // remove all the key-value objects in the database, except fot counter and pastTime
     final sp = await SharedPreferences.getInstance();
     final keys = sp.getKeys().toList();
+    print(keys);
     for(var item in keys){
       if(item != 'counter' && item != 'pastTime'){
         sp.remove(item);

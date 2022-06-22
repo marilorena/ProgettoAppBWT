@@ -19,72 +19,72 @@ class YogaPage extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: FutureBuilder(
-          future: _fetchPose(context),
-          builder: (context, snapshot){
+          future: _isTokenValid(),
+          builder: (context, snapshot) {
             if(snapshot.hasData){
-              final poses = snapshot.data as List<YogaPose>;
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Based on your today\'s data,\n here are 3 suggested yoga poses for you\n(swipe left to see all)',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16)
-                  ),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height*0.5,
-                      maxWidth: MediaQuery.of(context).size.width*0.8
-                    ),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      cacheExtent: 0,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: poses.length,
-                      padding: const EdgeInsets.fromLTRB(10, 30, 10, 30),
-                      separatorBuilder: (context, index) => const SizedBox(width: 20),
-                      itemBuilder: (context, index) => SizedBox(
-                        height: MediaQuery.of(context).size.height*0.5,
-                        width: MediaQuery.of(context).size.width*0.75,
-                        child: Card(
-                          shadowColor: const Color.fromARGB(0, 190, 228, 193),
-                          color: const Color.fromARGB(255, 224, 245, 223),
-                          elevation: 10,
-                          child: FittedBox(
-                            child: Padding(
-                              padding: const EdgeInsets.all(50),
-                              child: Column(
-                                children: [
-                                  Text(poses[index].name, style: const TextStyle(fontSize: 16)),
-                                  Text(
-                                    poses[index].sanskritName,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontStyle: FontStyle.italic,
-                                      color: Colors.green
-                                    )
-                                  ),
-                                  const SizedBox(height: 15),
-                                  Image.asset(
-                                    'asset/yoga/${poses[index].id}.png',
-                                    height: MediaQuery.of(context).size.height*0.2
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    ),
-                  )         
-                ]
-              );
-            } else {
+              final isTokenValid = snapshot.data as bool;
               return FutureBuilder(
-                future: _isTokenValid(),
+                future: _fetchPose(context, isTokenValid),
                 builder: (context, snapshot){
                   if(snapshot.hasData){
-                    final isTokenValid = snapshot.data as bool;
+                    final poses = snapshot.data as List<YogaPose>;
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Based on your today\'s data,\n here are 3 suggested yoga poses for you\n(swipe left to see all)',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16)
+                        ),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery.of(context).size.height*0.5,
+                            maxWidth: MediaQuery.of(context).size.width*0.8
+                          ),
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            cacheExtent: 0,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: poses.length,
+                            padding: const EdgeInsets.fromLTRB(10, 30, 10, 30),
+                            separatorBuilder: (context, index) => const SizedBox(width: 20),
+                            itemBuilder: (context, index) => SizedBox(
+                              height: MediaQuery.of(context).size.height*0.5,
+                              width: MediaQuery.of(context).size.width*0.75,
+                              child: Card(
+                                shadowColor: const Color.fromARGB(0, 190, 228, 193),
+                                color: const Color.fromARGB(255, 224, 245, 223),
+                                elevation: 10,
+                                child: FittedBox(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(50),
+                                    child: Column(
+                                      children: [
+                                        Text(poses[index].name, style: const TextStyle(fontSize: 16)),
+                                        Text(
+                                          poses[index].sanskritName,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontStyle: FontStyle.italic,
+                                            color: Colors.green
+                                          )
+                                        ),
+                                        const SizedBox(height: 15),
+                                        Image.asset(
+                                          'asset/yoga/${poses[index].id}.png',
+                                          height: MediaQuery.of(context).size.height*0.2
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          ),
+                        )         
+                      ]
+                    );
+                  } else {
                     if(!isTokenValid){
                       return _showIfNotAuthorized(context);
                     } else if(QueriesCounter.getInstance().getStopQueries()){
@@ -92,11 +92,11 @@ class YogaPage extends StatelessWidget {
                     } else {
                       return const CircularProgressIndicator();
                     }
-                  } else {
-                    return const CircularProgressIndicator();
                   }
                 }
               );
+            } else {
+              return const CircularProgressIndicator();
             }
           }
         )
@@ -111,11 +111,11 @@ class YogaPage extends StatelessWidget {
   }
 
   // fetch methods
-  Future<List<YogaPose>?> _fetchPose(BuildContext context) async{
+  Future<List<YogaPose>?> _fetchPose(BuildContext context, bool isTokenValid) async{
     List<YogaPose>? poses;
-    final steps = await _fetchSteps(context);
-    final sleepData = await _fetchSleep(context);
-    final heartData = await _fetchHeartData(context);
+    final steps = await _fetchSteps(context, isTokenValid);
+    final sleepData = await _fetchSleep(context, isTokenValid);
+    final heartData = await _fetchHeartData(context, isTokenValid);
     
     if(steps != null && steps.isNotEmpty){
       double? numOfSteps = steps[0].value;
@@ -202,7 +202,7 @@ class YogaPage extends StatelessWidget {
     return poses;
   }
 
-  Future<List<FitbitActivityTimeseriesData>?> _fetchSteps(BuildContext context) async{
+  Future<List<FitbitActivityTimeseriesData>?> _fetchSteps(BuildContext context, bool isTokenValid) async{
     DateTime now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityTimeseriesByDate(now);
     if(activityFromDB != null){
@@ -210,25 +210,18 @@ class YogaPage extends StatelessWidget {
       return [FitbitActivityTimeseriesData(value: activityFromDB.steps)];
     } else {
       // otherwise fetch from API
-      FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManager = FitbitActivityTimeseriesDataManager(
-        clientID: Credentials.getCredentials().id,
-        clientSecret: Credentials.getCredentials().secret,
-        type: 'steps'
-      );
-      final sp = await SharedPreferences.getInstance();
-      final userID = sp.getString('userID');
       bool stopQueries = await QueriesCounter.getInstance().check();
-      if(stopQueries){
+      if(stopQueries || !isTokenValid){
         return null;
       } else {
-        final isTokenValid = await FitbitConnector.isTokenValid();
-        if(!isTokenValid){
-          return null;
-        }
-        stopQueries = await QueriesCounter.getInstance().check();
-        return stopQueries
-        ? null
-        : await fitbitActivityTimeseriesDataManager
+        FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManager = FitbitActivityTimeseriesDataManager(
+          clientID: Credentials.getCredentials().id,
+          clientSecret: Credentials.getCredentials().secret,
+          type: 'steps'
+        );
+        final sp = await SharedPreferences.getInstance();
+        final userID = sp.getString('userID');
+        return await fitbitActivityTimeseriesDataManager
           .fetch(FitbitActivityTimeseriesAPIURL.dayWithResource(
             date: DateTime.now(),
             userID: userID,
@@ -240,7 +233,7 @@ class YogaPage extends StatelessWidget {
   }
 
 
-  Future<List<FitbitSleepData>?> _fetchSleep(BuildContext context) async{
+  Future<List<FitbitSleepData>?> _fetchSleep(BuildContext context, bool isTokenValid) async{
     DateTime now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     final sleepFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getSleepDataByDate(now);
     if(sleepFromDB.isNotEmpty){
@@ -264,87 +257,69 @@ class YogaPage extends StatelessWidget {
       final sp = await SharedPreferences.getInstance();
       final userID = sp.getString('userID');
       bool stopQueries = await QueriesCounter.getInstance().check();
-      if(stopQueries){
+      if(stopQueries || !isTokenValid){
         return null;
       } else {
-        final isTokenValid = await FitbitConnector.isTokenValid();
-        if(!isTokenValid){
-          return null;
-        }
-        stopQueries = await QueriesCounter.getInstance().check();
-        if(stopQueries){
-          return null;
-        } else {
-          final fetchedData = await fitbitSleepDataManager.fetch(
-            FitbitSleepAPIURL.withUserIDAndDay(
-              date: DateTime.now(),
-              userID: userID,
-            )
-          ) as List<FitbitSleepData>;
-          if(fetchedData.isNotEmpty){
-            List<Sleep> toBeInsert = [];
-            for(var item in fetchedData){
-              toBeInsert.add(Sleep(
-                id: null,
-                date: item.dateOfSleep!,
-                entryDateTime: item.entryDateTime!,
-                level: item.level
-              ));
-            }
-            await Provider.of<DatabaseRepository>(context, listen: false).insertSleepData(toBeInsert);
+        final fetchedData = await fitbitSleepDataManager.fetch(
+          FitbitSleepAPIURL.withUserIDAndDay(
+            date: DateTime.now(),
+            userID: userID,
+          )
+        ) as List<FitbitSleepData>;
+        if(fetchedData.isNotEmpty){
+          List<Sleep> toBeInsert = [];
+          for(var item in fetchedData){
+            toBeInsert.add(Sleep(
+              id: null,
+              date: item.dateOfSleep!,
+              entryDateTime: item.entryDateTime!,
+              level: item.level
+            ));
           }
-          return fetchedData;
+          await Provider.of<DatabaseRepository>(context, listen: false).insertSleepData(toBeInsert);
         }
+        return fetchedData;
       }
     }
   }
 
-  Future<List<FitbitHeartData>?> _fetchHeartData(BuildContext context) async {
+  Future<List<FitbitHeartData>?> _fetchHeartData(BuildContext context, bool isTokenValid) async {
     DateTime now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     final heartFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getHeartDataByDate(now);
     if(heartFromDB != null){
       return [FitbitHeartData(minutesPeak: heartFromDB.minutesPeak)];
     } else {
-      FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(
-        clientID: Credentials.getCredentials().id,
-        clientSecret: Credentials.getCredentials().secret
-      );
-      final sp = await SharedPreferences.getInstance();
-      final userID = sp.getString('userID');
       bool stopQueries = await QueriesCounter.getInstance().check();
-      if(stopQueries){
+      if(stopQueries || !isTokenValid){
         return null;
       } else {
-        final isTokenValid = await FitbitConnector.isTokenValid();
-        if(!isTokenValid){
-          return null;
+        FitbitHeartDataManager fitbitHeartDataManager = FitbitHeartDataManager(
+          clientID: Credentials.getCredentials().id,
+          clientSecret: Credentials.getCredentials().secret
+        );
+        final sp = await SharedPreferences.getInstance();
+        final userID = sp.getString('userID');
+        final fetchedData = await fitbitHeartDataManager.fetch(
+          FitbitHeartAPIURL.dayWithUserID(
+            date: DateTime.now(),
+            userID: userID,
+          )
+        ) as List<FitbitHeartData>;
+        if(fetchedData.isNotEmpty){
+          await Provider.of<DatabaseRepository>(context, listen: false).insertHeartData([Heart(
+            date: fetchedData[0].dateOfMonitoring?? DateTime.fromMillisecondsSinceEpoch(0),
+            restingHR: fetchedData[0].restingHeartRate,
+            minimumOutOfRange: fetchedData[0].minimumOutOfRange,
+            minutesOutOfRange: fetchedData[0].minutesOutOfRange,
+            minimumFatBurn: fetchedData[0].minimumFatBurn,
+            minutesFatBurn: fetchedData[0].minutesFatBurn,
+            minimumCardio: fetchedData[0].minimumCardio,
+            minutesCardio: fetchedData[0].minutesCardio,
+            minimumPeak: fetchedData[0].minimumPeak,
+            minutesPeak: fetchedData[0].minutesPeak
+          )]);
         }
-        stopQueries = await QueriesCounter.getInstance().check();
-        if(stopQueries){
-          return null;
-        } else {
-          final fetchedData = await fitbitHeartDataManager.fetch(
-            FitbitHeartAPIURL.dayWithUserID(
-              date: DateTime.now(),
-              userID: userID,
-            )
-          ) as List<FitbitHeartData>;
-          if(fetchedData.isNotEmpty){
-            await Provider.of<DatabaseRepository>(context, listen: false).insertHeartData([Heart(
-              date: fetchedData[0].dateOfMonitoring?? DateTime.fromMillisecondsSinceEpoch(0),
-              restingHR: fetchedData[0].restingHeartRate,
-              minimumOutOfRange: fetchedData[0].minimumOutOfRange,
-              minutesOutOfRange: fetchedData[0].minutesOutOfRange,
-              minimumFatBurn: fetchedData[0].minimumFatBurn,
-              minutesFatBurn: fetchedData[0].minutesFatBurn,
-              minimumCardio: fetchedData[0].minimumCardio,
-              minutesCardio: fetchedData[0].minutesCardio,
-              minimumPeak: fetchedData[0].minimumPeak,
-              minutesPeak: fetchedData[0].minutesPeak
-            )]);
-          }
-          return fetchedData;
-        }
+        return fetchedData;
       }
     }
   }

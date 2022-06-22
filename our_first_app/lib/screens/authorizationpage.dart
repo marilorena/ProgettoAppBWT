@@ -342,6 +342,7 @@ class AuthorizationPage extends StatelessWidget {
         ),
         backgroundColor: Color.fromARGB(150, 195, 181, 236)
       ));
+      Navigator.pop(context);
     }
   }
 }

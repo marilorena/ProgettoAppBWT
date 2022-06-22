@@ -32,7 +32,7 @@ class SleepPage extends StatelessWidget{
   }
 
   // fetch method
-  Future<List<FitbitSleepData>?> _fetchSleep(BuildContext context, int subtracted) async {
+  Future<List<FitbitSleepData>?> _fetchSleep(BuildContext context, int subtracted, bool isTokenValid) async {
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
     final sleepFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getSleepDataByDate(date);
     if(sleepFromDB.isNotEmpty){
@@ -48,46 +48,38 @@ class SleepPage extends StatelessWidget{
       sleepData.sort((a,b) => a.entryDateTime!.compareTo(b.entryDateTime!)); // sort by ascending entryDateTime
       return sleepData;
     } else {
-      final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(
-        clientID: Credentials.getCredentials().id,
-        clientSecret: Credentials.getCredentials().secret,
-      );
-      final sp = await SharedPreferences.getInstance();
-      final userID = sp.getString('userID');
-      final now = DateTime.now();
+      // otherwise fetch from API
       bool stopQueries = await QueriesCounter.getInstance().check();
-      if(stopQueries){
+      if(stopQueries || !isTokenValid){
         return null;
       } else {
-        final isTokenValid = await FitbitConnector.isTokenValid();
-        if(!isTokenValid){
-          return null;
-        }
-        stopQueries = await QueriesCounter.getInstance().check();
-        if(stopQueries){
-          return null;
-        } else {
-          final fetchedData = await fitbitSleepDataManager.fetch(
-            FitbitSleepAPIURL.withUserIDAndDay(
-              date: DateTime.utc(now.year, now.month, now.day+subtracted),
-              userID: userID,
-            )
-          ) as List<FitbitSleepData>;
-          if(fetchedData.isNotEmpty){
-            List<Sleep> toBeInsert = [];
-            for(var item in fetchedData){
-              toBeInsert.add(Sleep(
-                id: null,
-                date: item.dateOfSleep!,
-                entryDateTime: item.entryDateTime!,
-                level: item.level
-              ));
-            }
-            await Provider.of<DatabaseRepository>(context, listen: false).insertSleepData(toBeInsert);
+        final FitbitSleepDataManager fitbitSleepDataManager = FitbitSleepDataManager(
+          clientID: Credentials.getCredentials().id,
+          clientSecret: Credentials.getCredentials().secret,
+        );
+        final sp = await SharedPreferences.getInstance();
+        final userID = sp.getString('userID');
+        final now = DateTime.now();
+        final fetchedData = await fitbitSleepDataManager.fetch(
+        FitbitSleepAPIURL.withUserIDAndDay(
+            date: DateTime.utc(now.year, now.month, now.day+subtracted),
+            userID: userID,
+          )
+        ) as List<FitbitSleepData>;
+        if(fetchedData.isNotEmpty){
+          List<Sleep> toBeInsert = [];
+          for(var item in fetchedData){
+            toBeInsert.add(Sleep(
+              id: null,
+              date: item.dateOfSleep!,
+              entryDateTime: item.entryDateTime!,
+              level: item.level
+            ));
           }
-          return fetchedData;
-        } 
-      }
+          await Provider.of<DatabaseRepository>(context, listen: false).insertSleepData(toBeInsert);
+        }
+        return fetchedData;
+      } 
     }
   }
 
@@ -269,33 +261,33 @@ class SleepPage extends StatelessWidget{
 
   Widget _showSleep(BuildContext context, int subtractedDays){
     return FutureBuilder(
-      future: _fetchSleep(context, subtractedDays),
-      builder: (context, snapshot){
+      future: _isTokenValid(),
+      builder: (context, snapshot) {
         if(snapshot.hasData){
-          final sleepData = snapshot.data as List<FitbitSleepData>;
-          final startDate = sleepData.isEmpty ? null : sleepData[0].entryDateTime;
-          final endDate = sleepData.isEmpty ? null : sleepData[sleepData.length-1].entryDateTime;
-          return Column(
-            children: [
-              const SizedBox(height: 20),
-              _showHeader(
-                context,
-                subtractedDays: subtractedDays,
-                startDate: startDate,
-                endDate: endDate
-              ),
-              const SizedBox(height: 30),
-              Text('sleep duration: ${_getSleepDuration(startDate, endDate)}', style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 30),
-              _showChart(context, subtractedDays, sleepData)
-            ]
-          );
-        } else {
+          final isTokenValid = snapshot.data as bool;
           return FutureBuilder(
-            future: _isTokenValid(),
+            future: _fetchSleep(context, subtractedDays, isTokenValid),
             builder: (context, snapshot){
               if(snapshot.hasData){
-                final isTokenValid = snapshot.data as bool;
+                final sleepData = snapshot.data as List<FitbitSleepData>;
+                final startDate = sleepData.isEmpty ? null : sleepData[0].entryDateTime;
+                final endDate = sleepData.isEmpty ? null : sleepData[sleepData.length-1].entryDateTime;
+                return Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    _showHeader(
+                      context,
+                      subtractedDays: subtractedDays,
+                      startDate: startDate,
+                      endDate: endDate
+                    ),
+                    const SizedBox(height: 30),
+                    Text('sleep duration: ${_getSleepDuration(startDate, endDate)}', style: const TextStyle(fontSize: 16)),
+                    const SizedBox(height: 30),
+                    _showChart(context, subtractedDays, sleepData)
+                  ]
+                );
+              } else {
                 if(!isTokenValid){
                   return _showIfNotAuthorized(context);
                 } else if(QueriesCounter.getInstance().getStopQueries()){
@@ -303,11 +295,11 @@ class SleepPage extends StatelessWidget{
                 } else {
                   return const CircularProgressIndicator();
                 }
-              } else {
-                return const CircularProgressIndicator();
               }
             }
           );
+        } else {
+          return const CircularProgressIndicator();
         }
       }
     );

@@ -35,34 +35,34 @@ class _ActivityPageState extends State<ActivityPage> {
       ),
       body: Center(
         child: FutureBuilder(
-          future: _fetchSteps(context, subtractedDays),
-          builder: (context, snapshot){
+          future: _isTokenValid(),
+          builder: (context, snapshot) {
             if(snapshot.hasData){
-              final stepsData = snapshot.data as List<FitbitActivityTimeseriesData>;
-              return ListView(
-                children: [
-                  const SizedBox(height: 20),
-                  _showHeader(context, subtractedDays, stepsData[0].dateOfMonitoring),
-                  const SizedBox(height: 20),
-                  _showStepsAndFloors(context, subtractedDays, stepsData),
-                  const SizedBox(height: 20),
-                  _showMinutes(context, subtractedDays),
-                  const SizedBox(height: 40),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Activities of the day:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      _showActivity(context, subtractedDays),
-                    ],
-                  )
-                ]
-              );
-            } else {
+              final isTokenValid = snapshot.data as bool;
               return FutureBuilder(
-                future: _isTokenValid(),
+                future: _fetchSteps(context, subtractedDays, isTokenValid),
                 builder: (context, snapshot){
                   if(snapshot.hasData){
-                    final isTokenValid = snapshot.data as bool;
+                    final stepsData = snapshot.data as List<FitbitActivityTimeseriesData>;
+                    return ListView(
+                      children: [
+                        const SizedBox(height: 20),
+                        _showHeader(context, subtractedDays, stepsData[0].dateOfMonitoring),
+                        const SizedBox(height: 20),
+                        _showStepsAndFloors(context, subtractedDays, stepsData, isTokenValid),
+                        const SizedBox(height: 20),
+                        _showMinutes(context, subtractedDays, isTokenValid),
+                        const SizedBox(height: 40),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('Activities of the day:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            _showActivity(context, subtractedDays, isTokenValid),
+                          ],
+                        )
+                      ]
+                    );
+                  } else {
                     if(!isTokenValid){
                       return _showIfNotAuthorized(context);
                     } else if(QueriesCounter.getInstance().getStopQueries()){
@@ -70,11 +70,11 @@ class _ActivityPageState extends State<ActivityPage> {
                     } else {
                       return const CircularProgressIndicator();
                     }
-                  } else {
-                    return const CircularProgressIndicator();
                   }
                 }
               );
+            } else {
+              return const CircularProgressIndicator();
             }
           }
         )
@@ -83,67 +83,58 @@ class _ActivityPageState extends State<ActivityPage> {
   }
 
   // fetch methods
-  Future<List<FitbitActivityTimeseriesData>?> _fetchSteps(BuildContext context, int subtracted) async {
+  Future<List<FitbitActivityTimeseriesData>?> _fetchSteps(BuildContext context, int subtracted, bool isTokenValid) async {
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
     final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityTimeseriesByDate(date);
     if(activityFromDB != null){
       return [FitbitActivityTimeseriesData(dateOfMonitoring: activityFromDB.date, value: activityFromDB.steps)];
     } else {
-      final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerSteps = FitbitActivityTimeseriesDataManager(
-        clientID: Credentials.getCredentials().id,
-        clientSecret: Credentials.getCredentials().secret,
-        type: 'steps'
-      );
-      final sp = await SharedPreferences.getInstance();
-      final userID = sp.getString('userID');
-      final now = DateTime.now();
       bool stopQueries = await QueriesCounter.getInstance().check();
-      if(stopQueries){
+      if(stopQueries || !isTokenValid){
         return null;
       } else {
-        final isTokenValid = await FitbitConnector.isTokenValid();
-        if(!isTokenValid){
-          return null;
+        final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerSteps = FitbitActivityTimeseriesDataManager(
+          clientID: Credentials.getCredentials().id,
+          clientSecret: Credentials.getCredentials().secret,
+          type: 'steps'
+        );
+        final sp = await SharedPreferences.getInstance();
+        final userID = sp.getString('userID');
+        final now = DateTime.now();
+        final fetchedData = await fitbitActivityTimeseriesDataManagerSteps.fetch(
+          FitbitActivityTimeseriesAPIURL.dayWithResource(
+            date: DateTime.utc(now.year, now.month, now.day+subtracted),
+            userID: userID,
+            resource: fitbitActivityTimeseriesDataManagerSteps.type
+          )
+        ) as List<FitbitActivityTimeseriesData>;
+        if(fetchedData.isNotEmpty){
+          dateOfMonitoring = fetchedData[0].dateOfMonitoring;
+          steps = fetchedData[0].value;
         }
-        stopQueries = await QueriesCounter.getInstance().check();
-        if(stopQueries){
-          return null;
-        } else {
-          final fetchedData = await fitbitActivityTimeseriesDataManagerSteps.fetch(
-            FitbitActivityTimeseriesAPIURL.dayWithResource(
-              date: DateTime.utc(now.year, now.month, now.day+subtracted),
-              userID: userID,
-              resource: fitbitActivityTimeseriesDataManagerSteps.type
-            )
-          ) as List<FitbitActivityTimeseriesData>;
-          if(fetchedData.isNotEmpty){
-            dateOfMonitoring = fetchedData[0].dateOfMonitoring;
-            steps = fetchedData[0].value;
-          }
-          return fetchedData;
-        }
+        return fetchedData;
       }
     }
   }
 
-  Future<List<FitbitActivityTimeseriesData>?> _fetchFloors(BuildContext context, int subtracted) async {
+  Future<List<FitbitActivityTimeseriesData>?> _fetchFloors(BuildContext context, int subtracted, bool isTokenValid) async {
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
     final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityTimeseriesByDate(date);
     if(activityFromDB != null){
       return [FitbitActivityTimeseriesData(value: activityFromDB.floors)];
     }
-    final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerFloors = FitbitActivityTimeseriesDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret,
-      type: 'floors'
-    );
-    final sp = await SharedPreferences.getInstance();
-    final userID = sp.getString('userID');
-    final now = DateTime.now();
     bool stopQueries = await QueriesCounter.getInstance().check();
-    if(stopQueries){
+    if(stopQueries || !isTokenValid){
       return null;
     } else {
+      final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerFloors = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'floors'
+      );
+      final sp = await SharedPreferences.getInstance();
+      final userID = sp.getString('userID');
+      final now = DateTime.now();
       final fetchedData = await fitbitActivityTimeseriesDataManagerFloors.fetch(
         FitbitActivityTimeseriesAPIURL.dayWithResource(
           date: DateTime.utc(now.year, now.month, now.day+subtracted),
@@ -158,7 +149,7 @@ class _ActivityPageState extends State<ActivityPage> {
     }
   }
 
-  Future<List<FitbitActivityData>?> _fetchActivity(BuildContext context, int subtracted) async {
+  Future<List<FitbitActivityData>?> _fetchActivity(BuildContext context, int subtracted, bool isTokenValid) async {
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
     final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityDataByDate(date);
     if(activityFromDB.isNotEmpty){
@@ -174,17 +165,17 @@ class _ActivityPageState extends State<ActivityPage> {
       }
       return activityData;
     } else {
-      final FitbitActivityDataManager fitbitActivityDataManager = FitbitActivityDataManager(
-        clientID: Credentials.getCredentials().id,
-        clientSecret: Credentials.getCredentials().secret
-      );
-      final sp = await SharedPreferences.getInstance();
-      final userID = sp.getString('userID');
-      final now = DateTime.now();
       bool stopQueries = await QueriesCounter.getInstance().check();
-      if(stopQueries){
+      if(stopQueries || !isTokenValid){
         return null;
       } else {
+        final FitbitActivityDataManager fitbitActivityDataManager = FitbitActivityDataManager(
+          clientID: Credentials.getCredentials().id,
+          clientSecret: Credentials.getCredentials().secret
+        );
+        final sp = await SharedPreferences.getInstance();
+        final userID = sp.getString('userID');
+        final now = DateTime.now();
         final fetchedData = await fitbitActivityDataManager.fetch(
           FitbitActivityAPIURL.day(
             date: DateTime.utc(now.year, now.month, now.day+subtracted),
@@ -207,7 +198,7 @@ class _ActivityPageState extends State<ActivityPage> {
     }
   }
 
-  Future<Map<String, double>?> _fetchMinutes(BuildContext context, int subtracted) async{
+  Future<Map<String, double>?> _fetchMinutes(BuildContext context, int subtracted, bool isTokenValid) async{
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+subtracted);
     final activityFromDB = await Provider.of<DatabaseRepository>(context, listen: false).getActivityTimeseriesByDate(date);
     if(activityFromDB != null){
@@ -217,114 +208,115 @@ class _ActivityPageState extends State<ActivityPage> {
         'Minutes fairly active: ${(activityFromDB.minutesFairly?? 0).toInt()}' : activityFromDB.minutesFairly?? 0,
         'Minutes very active: ${(activityFromDB.minutesVery?? 0).toInt()}' : activityFromDB.minutesVery?? 0
       };
-    }
-    final sp = await SharedPreferences.getInstance();
-    final userID = sp.getString('userID');
-    final now = DateTime.now();
+    } else {
+      final sp = await SharedPreferences.getInstance();
+      final userID = sp.getString('userID');
+      final now = DateTime.now();
     
-    // sedentary
-    final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerSedentary = FitbitActivityTimeseriesDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret,
-      type: 'minutesSedentary'
-    );
-    bool stopQueries = await QueriesCounter.getInstance().check();
-    List<FitbitActivityTimeseriesData> sedentary;
-    if(stopQueries){
-      return null;
-    } else {
-      sedentary = await fitbitActivityTimeseriesDataManagerSedentary.fetch(
-        FitbitActivityTimeseriesAPIURL.dayWithResource(
-          date: DateTime.utc(now.year, now.month, now.day+subtracted),
-          userID: userID,
-          resource: fitbitActivityTimeseriesDataManagerSedentary.type
-        )
-      ) as List<FitbitActivityTimeseriesData>;
+      // sedentary
+      final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerSedentary = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'minutesSedentary'
+      );
+      bool stopQueries = await QueriesCounter.getInstance().check();
+      List<FitbitActivityTimeseriesData> sedentary;
+      if(stopQueries || !isTokenValid){
+        return null;
+      } else {
+        sedentary = await fitbitActivityTimeseriesDataManagerSedentary.fetch(
+          FitbitActivityTimeseriesAPIURL.dayWithResource(
+            date: DateTime.utc(now.year, now.month, now.day+subtracted),
+            userID: userID,
+            resource: fitbitActivityTimeseriesDataManagerSedentary.type
+          )
+        ) as List<FitbitActivityTimeseriesData>;
+      }
+
+      // lightly active
+      final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerLightly = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'minutesLightlyActive'
+      );
+      stopQueries = await QueriesCounter.getInstance().check();
+      List<FitbitActivityTimeseriesData> lightly;
+      if(stopQueries || !isTokenValid){
+        return null;
+      } else {
+        lightly = await fitbitActivityTimeseriesDataManagerLightly.fetch(
+          FitbitActivityTimeseriesAPIURL.dayWithResource(
+            date: DateTime.utc(now.year, now.month, now.day+subtracted),
+            userID: userID,
+            resource: fitbitActivityTimeseriesDataManagerLightly.type
+          )
+        ) as List<FitbitActivityTimeseriesData>;
+      }
+
+      // fairly active
+      final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerFairly = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'minutesFairlyActive'
+      );
+      stopQueries = await QueriesCounter.getInstance().check();
+      List<FitbitActivityTimeseriesData> fairly;
+      if(stopQueries || !isTokenValid){
+        return null;
+      } else {
+        fairly = await fitbitActivityTimeseriesDataManagerFairly.fetch(
+          FitbitActivityTimeseriesAPIURL.dayWithResource(
+            date: DateTime.utc(now.year, now.month, now.day+subtracted),
+            userID: userID,
+            resource: fitbitActivityTimeseriesDataManagerFairly.type
+          )
+        ) as List<FitbitActivityTimeseriesData>;
+      }
+
+      // very
+      final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerVery = FitbitActivityTimeseriesDataManager(
+        clientID: Credentials.getCredentials().id,
+        clientSecret: Credentials.getCredentials().secret,
+        type: 'minutesVeryActive'
+      );
+      stopQueries = await QueriesCounter.getInstance().check();
+      List<FitbitActivityTimeseriesData> very;
+      if(stopQueries || !isTokenValid){
+        return null;
+      } else {
+        very = await fitbitActivityTimeseriesDataManagerVery.fetch(
+          FitbitActivityTimeseriesAPIURL.dayWithResource(
+            date: DateTime.utc(now.year, now.month, now.day+subtracted),
+            userID: userID,
+            resource: fitbitActivityTimeseriesDataManagerVery.type
+          )
+        ) as List<FitbitActivityTimeseriesData>;
+      }
+
+      double minSedentary = sedentary.isEmpty || sedentary[0].value == null ? 0 : sedentary[0].value!;
+      double minLightly = lightly.isEmpty || lightly[0].value == null ? 0 : lightly[0].value!;
+      double minFairly = fairly.isEmpty || fairly[0].value == null ? 0 : fairly[0].value!;
+      double minVery = very.isEmpty || very[0].value == null ? 0 : very[0].value!;
+
+      if(dateOfMonitoring != null){
+        await Provider.of<DatabaseRepository>(context, listen: false).insertActivityTimeseries([ActivityTimeseries(
+          date: dateOfMonitoring!,
+          steps: steps,
+          floors: floors,
+          minutesSedentary: minSedentary,
+          minutesLightly: minLightly,
+          minutesFairly: minFairly,
+          minutesVery: minVery
+        )]);
+      }
+
+      return {
+        'Minutes sedentary: ${minSedentary.toInt()}' : minSedentary,
+        'Minutes lightly active: ${minLightly.toInt()}' : minLightly,
+        'Minutes fairly active: ${minFairly.toInt()}' : minFairly,
+        'Minutes very active: ${minVery.toInt()}' : minVery
+      };
     }
-
-    // lightly active
-    final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerLightly = FitbitActivityTimeseriesDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret,
-      type: 'minutesLightlyActive'
-    );
-    stopQueries = await QueriesCounter.getInstance().check();
-    List<FitbitActivityTimeseriesData> lightly;
-    if(stopQueries){
-      return null;
-    } else {
-      lightly = await fitbitActivityTimeseriesDataManagerLightly.fetch(
-        FitbitActivityTimeseriesAPIURL.dayWithResource(
-          date: DateTime.utc(now.year, now.month, now.day+subtracted),
-          userID: userID,
-          resource: fitbitActivityTimeseriesDataManagerLightly.type
-        )
-      ) as List<FitbitActivityTimeseriesData>;
-    }
-
-    // fairly active
-    final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerFairly = FitbitActivityTimeseriesDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret,
-      type: 'minutesFairlyActive'
-    );
-    stopQueries = await QueriesCounter.getInstance().check();
-    List<FitbitActivityTimeseriesData> fairly;
-    if(stopQueries){
-      return null;
-    } else {
-      fairly = await fitbitActivityTimeseriesDataManagerFairly.fetch(
-        FitbitActivityTimeseriesAPIURL.dayWithResource(
-          date: DateTime.utc(now.year, now.month, now.day+subtracted),
-          userID: userID,
-          resource: fitbitActivityTimeseriesDataManagerFairly.type
-        )
-      ) as List<FitbitActivityTimeseriesData>;
-    }
-
-    // very
-    final FitbitActivityTimeseriesDataManager fitbitActivityTimeseriesDataManagerVery = FitbitActivityTimeseriesDataManager(
-      clientID: Credentials.getCredentials().id,
-      clientSecret: Credentials.getCredentials().secret,
-      type: 'minutesVeryActive'
-    );
-    stopQueries = await QueriesCounter.getInstance().check();
-    List<FitbitActivityTimeseriesData> very;
-    if(stopQueries){
-      return null;
-    } else {
-      very = await fitbitActivityTimeseriesDataManagerVery.fetch(
-        FitbitActivityTimeseriesAPIURL.dayWithResource(
-          date: DateTime.utc(now.year, now.month, now.day+subtracted),
-          userID: userID,
-          resource: fitbitActivityTimeseriesDataManagerVery.type
-        )
-      ) as List<FitbitActivityTimeseriesData>;
-    }
-
-    double minSedentary = sedentary.isEmpty || sedentary[0].value == null ? 0 : sedentary[0].value!;
-    double minLightly = lightly.isEmpty || lightly[0].value == null ? 0 : lightly[0].value!;
-    double minFairly = fairly.isEmpty || fairly[0].value == null ? 0 : fairly[0].value!;
-    double minVery = very.isEmpty || very[0].value == null ? 0 : very[0].value!;
-
-    if(dateOfMonitoring != null){
-      await Provider.of<DatabaseRepository>(context, listen: false).insertActivityTimeseries([ActivityTimeseries(
-        date: dateOfMonitoring!,
-        steps: steps,
-        floors: floors,
-        minutesSedentary: minSedentary,
-        minutesLightly: minLightly,
-        minutesFairly: minFairly,
-        minutesVery: minVery
-      )]);
-    }
-
-    return {
-      'Minutes sedentary: ${minSedentary.toInt()}' : minSedentary,
-      'Minutes lightly active: ${minLightly.toInt()}' : minLightly,
-      'Minutes fairly active: ${minFairly.toInt()}' : minFairly,
-      'Minutes very active: ${minVery.toInt()}' : minVery
-    };
   }
 
   // utils
@@ -522,13 +514,13 @@ class _ActivityPageState extends State<ActivityPage> {
     );
   }
 
-  Widget _showStepsAndFloors(BuildContext context, int subtractedDays, List<FitbitActivityTimeseriesData> stepsData){
+  Widget _showStepsAndFloors(BuildContext context, int subtractedDays, List<FitbitActivityTimeseriesData> stepsData, bool isTokenValid){
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildLaneChart(true, stepsData),
         FutureBuilder(
-          future: _fetchFloors(context, subtractedDays),
+          future: _fetchFloors(context, subtractedDays, isTokenValid),
           builder: (context, snapshot){
             if(snapshot.hasData){
               final floorsData = snapshot.data as List<FitbitActivityTimeseriesData>;
@@ -543,9 +535,9 @@ class _ActivityPageState extends State<ActivityPage> {
     );
   }
 
-  Widget _showMinutes(BuildContext context, int subtractedDays){
+  Widget _showMinutes(BuildContext context, int subtractedDays, bool isTokenValid){
     return FutureBuilder(
-      future: _fetchMinutes(context, subtractedDays),
+      future: _fetchMinutes(context, subtractedDays, isTokenValid),
       builder: (context, snapshot){
         if(snapshot.hasData){
           final dataMap = snapshot.data as Map<String, double>;
@@ -568,9 +560,9 @@ class _ActivityPageState extends State<ActivityPage> {
     );
   }
 
-  Widget _showActivity(BuildContext context, int subtractedDays){
+  Widget _showActivity(BuildContext context, int subtractedDays, bool isTokenValid){
     return FutureBuilder(
-      future: _fetchActivity(context, subtractedDays),
+      future: _fetchActivity(context, subtractedDays, isTokenValid),
       builder: (context, snapshot){
         if(snapshot.hasData){
           final activityData = snapshot.data as List<FitbitActivityData>;
