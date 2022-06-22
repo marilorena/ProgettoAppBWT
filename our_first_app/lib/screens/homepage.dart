@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage>{
                 // delete most recent day data
                 await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
                 await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
-                Navigator.pushNamed(context, '/activity/', arguments: 0);
+                Navigator.pushNamed(context, '/activity/', arguments: -1);
               }
             ),
           const Padding(

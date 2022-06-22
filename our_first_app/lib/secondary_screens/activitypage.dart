@@ -368,45 +368,66 @@ class _ActivityPageState extends State<ActivityPage> {
   // UI blocks
   List<Widget> _showActions(BuildContext context, int subtractedDays){
     return [
-      Visibility(
-        visible: subtractedDays == 0 ? true : false,
-        child: IconButton(
-          icon: const Icon(Icons.update),
-          onPressed: () async{
-            // delete current day data
-            await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
-            await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
-            _navigate(context, 0);
-          }
-        ),
-      ),
-      IconButton(
-        onPressed: () async{
-          final pickedDate = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2100)
-          );
-          if(pickedDate != null){
-            final now = DateTime.now();
-            final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
-            if(difference>=0){
-              if(difference==0){
+      FutureBuilder(
+        future: Future.delayed(const Duration(seconds: 5), () => 'ok'),
+        builder: (context,snapshot) {
+          return Visibility(
+            visible: snapshot.hasData || subtractedDays == 0 ? true : false,
+            child: IconButton(
+              icon: const Icon(Icons.update),
+              onPressed: () async{
                 // delete current day data
                 await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
                 await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+                _navigate(context, 0);
               }
-              _navigate(context, -difference);
-            }
-          }
-        },
-        icon: const Icon(Icons.calendar_month)
+            ),
+          );
+        }
       ),
-      IconButton(
-        icon: const Icon(Icons.settings),
-        onPressed: () async{
-          Navigator.pushNamed(context, '/activitysettings/');
+      FutureBuilder(
+        future: Future.delayed(const Duration(seconds: 5), () => 'ok'),
+        builder: (context, snapshot) {
+          return Visibility(
+            visible: snapshot.hasData,
+            child: IconButton(
+              onPressed: () async{
+                final pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100)
+                );
+                if(pickedDate != null){
+                  final now = DateTime.now();
+                  final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
+                  if(difference>=0){
+                    if(difference==0){
+                      // delete current day data
+                      await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
+                      await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+                    }
+                    _navigate(context, -difference);
+                  }
+                }
+              },
+              icon: const Icon(Icons.calendar_month)
+            ),
+          );
+        }
+      ),
+      FutureBuilder(
+        future: Future.delayed(const Duration(seconds: 5), () => 'ok'),
+        builder: (context, snapshot) {
+          return Visibility(
+            visible: snapshot.hasData,
+            child: IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () async{
+                Navigator.pushNamed(context, '/activitysettings/');
+              }
+            ),
+          );
         }
       )
     ];
@@ -426,11 +447,19 @@ class _ActivityPageState extends State<ActivityPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            IconButton(
-              onPressed: () async{
-                _navigate(context, subtractedDays-1);
-              },
-              icon: const Icon(Icons.arrow_back_ios)
+            FutureBuilder(
+              future: Future.delayed(const Duration(seconds: 5), () => 'ok'),
+              builder: (context, snapshot) {
+                return Visibility(
+                  visible: snapshot.hasData,
+                  child: IconButton(
+                    onPressed: () async{
+                      _navigate(context, subtractedDays-1);
+                    },
+                    icon: const Icon(Icons.arrow_back_ios)
+                  ),
+                );
+              }
             ),
             Container(
               alignment: Alignment.center,
@@ -453,22 +482,27 @@ class _ActivityPageState extends State<ActivityPage> {
                 ],
               )
             ),
-            Visibility(
-              visible: subtractedDays == 0 ? false : true,
-              maintainSize: true,
-              maintainAnimation: true,
-              maintainState: true,
-              child: IconButton(
-                onPressed: () async{
-                  if(subtractedDays+1==0){
-                    // delete current day data
-                    await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
-                    await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
-                  }
-                  _navigate(context, subtractedDays+1);
-                },
-                icon: const Icon(Icons.arrow_forward_ios)
-              ),
+            FutureBuilder(
+              future: Future.delayed(const Duration(seconds: 5), () => 'ok'),
+              builder: (context, snapshot) {
+                return Visibility(
+                  visible: !snapshot.hasData || subtractedDays == 0 ? false : true,
+                  maintainSize: true,
+                  maintainAnimation: true,
+                  maintainState: true,
+                  child: IconButton(
+                    onPressed: () async{
+                      if(subtractedDays+1==0){
+                        // delete current day data
+                        await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
+                        await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+                      }
+                      _navigate(context, subtractedDays+1);
+                    },
+                    icon: const Icon(Icons.arrow_forward_ios)
+                  ),
+                );
+              }
             )
           ],
         ),
