@@ -213,6 +213,8 @@ class AuthorizationPage extends StatelessWidget {
           resource: minutesVeryDataManager.type
         )
       ) as List<FitbitActivityTimeseriesData>;
+      // store the time of fetching
+      sp.setInt('pastTimeActivity', DateTime.now().millisecondsSinceEpoch);
       // save
       List<ActivityTimeseries> activityTimeseriesList = [];
       for(var i=0; i<stepsData.length; i++){

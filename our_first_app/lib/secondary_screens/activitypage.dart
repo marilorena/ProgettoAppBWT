@@ -376,10 +376,15 @@ class _ActivityPageState extends State<ActivityPage> {
             child: IconButton(
               icon: const Icon(Icons.update),
               onPressed: () async{
-                // delete current day data
-                await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
-                await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
-                _navigate(context, 0);
+                final sp = await SharedPreferences.getInstance();
+                final minFromLastFetch = (DateTime.now().millisecondsSinceEpoch - (sp.getInt('pastTimeActivity')?? 0))/1000/60;
+                if(minFromLastFetch >= 15){
+                  // delete current day data
+                  await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
+                  await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+                  sp.setInt('pastTimeActivity', DateTime.now().millisecondsSinceEpoch);
+                  _navigate(context, 0);
+                }
               }
             ),
           );
@@ -401,11 +406,14 @@ class _ActivityPageState extends State<ActivityPage> {
                 if(pickedDate != null){
                   final now = DateTime.now();
                   final int difference = (DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch - pickedDate.millisecondsSinceEpoch)~/1000~/60~/60~/24;
-                  if(difference>=0){
-                    if(difference==0){
+                  if(difference >= 0){
+                    final sp = await SharedPreferences.getInstance();
+                    final minFromLastFetch = (DateTime.now().millisecondsSinceEpoch - (sp.getInt('pastTimeActivity')?? 0))/1000/60;
+                    if(difference==0 && minFromLastFetch >= 15){
                       // delete current day data
                       await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
                       await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+                      sp.setInt('pastTimeActivity', DateTime.now().millisecondsSinceEpoch);
                     }
                     _navigate(context, -difference);
                   }
@@ -495,10 +503,13 @@ class _ActivityPageState extends State<ActivityPage> {
                   maintainState: true,
                   child: IconButton(
                     onPressed: () async{
-                      if(subtractedDays+1==0){
+                      final sp = await SharedPreferences.getInstance();
+                      final minFromLastFetch = (DateTime.now().millisecondsSinceEpoch - (sp.getInt('pastTimeActivity')?? 0))/1000/60;
+                      if(subtractedDays+1==0 && minFromLastFetch >= 15){
                         // delete current day data
                         await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
                         await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+                        sp.setInt('pastTimeActivity', DateTime.now().millisecondsSinceEpoch);
                       }
                       _navigate(context, subtractedDays+1);
                     },
@@ -605,7 +616,7 @@ class _ActivityPageState extends State<ActivityPage> {
           return Container(
             alignment: Alignment.center,
             height: 200,
-            width: MediaQuery.of(context).size.width/3,
+            width: MediaQuery.of(context).size.width/2,
             child: activityData.isEmpty
             ? const Text('none', style: TextStyle(fontSize: 14))
             : ListView.separated(

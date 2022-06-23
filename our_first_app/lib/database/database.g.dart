@@ -92,7 +92,7 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `accountTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT, `dateOfBirth` TEXT, `gender` TEXT, `height` REAL, `weight` REAL, `legalTermsAcceptRequired` INTEGER, `avatar` TEXT)');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `activityTable` (`id` INTEGER, `date` INTEGER NOT NULL, `type` TEXT, `distance` REAL, `duration` REAL, `startTime` INTEGER NOT NULL, `calories` REAL, PRIMARY KEY (`date`))');
+            'CREATE TABLE IF NOT EXISTS `activityTable` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `date` INTEGER NOT NULL, `type` TEXT, `distance` REAL, `duration` REAL, `startTime` INTEGER NOT NULL, `calories` REAL)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `activityTimeseriesTable` (`date` INTEGER NOT NULL, `steps` REAL, `floors` REAL, `minutesSedentary` REAL, `minutesLightly` REAL, `minutesFairly` REAL, `minutesVery` REAL, PRIMARY KEY (`date`))');
         await database.execute(

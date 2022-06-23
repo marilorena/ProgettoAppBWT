@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../database/repository/database_repository.dart';
 
 class HomePage extends StatefulWidget {
@@ -76,9 +77,14 @@ class _HomePageState extends State<HomePage>{
                 ),
               ),
               onTap: () async{
-                // delete most recent day data
-                await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
-                await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+                final sp = await SharedPreferences.getInstance();
+                final minFromLastFetch = (DateTime.now().millisecondsSinceEpoch - (sp.getInt('pastTimeActivity')?? 0))/1000/60;
+                if(minFromLastFetch >= 15){
+                  // delete most recent day data
+                  await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityData();
+                  await Provider.of<DatabaseRepository>(context, listen: false).deleteRecentActivityTimeseries();
+                  sp.setInt('pastTimeActivity', DateTime.now().millisecondsSinceEpoch);
+                }
                 Navigator.pushNamed(context, '/activity/', arguments: 0);
               }
             ),
