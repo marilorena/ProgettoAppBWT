@@ -153,6 +153,17 @@ class _HomePageState extends State<HomePage>{
               },
             ),
             label: 'Profile'
+          ),
+           BottomNavigationBarItem(
+          icon: IconButton(
+            icon: const Icon(MdiIcons.cash),
+              onPressed: () {
+                
+                Navigator.popAndPushNamed(context, '/money/');
+                
+              },
+            ),
+            label: 'Coins'
           )
         ],
         currentIndex: 0,
