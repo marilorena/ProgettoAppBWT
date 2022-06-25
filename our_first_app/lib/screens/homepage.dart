@@ -154,25 +154,21 @@ class _HomePageState extends State<HomePage>{
         ),
         BottomNavigationBarItem(
           icon: IconButton(
+            icon: const Icon(MdiIcons.flowerTulip),
+            onPressed: () {
+              Navigator.popAndPushNamed(context, '/flower/');
+            },
+          ),
+          label: 'Flower'
+        ),
+        BottomNavigationBarItem(
+          icon: IconButton(
             icon: const Icon(Icons.person),
               onPressed: () {
-                
-                Navigator.popAndPushNamed(context, '/profile/');
-                
+                Navigator.popAndPushNamed(context, '/profile/');  
               },
             ),
             label: 'Profile'
-          ),
-           BottomNavigationBarItem(
-          icon: IconButton(
-            icon: const Icon(MdiIcons.flowerTulip),
-              onPressed: () {
-                
-                Navigator.popAndPushNamed(context, '/money/');
-                
-              },
-            ),
-            label: 'Flower'
           )
         ],
         currentIndex: 0,

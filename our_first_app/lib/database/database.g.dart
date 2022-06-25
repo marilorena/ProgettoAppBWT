@@ -304,9 +304,10 @@ class _$ActivityTimeseriesDao extends ActivityTimeseriesDao {
   }
 
   @override
-  Future<double?> getStepsSum() {
-    // TODO: implement getStepsSum
-    throw UnimplementedError();
+  Future<List<double>> getSteps() {
+    return _queryAdapter.queryList('SELECT steps FROM activityTimeseriesTable',
+      mapper: (Map<String, Object?> row) => row['steps'] as double
+    );
   }
 }
 
@@ -359,7 +360,8 @@ class _$HeartDao extends HeartDao {
     return await _queryAdapter.query('SELECT MAX(date) FROM heartTable',
       mapper: (Map<String, Object?> row){
         return row['date'] == null ? DateTime.fromMillisecondsSinceEpoch(0) : _dateTimeConverter.decode(row['date'] as int);
-      });
+      }
+    );
   }
 
   @override

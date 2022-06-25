@@ -51,6 +51,10 @@ class DatabaseRepository extends ChangeNotifier{
     return await database.activityTimeseriesDao.getActivityTimeseriesByDate(date);
   }
 
+  Future<List<double>> getSteps() async{
+    return await database.activityTimeseriesDao.getSteps();
+  }
+
   Future<void> insertActivityTimeseries(List<ActivityTimeseries> activityTimeseriesList) async{
     await database.activityTimeseriesDao.insertActivityTimeseries(activityTimeseriesList);
     notifyListeners();
@@ -102,13 +106,6 @@ class DatabaseRepository extends ChangeNotifier{
 
   Future<void> deleteAllSleepData() async{
     await database.sleepDao.deleteAllSleepData();
-    notifyListeners();
-  }
-  
-//sum Of the steps
-
-  Future<double?> getStepsSum() async{
-    await database.activityTimeseriesDao.getStepsSum();
     notifyListeners();
   }
 }

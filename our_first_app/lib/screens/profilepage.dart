@@ -245,6 +245,15 @@ class ProfilePage extends StatelessWidget{
             label: 'Home'
           ),
           BottomNavigationBarItem(
+          icon: IconButton(
+            icon: const Icon(MdiIcons.flowerTulip),
+              onPressed: () {
+                Navigator.popAndPushNamed(context, '/flower/');
+              },
+            ),
+            label: 'Flower'
+          ),
+          BottomNavigationBarItem(
             icon: IconButton(
               icon: const Icon(Icons.person),
               onPressed: (){
@@ -252,20 +261,9 @@ class ProfilePage extends StatelessWidget{
               },
             ),
             label: 'Profile'
-          ),
-          BottomNavigationBarItem(
-          icon: IconButton(
-            icon: const Icon(MdiIcons.flowerTulip),
-              onPressed: () {
-                
-                Navigator.popAndPushNamed(context, '/money/');
-                
-              },
-            ),
-            label: 'Flower'
           )
         ],
-        currentIndex: 1,
+        currentIndex: 2,
         selectedItemColor: Colors.green,
         unselectedLabelStyle: const TextStyle(fontSize: 14)
       )
@@ -276,7 +274,6 @@ class ProfilePage extends StatelessWidget{
     // remove all the key-value objects in the database, except fot counter and pastTime
     final sp = await SharedPreferences.getInstance();
     final keys = sp.getKeys().toList();
-    print(keys);
     for(var item in keys){
       if(item != 'counter' && item != 'pastTime'){
         sp.remove(item);
