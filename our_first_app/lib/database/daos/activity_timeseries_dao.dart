@@ -16,4 +16,7 @@ abstract class ActivityTimeseriesDao {
 
   @Query('DELETE FROM activityTimeseriesTable')
   Future<void> deleteAllActivityTimeseries();
+
+  @Query('SELECT SUM(steps) FROM activityTimeseriesTable')
+  Future<double?> getStepsSum();
 }

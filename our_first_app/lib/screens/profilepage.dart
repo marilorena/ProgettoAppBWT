@@ -1,5 +1,6 @@
 import 'package:fitbitter/fitbitter.dart';
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:our_first_app/database/entities/account_entity.dart';
 import 'package:our_first_app/database/repository/database_repository.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
@@ -251,6 +252,17 @@ class ProfilePage extends StatelessWidget{
               },
             ),
             label: 'Profile'
+          ),
+          BottomNavigationBarItem(
+          icon: IconButton(
+            icon: const Icon(MdiIcons.flowerTulip),
+              onPressed: () {
+                
+                Navigator.popAndPushNamed(context, '/money/');
+                
+              },
+            ),
+            label: 'Flower'
           )
         ],
         currentIndex: 1,

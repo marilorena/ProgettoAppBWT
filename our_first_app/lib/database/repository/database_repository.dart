@@ -104,4 +104,11 @@ class DatabaseRepository extends ChangeNotifier{
     await database.sleepDao.deleteAllSleepData();
     notifyListeners();
   }
+  
+//sum Of the steps
+
+  Future<double?> getStepsSum() async{
+    await database.activityTimeseriesDao.getStepsSum();
+    notifyListeners();
+  }
 }

@@ -9,6 +9,7 @@ import 'package:our_first_app/screens/profilepage.dart';
 import 'package:our_first_app/secondary_screens/activitypage.dart';
 import 'package:our_first_app/secondary_screens/activitysettingspage.dart';
 import 'package:our_first_app/secondary_screens/heartpage.dart';
+import 'package:our_first_app/secondary_screens/money.dart';
 import 'package:our_first_app/secondary_screens/sleeppage.dart';
 import 'package:our_first_app/secondary_screens/yogapage.dart';
 import 'package:provider/provider.dart';
@@ -55,7 +56,8 @@ class MyApp extends StatelessWidget{
               '/heart/': (context) => const HeartPage(),
               '/activity/': (context) => const ActivityPage(),
               '/sleep/': (context) => const SleepPage(),
-              '/activitysettings/': (context) => const ActivitySettings()
+              '/activitysettings/': (context) => const ActivitySettings(),
+              '/money/' : (context) =>  const Coins(),
             }
           );
         } else {

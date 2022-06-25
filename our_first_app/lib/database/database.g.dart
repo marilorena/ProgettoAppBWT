@@ -302,6 +302,12 @@ class _$ActivityTimeseriesDao extends ActivityTimeseriesDao {
     await _activityTimeseriesInsertionAdapter.insertList(
         activityTimeseriesList, OnConflictStrategy.abort);
   }
+
+  @override
+  Future<double?> getStepsSum() {
+    // TODO: implement getStepsSum
+    throw UnimplementedError();
+  }
 }
 
 class _$HeartDao extends HeartDao {

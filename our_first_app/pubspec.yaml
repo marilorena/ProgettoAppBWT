@@ -99,6 +99,12 @@ flutter:
     - asset/yoga/28.png
     - asset/yoga/30.png
     - asset/yoga/41.png
+    - asset/Animation/1.png
+    - asset/Animation/2.png
+    - asset/Animation/3.png
+    - asset/Animation/4.png
+    - asset/Animation/5.png
+    - asset/Animation/6.png
   
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
