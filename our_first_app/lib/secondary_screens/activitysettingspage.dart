@@ -20,7 +20,6 @@ class ActivitySettings extends StatelessWidget{
           future: SharedPreferences.getInstance(),
           builder: (context,snapshot){
             if(snapshot.hasData){
-              final sp = snapshot.data as SharedPreferences;
               return SizedBox(
                 width: MediaQuery.of(context).size.width*0.8,
                 child: Consumer<Targets>(
@@ -31,8 +30,8 @@ class ActivitySettings extends StatelessWidget{
                       const SizedBox(height: 5),
                       Slider(
                         value: targets.steps,
-                        onChanged: (value){
-                          targets.updateSteps(value);
+                        onChanged: (value) async{
+                          await targets.updateSteps(value);
                         },
                         min: 5000,
                         max: 50000,
@@ -44,8 +43,8 @@ class ActivitySettings extends StatelessWidget{
                       const SizedBox(height: 5),
                       Slider(
                         value: targets.floors,
-                        onChanged: (value){
-                          targets.updateFloors(value);
+                        onChanged: (value) async{
+                          await targets.updateFloors(value);
                         },
                         min: 1,
                         max: 100,

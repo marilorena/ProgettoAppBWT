@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:our_first_app/database/entities/account_entity.dart';
 import 'package:our_first_app/database/repository/database_repository.dart';
+import 'package:our_first_app/model/targets.dart';
 import 'package:our_first_app/utils/client_credentials.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -271,6 +272,9 @@ class ProfilePage extends StatelessWidget{
   }
   
   Future<void> _toLoginPage(BuildContext context, DatabaseRepository dbr) async{
+    await Provider.of<Targets>(context, listen:false).updateSteps(5000);
+    await Provider.of<Targets>(context, listen:false).updateFloors(1);
+
     // remove all the key-value objects in the database, except fot counter and pastTime
     final sp = await SharedPreferences.getInstance();
     final keys = sp.getKeys().toList();
