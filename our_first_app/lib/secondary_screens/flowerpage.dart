@@ -10,49 +10,66 @@ class Coins extends StatelessWidget {
   Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(150, 195, 181, 236),
         centerTitle: true,
-        title: const Text('Flower growth by steps'),
-      ),
-      body: Center(
-        child: Consumer<DatabaseRepository>( 
-          builder: (context, dbr, child) => FutureBuilder(
-            initialData: null,
-            future: dbr.getSteps(),
-            builder: (context, snapshot){
-              final data = snapshot.data as List<double>?;
-              final steps = data == null || data.isEmpty ? 0 : data.reduce((a, b) => a + b)~/1;
-              final points = steps~/10000;
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(MdiIcons.walk),
-                      const SizedBox(width: 10),
-                      Text('Total steps: $steps', style: const TextStyle(fontSize: 16)) 
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.star),
-                      const SizedBox(width: 10),
-                      Text('Level: $points', style: const TextStyle(fontSize: 18))
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    margin: const EdgeInsets.all(20),
-                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height/2),
-                    child: _getFlower(points)
-                  )
-                ]
-              ); 
-            }  
+        title: const Text(
+          'Flower\'s growth-by-steps',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            letterSpacing: 1,
           )
-        )
+        ),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('asset/sfondo5.jpg'),
+            fit: BoxFit.fitHeight
+          )
+        ),
+        child: Center(
+          child: Consumer<DatabaseRepository>( 
+            builder: (context, dbr, child) => FutureBuilder(
+              initialData: null,
+              future: dbr.getSteps(),
+              builder: (context, snapshot){
+                final data = snapshot.data as List<double>?;
+                final steps = data == null || data.isEmpty ? 0 : data.reduce((a, b) => a + b)~/1;
+                final points = steps~/10000;
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(MdiIcons.walk),
+                        const SizedBox(width: 10),
+                        Text('Total steps: $steps', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)) 
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.star),
+                        const SizedBox(width: 10),
+                        Text('Level: $points', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      margin: const EdgeInsets.all(20),
+                      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height/2),
+                      child: _getFlower(points)
+                    )
+                  ]
+                ); 
+              }  
+            )
+          )
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         elevation: 0,
