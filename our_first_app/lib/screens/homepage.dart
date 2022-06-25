@@ -156,14 +156,14 @@ class _HomePageState extends State<HomePage>{
           ),
            BottomNavigationBarItem(
           icon: IconButton(
-            icon: const Icon(MdiIcons.cash),
+            icon: const Icon(MdiIcons.flowerTulip),
               onPressed: () {
                 
                 Navigator.popAndPushNamed(context, '/money/');
                 
               },
             ),
-            label: 'Coins'
+            label: 'Flower'
           )
         ],
         currentIndex: 0,

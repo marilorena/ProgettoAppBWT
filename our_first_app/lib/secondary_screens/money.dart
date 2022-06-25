@@ -11,17 +11,44 @@ class Coins extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: const Color.fromARGB(150, 195, 181, 236),
-        centerTitle: true,
-        title: const Text(
-          'Coins Page',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 27,
-            letterSpacing: 1,
+      bottomNavigationBar: BottomNavigationBar(
+    elevation: 0,
+    backgroundColor: const Color.fromARGB(56, 240, 235, 160),
+    items: [
+      BottomNavigationBarItem(
+        icon: IconButton(
+          icon: const Icon(Icons.home),
+            onPressed: () {
+              Navigator.popAndPushNamed(context, '/home/');
+            },
+          ),
+          label: 'Home'
+        ),
+        BottomNavigationBarItem(
+          icon: IconButton(
+            icon: const Icon(Icons.person),
+              onPressed: () { 
+                Navigator.popAndPushNamed(context, '/profile/'); 
+              },
+            ),
+            label: 'Profile'
+          ),
+           BottomNavigationBarItem(
+          icon: IconButton(
+            icon: const Icon(MdiIcons.flowerTulip),
+              onPressed: () {
+                
+                Navigator.popAndPushNamed(context, '/money/');
+                
+              },
+            ),
+            label: 'Flower'
           )
-        ),),
+        ],
+        currentIndex: 0,
+        selectedItemColor: Colors.green,
+        unselectedLabelStyle: const TextStyle(fontSize: 14)
+      ),
       body: Container(
         child: Center(
           child: Consumer<DatabaseRepository>( 
@@ -29,19 +56,13 @@ class Coins extends StatelessWidget {
                 initialData: null,
                 future: dbr.getStepsSum(),
                 builder: (context, snapshot){
-                  if(snapshot.hasData){
-                    final data = (snapshot.data as double?) as int;
-                      double coins = data/1000;  
-                      return Card(
-                         elevation: 5,
-                              child: ListTile(
-                                title: Text('${coins}'),
-                                trailing: const Icon(MdiIcons.cash),
-                              )
-                      ); 
-                    }else{
-                      return Text('No coins');
-                    }
+                  
+                    final data = (snapshot.data as double?) ;
+                    final coins = data == null ? 0 : data/1000; 
+                     
+                      return _getmymoney(coins);
+                     
+                    
                   }
                 
                   
@@ -51,5 +72,49 @@ class Coins extends StatelessWidget {
       ),
     );
   }
+
+
+
+
+ Widget _getmymoney(num coins) {
+      
+        
+          if (coins >= 20){
+          return Card( 
+          elevation: 5,
+          child: Image.asset('asset/Animation/6.png'),
+            );
+          } else if (coins < 20 && coins >= 18){
+            return Card( 
+          elevation: 5,
+          child: Image.asset('asset/Animation/5.png'),
+          );
+          } else if (coins < 18 && coins >= 15 ) {
+          return Card( 
+          elevation: 5,
+          child: Image.asset('asset/Animation/4.png'),
+          );
+          } else if (coins < 15 && coins >= 10){
+          return Card( 
+          elevation: 5,
+          child: Image.asset('asset/Animation/3.png'),
+          );
+          } else if (coins < 10 && coins >= 5 ) {
+          return Card( 
+          elevation: 5,
+          child: Image.asset('asset/Animation/2.png'),
+          );
+          } else if (coins < 5){
+          return Card( 
+          elevation: 5,
+          child: Image.asset('asset/Animation/1.png'),
+          );
+          }
+       
+    return CircularProgressIndicator();
+  }
+
+
 }
 
+     

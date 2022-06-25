@@ -107,7 +107,7 @@ class DatabaseRepository extends ChangeNotifier{
   
 //sum Of the steps
 
-  Future<void> getStepsSum() async{
+  Future<double?> getStepsSum() async{
     await database.activityTimeseriesDao.getStepsSum();
     notifyListeners();
   }
