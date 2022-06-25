@@ -350,7 +350,10 @@ class _$HeartDao extends HeartDao {
 
   @override
   Future<DateTime?> getRecentHeartDate() async {
-    await _queryAdapter.queryNoReturn('SELECT MAX(date) FROM heartTable');
+    return await _queryAdapter.query('SELECT MAX(date) FROM heartTable',
+      mapper: (Map<String, Object?> row){
+        return row['date'] == null ? DateTime.fromMillisecondsSinceEpoch(0) : _dateTimeConverter.decode(row['date'] as int);
+      });
   }
 
   @override
