@@ -181,10 +181,12 @@ class ProfilePage extends StatelessWidget{
                                 builder: (context) => Center(
                                   child: Card(
                                     elevation: 5,
-                                    margin: const EdgeInsets.fromLTRB(70, 20, 70, 20),
+                                    margin: const EdgeInsets.fromLTRB(40, 20, 40, 20),
                                     child: Container(
                                       padding: const EdgeInsets.all(20),
-                                      height: MediaQuery.of(context).size.height/3.2,
+                                      constraints: BoxConstraints(
+                                        maxHeight: MediaQuery.of(context).size.height/3.2
+                                      ),
                                       child: Column(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [

@@ -31,8 +31,11 @@ class AuthorizationPage extends StatelessWidget {
                     elevation: 5,
                     child: Container(
                       padding: const EdgeInsets.all(20),
-                      height: MediaQuery.of(context).size.height*0.35,
-                      width: MediaQuery.of(context).size.width*0.8,
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height*0.35,
+                        maxHeight: MediaQuery.of(context).size.height*0.5,
+                        maxWidth: MediaQuery.of(context).size.width*0.8
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
