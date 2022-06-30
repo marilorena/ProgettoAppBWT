@@ -32,8 +32,7 @@ class Coins extends StatelessWidget {
                           ? 0
                           : data.reduce((a, b) => a + b) ~/ 1;
                       final points = steps ~/ 10000;
-                      return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      return ListView(
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
