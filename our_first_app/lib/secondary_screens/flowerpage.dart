@@ -37,7 +37,7 @@ class Coins extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                SizedBox(width: 15),
+                                SizedBox(width: 10, height: 40,),
                                 Text(
                                   'Let\'s grow your flower!',
                                   style: TextStyle(
@@ -53,7 +53,7 @@ class Coins extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 const Icon(MdiIcons.walk),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: 10, height: 1,),
                                 Text('Total steps: $steps',
                                     style: const TextStyle(
                                         fontSize: 16,
